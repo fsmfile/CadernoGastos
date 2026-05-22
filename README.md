@@ -2,13 +2,14 @@
 
 PWA leve para registro compartilhado de gastos de viagem, com sincronização via Google Sheets.
 
-**Versão atual:** 1.2.0
+**Versão atual:** 1.3.0
 
 ## Funcionalidades
 
-- 📒 Registro de gastos com local, item, valor, data, categoria e tipo (débito/crédito)
-- 🏷️ 12 categorias pré-cadastradas com emojis (alimentação, hospedagem, transporte, etc.)
-- 📊 Total geral + breakdown por tipo
+- 🗺️ **Múltiplas viagens** — cada uma com orçamento e gastos isolados
+- 💰 **Saldo em tempo real** — separado em conta (débito) e crédito, com barras de progresso
+- 📒 Registro de gastos com local, item, valor, data, categoria e tipo
+- 🏷️ 12 categorias pré-cadastradas com emojis
 - ☁️ Sincronização automática com planilha do Google compartilhada
 - 🔐 Sistema de aprovação de remoções entre os dois usuários
 - 📱 Funciona offline (PWA com service worker)
@@ -67,6 +68,7 @@ Tudo client-side: HTML + CSS + Vanilla JS. Sem build, sem dependências, sem fra
 
 ## Histórico de versões
 
+- **1.3.0** — Múltiplas viagens com orçamento próprio + saldo em tempo real (débito/crédito)
 - **1.2.0** — PWA completo (manifest, service worker, ícones, offline)
 - **1.1.1** — Correção do botão "Copiar" do código do Apps Script
 - **1.1.0** — Sistema de aprovação de remoções entre dois usuários

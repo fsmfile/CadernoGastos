@@ -127,7 +127,332 @@
     .icon-btn:active { transform: scale(0.94); background: var(--paper); }
     .icon-btn svg { width: 18px; height: 18px; }
 
-    /* ===== TOTAL ===== */
+    /* ===== SELETOR DE VIAGEM ===== */
+    .trip-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      margin-bottom: 18px;
+      cursor: pointer;
+      transition: all .15s ease;
+      font-family: inherit;
+      text-align: left;
+    }
+    .trip-selector:active { transform: scale(0.99); background: #fff; }
+    .trip-selector .trip-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .trip-selector .trip-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .trip-selector .trip-label {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .trip-selector .trip-name {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 32;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .trip-selector .chevron {
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .trip-selector.empty .trip-name {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    /* ===== SALDO ===== */
+    .balance-card {
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 26px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .balance-card::after {
+      content: '';
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .balance-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .balance-total {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 144, 'SOFT' 0;
+      font-weight: 400;
+      font-size: clamp(34px, 10vw, 44px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      font-feature-settings: 'tnum';
+      position: relative;
+    }
+    .balance-total .cents { font-size: 0.55em; color: var(--ink-soft); }
+    .balance-total.negative { color: var(--accent); }
+
+    .balance-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 18px;
+      position: relative;
+    }
+    .balance-cell {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .balance-cell-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .balance-cell-label .dot { width: 6px; height: 6px; }
+    .balance-cell-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .balance-cell-value.negative { color: var(--accent); }
+    .balance-cell-budget {
+      font-size: 10.5px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 6px;
+    }
+    .progress {
+      width: 100%;
+      height: 5px;
+      background: rgba(27,27,58,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .4s cubic-bezier(.4,0,.2,1), background .3s ease;
+    }
+    .progress-bar.debito { background: var(--debito); }
+    .progress-bar.credito { background: var(--credito); }
+    .progress-bar.warning { background: var(--pending) !important; }
+    .progress-bar.danger { background: var(--accent) !important; }
+
+    .balance-spent {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      font-variant-numeric: tabular-nums;
+      position: relative;
+    }
+    .balance-spent strong { color: var(--ink-soft); font-weight: 500; }
+
+    /* ===== VIAGENS MODAL ===== */
+    .trip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .trip-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 14px;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all .15s ease;
+      text-align: left;
+      font-family: inherit;
+    }
+    .trip-item:active { transform: scale(0.99); }
+    .trip-item.active {
+      border-color: var(--ink);
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(27,27,58,0.06);
+    }
+    .trip-item.archived { opacity: 0.55; }
+    .trip-item-main { min-width: 0; }
+    .trip-item-name {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 24;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-bottom: 3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .trip-item-meta {
+      font-size: 11px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .trip-item-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+    }
+    .trip-item-check {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--paper);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+    .trip-item.active .trip-item-check { display: flex; }
+    .trip-item-edit {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 6px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .trip-form {
+      background: var(--paper-light);
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .trip-form h4 {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 16px;
+      color: var(--ink-soft);
+      margin: 0 0 12px;
+    }
+    .trip-form .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .trip-form input {
+      width: 100%;
+      font-family: inherit;
+      font-size: 15px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .trip-form input:focus { outline: none; border-color: var(--ink); }
+    .trip-form label {
+      font-size: 11px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .trip-form .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .trip-form .actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .trip-form .actions .primary {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .trip-form .actions .secondary {
+      background: transparent;
+      color: var(--ink-soft);
+      border: 1px solid var(--line);
+    }
+    .trip-form .actions .danger {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .new-trip-btn {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1px dashed var(--accent);
+      border-radius: 12px;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+    }
+    .new-trip-btn:active { background: rgba(196,77,62,0.06); }
+
+    /* ===== VIAGENS MODAL FIM ===== */
+
+    /* ===== TOTAL (legado, mantido por compat) ===== */
     .total-card {
       background: var(--paper-light);
       border: 1px solid var(--line);
@@ -792,13 +1117,39 @@
       </button>
     </header>
 
-    <!-- TOTAL CARD -->
-    <div class="total-card">
-      <div class="total-label">Total gasto</div>
-      <div class="total-value" id="totalValue">R$ 0<span class="cents">,00</span></div>
-      <div class="total-breakdown">
-        <div><span class="dot debito"></span>Débito <strong id="totalDebito">R$ 0,00</strong></div>
-        <div><span class="dot credito"></span>Crédito <strong id="totalCredito">R$ 0,00</strong></div>
+    <!-- TRIP SELECTOR -->
+    <button class="trip-selector" id="tripSelector">
+      <div class="trip-icon">🗺️</div>
+      <div class="trip-info">
+        <div class="trip-label">Viagem ativa</div>
+        <div class="trip-name" id="tripName">—</div>
+      </div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+
+    <!-- BALANCE -->
+    <div class="balance-card" id="balanceCard">
+      <div class="balance-label">Saldo disponível</div>
+      <div class="balance-total" id="balanceTotal">R$ 0<span class="cents">,00</span></div>
+      <div class="balance-split">
+        <div class="balance-cell">
+          <div class="balance-cell-label"><span class="dot debito"></span>Em conta</div>
+          <div class="balance-cell-value" id="saldoDebito">R$ 0,00</div>
+          <div class="balance-cell-budget" id="orcamentoDebito">de R$ 0,00</div>
+          <div class="progress"><div class="progress-bar debito" id="barDebito" style="width:0%"></div></div>
+        </div>
+        <div class="balance-cell">
+          <div class="balance-cell-label"><span class="dot credito"></span>Crédito</div>
+          <div class="balance-cell-value" id="saldoCredito">R$ 0,00</div>
+          <div class="balance-cell-budget" id="orcamentoCredito">de R$ 0,00</div>
+          <div class="progress"><div class="progress-bar credito" id="barCredito" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="balance-spent">
+        <span>Total gasto</span>
+        <strong id="totalGasto">R$ 0,00</strong>
       </div>
     </div>
 
@@ -853,6 +1204,53 @@
     <span id="syncText">Sincronizando…</span>
   </div>
 
+  <!-- TRIPS MODAL -->
+  <div class="modal-backdrop" id="tripsBackdrop">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h2>Viagens</h2>
+      <p>Cada viagem tem seu próprio orçamento e histórico de gastos.</p>
+
+      <div class="trip-list" id="tripList"></div>
+
+      <div class="trip-form" id="tripForm" style="display:none;">
+        <h4 id="tripFormTitle">Nova viagem</h4>
+        <input type="hidden" id="tripFormId" />
+        <div style="margin-bottom:10px;">
+          <label>Nome</label>
+          <input type="text" id="tripFormNome" placeholder="ex: Bahia, mai/2026" maxlength="50" />
+        </div>
+        <div class="field-row">
+          <div>
+            <label>Início</label>
+            <input type="date" id="tripFormInicio" />
+          </div>
+          <div>
+            <label>Fim</label>
+            <input type="date" id="tripFormFim" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label>💵 Em conta</label>
+            <input type="number" id="tripFormOrcDebito" placeholder="0,00" inputmode="decimal" step="0.01" min="0" />
+          </div>
+          <div>
+            <label>💳 Crédito</label>
+            <input type="number" id="tripFormOrcCredito" placeholder="0,00" inputmode="decimal" step="0.01" min="0" />
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="secondary" id="tripFormCancel">Cancelar</button>
+          <button type="button" class="danger" id="tripFormDelete" style="display:none;">Excluir</button>
+          <button type="button" class="primary" id="tripFormSave">Salvar</button>
+        </div>
+      </div>
+
+      <button type="button" class="new-trip-btn" id="newTripBtn">＋ Nova viagem</button>
+    </div>
+  </div>
+
   <!-- SETTINGS MODAL -->
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal" id="modal">
@@ -882,37 +1280,101 @@
 <button class="copy-btn" id="copyCode">Copiar</button><span id="codeContent">function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    ensureHeader(sheet);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const action = data.action || 'add';
-    if (action === 'add')           return addRow(sheet, data);
-    if (action === 'requestDelete') return setStatus(sheet, data.id, 'pendente', data.solicitadoPor || '');
-    if (action === 'cancelDelete')  return setStatus(sheet, data.id, '', '');
-    if (action === 'rejectDelete')  return setStatus(sheet, data.id, '', '');
-    if (action === 'approveDelete') return deleteRow(sheet, data.id);
+
+    if (action === 'add')           return addGasto(ss, data);
+    if (action === 'requestDelete') return setStatus(ss, data.id, 'pendente', data.solicitadoPor || '');
+    if (action === 'cancelDelete')  return setStatus(ss, data.id, '', '');
+    if (action === 'rejectDelete')  return setStatus(ss, data.id, '', '');
+    if (action === 'approveDelete') return deleteGasto(ss, data.id);
+    if (action === 'addTrip')       return addViagem(ss, data);
+    if (action === 'updateTrip')    return updateViagem(ss, data);
+    if (action === 'deleteTrip')    return deleteViagem(ss, data.id);
     return jsonErr('Ação desconhecida: ' + action);
   } catch (err) { return jsonErr(err); }
 }
 
-function ensureHeader(sheet) {
+function doGet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const gSheet = getGastosSheet(ss);
+  const vSheet = getViagensSheet(ss);
+  ensureGastosHeader(gSheet);
+  ensureViagensHeader(vSheet);
+
+  const gv = gSheet.getDataRange().getValues();
+  const gh = gv[0] || [];
+  const gi = (n) => gh.indexOf(n);
+  const gastos = gv.slice(1).map(r => ({
+    id: r[gi('ID')],
+    viagemId: gi('ViagemId') >= 0 ? r[gi('ViagemId')] : '',
+    data: r[gi('Registrado')] || r[gi('Data')],
+    dataGasto: gi('DataGasto') >= 0 ? r[gi('DataGasto')] : null,
+    local: r[gi('Local')], item: r[gi('Item')],
+    valor: r[gi('Valor')], tipo: r[gi('Tipo')],
+    categoria: gi('Categoria') >= 0 ? (r[gi('Categoria')] || '') : '',
+    statusRemocao: gi('StatusRemocao') >= 0 ? (r[gi('StatusRemocao')] || '') : '',
+    solicitadoPor: gi('SolicitadoPor') >= 0 ? (r[gi('SolicitadoPor')] || '') : ''
+  })).filter(r => r.id);
+
+  const vv = vSheet.getDataRange().getValues();
+  const vh = vv[0] || [];
+  const vi = (n) => vh.indexOf(n);
+  const viagens = vv.slice(1).map(r => ({
+    id: r[vi('ID')], nome: r[vi('Nome')],
+    inicio: vi('Inicio') >= 0 ? r[vi('Inicio')] : null,
+    fim: vi('Fim') >= 0 ? r[vi('Fim')] : null,
+    orcamentoDebito: Number(r[vi('OrcamentoDebito')]) || 0,
+    orcamentoCredito: Number(r[vi('OrcamentoCredito')]) || 0,
+    criadaEm: vi('CriadaEm') >= 0 ? r[vi('CriadaEm')] : null,
+    arquivada: vi('Arquivada') >= 0 ? !!r[vi('Arquivada')] : false
+  })).filter(r => r.id);
+
+  return jsonOk({ data: gastos, viagens: viagens });
+}
+
+function getGastosSheet(ss) {
+  let s = ss.getSheetByName('Gastos');
+  if (!s) {
+    s = ss.getSheets()[0];
+    if (s.getName() !== 'Gastos' && s.getName() !== 'Viagens') s.setName('Gastos');
+    else if (s.getName() === 'Viagens') s = ss.insertSheet('Gastos', 0);
+  }
+  return s;
+}
+
+function getViagensSheet(ss) {
+  let s = ss.getSheetByName('Viagens');
+  if (!s) s = ss.insertSheet('Viagens');
+  return s;
+}
+
+function ensureGastosHeader(sheet) {
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID','Registrado','DataGasto','Local','Item','Valor','Tipo','Categoria','StatusRemocao','SolicitadoPor']);
+    sheet.appendRow(['ID','ViagemId','Registrado','DataGasto','Local','Item','Valor','Tipo','Categoria','StatusRemocao','SolicitadoPor']);
     return;
   }
   const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  ['DataGasto','Categoria','StatusRemocao','SolicitadoPor'].forEach(col => {
+  ['ViagemId','DataGasto','Categoria','StatusRemocao','SolicitadoPor'].forEach(col => {
     if (head.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
     }
   });
 }
 
-function addRow(sheet, data) {
+function ensureViagensHeader(sheet) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['ID','Nome','Inicio','Fim','OrcamentoDebito','OrcamentoCredito','CriadaEm','Arquivada']);
+  }
+}
+
+function addGasto(ss, data) {
+  const sheet = getGastosSheet(ss);
+  ensureGastosHeader(sheet);
   const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const v = {
-    'ID': data.id,
-    'Registrado': new Date(data.data),
-    'Data': new Date(data.data),
+    'ID': data.id, 'ViagemId': data.viagemId || '',
+    'Registrado': new Date(data.data), 'Data': new Date(data.data),
     'DataGasto': data.dataGasto ? new Date(data.dataGasto + 'T12:00:00') : new Date(data.data),
     'Local': data.local, 'Item': data.item,
     'Valor': Number(data.valor), 'Tipo': data.tipo,
@@ -923,16 +1385,19 @@ function addRow(sheet, data) {
   return jsonOk({});
 }
 
-function findRow(sheet, id) {
+function findRow(sheet, id, col) {
   const vals = sheet.getDataRange().getValues();
+  const cIdx = col ? vals[0].indexOf(col) : 0;
   for (let i = 1; i < vals.length; i++) {
-    if (String(vals[i][0]) === String(id)) return i + 1;
+    if (String(vals[i][cIdx]) === String(id)) return i + 1;
   }
   return -1;
 }
 
-function setStatus(sheet, id, status, por) {
-  const row = findRow(sheet, id);
+function setStatus(ss, id, status, por) {
+  const sheet = getGastosSheet(ss);
+  ensureGastosHeader(sheet);
+  const row = findRow(sheet, id, 'ID');
   if (row < 0) return jsonErr('ID não encontrado');
   const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const cS = head.indexOf('StatusRemocao') + 1;
@@ -942,9 +1407,54 @@ function setStatus(sheet, id, status, por) {
   return jsonOk({});
 }
 
-function deleteRow(sheet, id) {
-  const row = findRow(sheet, id);
+function deleteGasto(ss, id) {
+  const sheet = getGastosSheet(ss);
+  const row = findRow(sheet, id, 'ID');
   if (row < 0) return jsonErr('ID não encontrado');
+  sheet.deleteRow(row);
+  return jsonOk({});
+}
+
+function addViagem(ss, data) {
+  const sheet = getViagensSheet(ss);
+  ensureViagensHeader(sheet);
+  sheet.appendRow([
+    data.id, data.nome,
+    data.inicio ? new Date(data.inicio + 'T12:00:00') : '',
+    data.fim ? new Date(data.fim + 'T12:00:00') : '',
+    Number(data.orcamentoDebito) || 0,
+    Number(data.orcamentoCredito) || 0,
+    new Date(), false
+  ]);
+  return jsonOk({});
+}
+
+function updateViagem(ss, data) {
+  const sheet = getViagensSheet(ss);
+  ensureViagensHeader(sheet);
+  const row = findRow(sheet, data.id, 'ID');
+  if (row < 0) return jsonErr('Viagem não encontrada');
+  const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const map = {
+    'Nome': data.nome,
+    'Inicio': data.inicio ? new Date(data.inicio + 'T12:00:00') : '',
+    'Fim': data.fim ? new Date(data.fim + 'T12:00:00') : '',
+    'OrcamentoDebito': Number(data.orcamentoDebito) || 0,
+    'OrcamentoCredito': Number(data.orcamentoCredito) || 0,
+    'Arquivada': !!data.arquivada
+  };
+  Object.keys(map).forEach(k => {
+    if (map[k] === undefined) return;
+    const col = head.indexOf(k) + 1;
+    if (col > 0) sheet.getRange(row, col).setValue(map[k]);
+  });
+  return jsonOk({});
+}
+
+function deleteViagem(ss, id) {
+  const sheet = getViagensSheet(ss);
+  const row = findRow(sheet, id, 'ID');
+  if (row < 0) return jsonErr('Viagem não encontrada');
   sheet.deleteRow(row);
   return jsonOk({});
 }
@@ -956,25 +1466,6 @@ function jsonOk(extra) {
 function jsonErr(err) {
   return ContentService.createTextOutput(JSON.stringify({ok:false, error:String(err)}))
     .setMimeType(ContentService.MimeType.JSON);
-}
-
-function doGet() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const vals = sheet.getDataRange().getValues();
-  if (vals.length === 0) return jsonOk({data:[]});
-  const head = vals[0];
-  const idx = (n) => head.indexOf(n);
-  const rows = vals.slice(1).map(r => ({
-    id: r[idx('ID')],
-    data: r[idx('Registrado')] || r[idx('Data')],
-    dataGasto: idx('DataGasto') >= 0 ? r[idx('DataGasto')] : null,
-    local: r[idx('Local')], item: r[idx('Item')],
-    valor: r[idx('Valor')], tipo: r[idx('Tipo')],
-    categoria: idx('Categoria') >= 0 ? (r[idx('Categoria')] || '') : '',
-    statusRemocao: idx('StatusRemocao') >= 0 ? (r[idx('StatusRemocao')] || '') : '',
-    solicitadoPor: idx('SolicitadoPor') >= 0 ? (r[idx('SolicitadoPor')] || '') : ''
-  })).filter(r => r.id);
-  return jsonOk({data: rows});
 }</span></div>
       </div>
 
@@ -1010,7 +1501,7 @@ function doGet() {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.2.0';
+  const APP_VERSION = '1.3.0';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -1018,6 +1509,8 @@ function doGet() {
   const LOCAL_KEY = 'gastos_viagem_local_v1';
   const CAT_KEY = 'gastos_viagem_cat_v1';
   const USER_KEY = 'gastos_viagem_user_v1';
+  const TRIPS_KEY = 'gastos_viagem_trips_v1';
+  const ACTIVE_TRIP_KEY = 'gastos_viagem_active_trip_v1';
 
   // Categorias pré-cadastradas para viagem
   const CATEGORIAS = [
@@ -1036,9 +1529,15 @@ function doGet() {
   ];
   const CAT_BY_ID = Object.fromEntries(CATEGORIAS.map(c => [c.id, c]));
 
+  function makeId() {
+    return crypto.randomUUID ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+  }
+
   // ===== STATE =====
   let state = {
     entries: JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'),
+    trips: JSON.parse(localStorage.getItem(TRIPS_KEY) || '[]'),
+    activeTripId: localStorage.getItem(ACTIVE_TRIP_KEY) || '',
     scriptUrl: localStorage.getItem(URL_KEY) || '',
     tipo: localStorage.getItem(TIPO_KEY) || 'debito',
     lastLocal: localStorage.getItem(LOCAL_KEY) || '',
@@ -1052,6 +1551,14 @@ function doGet() {
     if (!e.dataGasto) e.dataGasto = toDateOnly(e.data);
     if (!e.statusRemocao) e.statusRemocao = '';
     if (!e.solicitadoPor) e.solicitadoPor = '';
+    if (e.viagemId === undefined) e.viagemId = '';
+  });
+  // Migração: trips sem synced viram synced=true (já existiam antes)
+  state.trips.forEach(t => {
+    if (t.synced === undefined) t.synced = true;
+    if (!t.inicio) t.inicio = '';
+    if (!t.fim) t.fim = '';
+    if (t.arquivada === undefined) t.arquivada = false;
   });
 
   // ===== DOM =====
@@ -1065,13 +1572,11 @@ function doGet() {
   const entriesEl = $('entries');
   const dataGastoInput = $('dataGasto');
   const todayBtn = $('todayBtn');
-  const totalValueEl = $('totalValue');
-  const totalDebitoEl = $('totalDebito');
-  const totalCreditoEl = $('totalCredito');
   const locaisDatalist = $('locais');
   const syncBar = $('syncBar');
   const syncText = $('syncText');
   const modalBackdrop = $('modalBackdrop');
+  const tripsBackdrop = $('tripsBackdrop');
   const scriptUrlInput = $('scriptUrl');
 
   // ===== FORMATTERS =====
@@ -1137,21 +1642,88 @@ function doGet() {
 
   // ===== STORAGE =====
   const persist = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state.entries));
+  const persistTrips = () => localStorage.setItem(TRIPS_KEY, JSON.stringify(state.trips));
+  const persistActiveTrip = () => localStorage.setItem(ACTIVE_TRIP_KEY, state.activeTripId || '');
+
+  // ===== VIAGENS =====
+  function getActiveTrip() {
+    return state.trips.find(t => t.id === state.activeTripId) || null;
+  }
+  function entriesOfActiveTrip() {
+    const tripId = state.activeTripId;
+    return state.entries.filter(e => !e.deleted && (e.viagemId || '') === (tripId || ''));
+  }
+  function setActiveTrip(id) {
+    state.activeTripId = id || '';
+    persistActiveTrip();
+    render();
+  }
 
   // ===== RENDER =====
-  function renderTotal() {
-    const debito = state.entries
-      .filter(e => e.tipo === 'debito' && !e.deleted)
-      .reduce((s, e) => s + Number(e.valor), 0);
-    const credito = state.entries
-      .filter(e => e.tipo === 'credito' && !e.deleted)
-      .reduce((s, e) => s + Number(e.valor), 0);
-    const total = debito + credito;
+  function renderTripSelector() {
+    const sel = $('tripSelector');
+    const nameEl = $('tripName');
+    const trip = getActiveTrip();
+    if (!trip) {
+      sel.classList.add('empty');
+      nameEl.textContent = 'Toque para criar uma viagem';
+    } else {
+      sel.classList.remove('empty');
+      nameEl.textContent = trip.nome;
+    }
+  }
 
-    const { main, cents } = fmtMoneyParts(total);
-    totalValueEl.innerHTML = `${main}<span class="cents">${cents}</span>`;
-    totalDebitoEl.textContent = fmtMoney(debito);
-    totalCreditoEl.textContent = fmtMoney(credito);
+  function renderBalance() {
+    const trip = getActiveTrip();
+    const orcDebito = trip ? Number(trip.orcamentoDebito) || 0 : 0;
+    const orcCredito = trip ? Number(trip.orcamentoCredito) || 0 : 0;
+
+    const entries = entriesOfActiveTrip();
+    const gastoDebito = entries
+      .filter(e => e.tipo === 'debito')
+      .reduce((s, e) => s + Number(e.valor), 0);
+    const gastoCredito = entries
+      .filter(e => e.tipo === 'credito')
+      .reduce((s, e) => s + Number(e.valor), 0);
+
+    const saldoDebito = orcDebito - gastoDebito;
+    const saldoCredito = orcCredito - gastoCredito;
+    const saldoTotal = saldoDebito + saldoCredito;
+    const totalGasto = gastoDebito + gastoCredito;
+
+    // Saldo total
+    const balTotalEl = $('balanceTotal');
+    const { main, cents } = fmtMoneyParts(saldoTotal);
+    balTotalEl.innerHTML = `${main}<span class="cents">${cents}</span>`;
+    balTotalEl.classList.toggle('negative', saldoTotal < 0);
+
+    // Em conta
+    const sDebEl = $('saldoDebito');
+    sDebEl.textContent = fmtMoney(saldoDebito);
+    sDebEl.classList.toggle('negative', saldoDebito < 0);
+    $('orcamentoDebito').textContent = `de ${fmtMoney(orcDebito)}`;
+
+    // Crédito
+    const sCredEl = $('saldoCredito');
+    sCredEl.textContent = fmtMoney(saldoCredito);
+    sCredEl.classList.toggle('negative', saldoCredito < 0);
+    $('orcamentoCredito').textContent = `de ${fmtMoney(orcCredito)}`;
+
+    // Progress bars (percentual gasto)
+    const pctDeb = orcDebito > 0 ? Math.min(100, (gastoDebito / orcDebito) * 100) : 0;
+    const pctCred = orcCredito > 0 ? Math.min(100, (gastoCredito / orcCredito) * 100) : 0;
+    const barD = $('barDebito');
+    const barC = $('barCredito');
+    barD.style.width = pctDeb + '%';
+    barC.style.width = pctCred + '%';
+    barD.classList.remove('warning','danger');
+    barC.classList.remove('warning','danger');
+    if (pctDeb >= 100 || saldoDebito < 0) barD.classList.add('danger');
+    else if (pctDeb >= 80) barD.classList.add('warning');
+    if (pctCred >= 100 || saldoCredito < 0) barC.classList.add('danger');
+    else if (pctCred >= 80) barC.classList.add('warning');
+
+    $('totalGasto').textContent = fmtMoney(totalGasto);
   }
 
   function renderCategorias() {
@@ -1163,8 +1735,9 @@ function doGet() {
   }
 
   function renderEntries() {
+    const tripId = state.activeTripId || '';
     const list = state.entries
-      .filter(e => !e.deleted)
+      .filter(e => !e.deleted && (e.viagemId || '') === tripId)
       .sort((a, b) => {
         const da = a.dataGasto || toDateOnly(a.data);
         const db = b.dataGasto || toDateOnly(b.data);
@@ -1173,7 +1746,10 @@ function doGet() {
       });
 
     if (list.length === 0) {
-      entriesEl.innerHTML = '<div class="empty">Nenhum gasto ainda.<br/>Comece registrando seu primeiro.</div>';
+      const hint = getActiveTrip()
+        ? 'Nenhum gasto ainda.<br/>Comece registrando seu primeiro.'
+        : 'Crie uma viagem para começar.';
+      entriesEl.innerHTML = `<div class="empty">${hint}</div>`;
       return;
     }
 
@@ -1246,7 +1822,7 @@ function doGet() {
   }
 
   function renderLocais() {
-    const locais = [...new Set(state.entries.filter(e => !e.deleted).map(e => e.local))];
+    const locais = [...new Set(entriesOfActiveTrip().map(e => e.local).filter(Boolean))];
     locaisDatalist.innerHTML = locais.map(l => `<option value="${escapeHtml(l)}">`).join('');
   }
 
@@ -1257,7 +1833,8 @@ function doGet() {
   }
 
   function render() {
-    renderTotal();
+    renderTripSelector();
+    renderBalance();
     renderEntries();
     renderLocais();
     renderCategorias();
@@ -1305,12 +1882,21 @@ function doGet() {
   }
 
   async function pushEntry(entry) {
-    // Default: add
     return postAction({
       action: 'add',
-      id: entry.id, data: entry.data, dataGasto: entry.dataGasto,
+      id: entry.id, viagemId: entry.viagemId || '',
+      data: entry.data, dataGasto: entry.dataGasto,
       local: entry.local, item: entry.item, valor: entry.valor,
       tipo: entry.tipo, categoria: entry.categoria
+    });
+  }
+
+  async function pushTrip(trip) {
+    return postAction({
+      action: 'addTrip',
+      id: trip.id, nome: trip.nome,
+      inicio: trip.inicio || '', fim: trip.fim || '',
+      orcamentoDebito: trip.orcamentoDebito, orcamentoCredito: trip.orcamentoCredito
     });
   }
 
@@ -1326,7 +1912,7 @@ function doGet() {
       try { json = JSON.parse(text); }
       catch { return { ok: false, reason: 'parse', detail: 'Resposta inválida: ' + text.slice(0, 120) }; }
       if (!json.ok) return { ok: false, reason: 'server', detail: json.error || 'Erro no script' };
-      return { ok: true, data: json.data || [] };
+      return { ok: true, data: json.data || [], viagens: json.viagens || [] };
     } catch (err) {
       return { ok: false, reason: 'network', detail: String(err.message || err) };
     }
@@ -1340,29 +1926,65 @@ function doGet() {
     showSync('Sincronizando…', false, false);
     syncBar.querySelector('.spinner').style.display = '';
 
-    // 1) Push pendentes (apenas adds)
-    const pending = state.entries.filter(e => e.synced === false && !e.deleted);
+    // 1) Push viagens pendentes (antes dos gastos, pois gastos têm FK)
+    const pendingTrips = state.trips.filter(t => t.synced === false && !t.deleted);
     let pushFailed = null;
-    for (const entry of pending) {
-      const result = await pushEntry(entry);
-      if (result.ok) {
-        entry.synced = true;
-        persist();
-      } else {
-        pushFailed = result;
-        break;
+    for (const trip of pendingTrips) {
+      const result = await pushTrip(trip);
+      if (result.ok) { trip.synced = true; persistTrips(); }
+      else { pushFailed = result; break; }
+    }
+
+    // 2) Push gastos pendentes
+    if (!pushFailed) {
+      const pending = state.entries.filter(e => e.synced === false && !e.deleted);
+      for (const entry of pending) {
+        const result = await pushEntry(entry);
+        if (result.ok) { entry.synced = true; persist(); }
+        else { pushFailed = result; break; }
       }
     }
 
-    // 2) Pull do servidor — fonte da verdade para itens existentes e status
+    // 3) Pull do servidor — fonte da verdade
     const remote = await pullEntries();
     if (remote.ok) {
-      const remoteById = new Map();
-      for (const r of remote.data) {
-        if (r.id) remoteById.set(String(r.id), r);
+      // 3a) Mescla viagens
+      const remoteTripsById = new Map();
+      for (const t of remote.viagens) {
+        if (t.id) remoteTripsById.set(String(t.id), t);
       }
+      const localTripsById = new Map(state.trips.map(t => [t.id, t]));
+      for (const [tid, t] of remoteTripsById) {
+        if (localTripsById.has(tid)) {
+          const lt = localTripsById.get(tid);
+          if (lt.synced !== false) { // Não sobrescreve trips pendentes
+            lt.nome = String(t.nome || lt.nome);
+            lt.inicio = t.inicio ? toDateOnly(t.inicio) : '';
+            lt.fim = t.fim ? toDateOnly(t.fim) : '';
+            lt.orcamentoDebito = Number(t.orcamentoDebito) || 0;
+            lt.orcamentoCredito = Number(t.orcamentoCredito) || 0;
+            lt.arquivada = !!t.arquivada;
+          }
+        } else {
+          state.trips.push({
+            id: tid,
+            nome: String(t.nome || 'Sem nome'),
+            inicio: t.inicio ? toDateOnly(t.inicio) : '',
+            fim: t.fim ? toDateOnly(t.fim) : '',
+            orcamentoDebito: Number(t.orcamentoDebito) || 0,
+            orcamentoCredito: Number(t.orcamentoCredito) || 0,
+            arquivada: !!t.arquivada,
+            synced: true
+          });
+        }
+      }
+      // Remove viagens que sumiram da planilha
+      state.trips = state.trips.filter(t => t.synced === false || remoteTripsById.has(t.id));
+      persistTrips();
 
-      // 2a) Atualiza/adiciona com base no remoto
+      // 3b) Mescla gastos
+      const remoteById = new Map();
+      for (const r of remote.data) { if (r.id) remoteById.set(String(r.id), r); }
       const localById = new Map(state.entries.map(e => [e.id, e]));
       for (const [rid, r] of remoteById) {
         const catId = String(r.categoria || '').toLowerCase().trim();
@@ -1373,9 +1995,11 @@ function doGet() {
           const e = localById.get(rid);
           e.statusRemocao = status;
           e.solicitadoPor = por;
+          if (!e.viagemId && r.viagemId) e.viagemId = String(r.viagemId);
         } else {
           state.entries.push({
             id: rid,
+            viagemId: String(r.viagemId || ''),
             data: dataReg,
             dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
             local: String(r.local || ''),
@@ -1389,12 +2013,14 @@ function doGet() {
           });
         }
       }
+      state.entries = state.entries.filter(e => e.synced === false || remoteById.has(e.id));
 
-      // 2b) Remove localmente itens que sumiram da planilha (foram aprovados)
-      state.entries = state.entries.filter(e => {
-        if (e.synced === false) return true; // ainda não foi enviado
-        return remoteById.has(e.id);
-      });
+      // Se a viagem ativa sumiu, seleciona a primeira disponível
+      if (state.activeTripId && !state.trips.find(t => t.id === state.activeTripId)) {
+        const firstActive = state.trips.find(t => !t.arquivada);
+        state.activeTripId = firstActive ? firstActive.id : '';
+        persistActiveTrip();
+      }
 
       persist();
       render();
@@ -1463,8 +2089,17 @@ function doGet() {
     const dataGasto = dataGastoInput.value || todayISO();
     if (!local || !item || !valor || valor <= 0) return;
 
+    // Garante viagem ativa
+    const trip = getActiveTrip();
+    if (!trip) {
+      showSync('Crie uma viagem primeiro 🗺️', true);
+      openTripsModal();
+      return;
+    }
+
     const entry = {
-      id: crypto.randomUUID ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2)),
+      id: makeId(),
+      viagemId: trip.id,
       data: new Date().toISOString(),
       dataGasto,
       local, item, valor,
@@ -1759,13 +2394,193 @@ function doGet() {
     }
   });
 
+  // ============ VIAGENS ============
+  function openTripsModal() {
+    renderTripList();
+    hideTripForm();
+    tripsBackdrop.classList.add('show');
+  }
+  function closeTripsModal() {
+    tripsBackdrop.classList.remove('show');
+  }
+  function renderTripList() {
+    const list = $('tripList');
+    const sorted = [...state.trips].sort((a, b) => {
+      if (!!a.arquivada !== !!b.arquivada) return a.arquivada ? 1 : -1;
+      return (b.inicio || '').localeCompare(a.inicio || '');
+    });
+    if (sorted.length === 0) {
+      list.innerHTML = '<div class="empty" style="padding:20px 10px;">Nenhuma viagem ainda</div>';
+      return;
+    }
+    list.innerHTML = sorted.map(t => {
+      const ativa = t.id === state.activeTripId;
+      const periodo = t.inicio || t.fim
+        ? `${fmtDateShort(t.inicio) || '—'} → ${fmtDateShort(t.fim) || '…'}`
+        : 'sem datas definidas';
+      const orcamento = `${fmtMoney(Number(t.orcamentoDebito || 0) + Number(t.orcamentoCredito || 0))}`;
+      return `
+      <button class="trip-item ${ativa ? 'active' : ''} ${t.arquivada ? 'archived' : ''}" data-trip="${t.id}">
+        <div class="trip-item-main">
+          <div class="trip-item-name">${escapeHtml(t.nome)}${t.arquivada ? ' · arquivada' : ''}</div>
+          <div class="trip-item-meta">${periodo} · ${orcamento}</div>
+        </div>
+        <div class="trip-item-actions">
+          <div class="trip-item-check">✓</div>
+          <button class="trip-item-edit" data-edit-trip="${t.id}" type="button">editar</button>
+        </div>
+      </button>`;
+    }).join('');
+  }
+
+  function showTripForm(trip) {
+    const f = $('tripForm');
+    f.style.display = 'block';
+    $('tripFormTitle').textContent = trip ? 'Editar viagem' : 'Nova viagem';
+    $('tripFormId').value = trip ? trip.id : '';
+    $('tripFormNome').value = trip ? trip.nome : '';
+    $('tripFormInicio').value = trip ? (trip.inicio || '') : todayISO();
+    $('tripFormFim').value = trip ? (trip.fim || '') : '';
+    $('tripFormOrcDebito').value = trip ? (trip.orcamentoDebito || '') : '';
+    $('tripFormOrcCredito').value = trip ? (trip.orcamentoCredito || '') : '';
+    $('tripFormDelete').style.display = trip ? '' : 'none';
+    $('newTripBtn').style.display = 'none';
+    f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => $('tripFormNome').focus(), 100);
+  }
+  function hideTripForm() {
+    $('tripForm').style.display = 'none';
+    $('newTripBtn').style.display = '';
+  }
+
+  $('tripSelector').addEventListener('click', openTripsModal);
+  tripsBackdrop.addEventListener('click', (e) => {
+    if (e.target === tripsBackdrop) closeTripsModal();
+  });
+
+  $('tripList').addEventListener('click', (e) => {
+    const editBtn = e.target.closest('[data-edit-trip]');
+    if (editBtn) {
+      e.stopPropagation();
+      const trip = state.trips.find(t => t.id === editBtn.dataset.editTrip);
+      if (trip) showTripForm(trip);
+      return;
+    }
+    const item = e.target.closest('[data-trip]');
+    if (item) {
+      setActiveTrip(item.dataset.trip);
+      closeTripsModal();
+    }
+  });
+
+  $('newTripBtn').addEventListener('click', () => showTripForm(null));
+  $('tripFormCancel').addEventListener('click', hideTripForm);
+
+  $('tripFormSave').addEventListener('click', async () => {
+    const id = $('tripFormId').value || makeId();
+    const editing = !!$('tripFormId').value;
+    const nome = $('tripFormNome').value.trim();
+    if (!nome) { alert('Dê um nome para a viagem'); return; }
+    const tripData = {
+      id, nome,
+      inicio: $('tripFormInicio').value || '',
+      fim: $('tripFormFim').value || '',
+      orcamentoDebito: parseFloat($('tripFormOrcDebito').value) || 0,
+      orcamentoCredito: parseFloat($('tripFormOrcCredito').value) || 0,
+      arquivada: false,
+      synced: false
+    };
+
+    if (editing) {
+      const existing = state.trips.find(t => t.id === id);
+      if (existing) Object.assign(existing, tripData, { synced: existing.synced });
+    } else {
+      state.trips.push(tripData);
+      // Primeira viagem: já ativa
+      if (!state.activeTripId) {
+        state.activeTripId = id;
+        persistActiveTrip();
+      }
+    }
+    persistTrips();
+    renderTripList();
+    hideTripForm();
+    render();
+
+    // Push pra planilha
+    if (state.scriptUrl) {
+      showSync('Salvando viagem…', false, false);
+      const action = editing ? 'updateTrip' : 'addTrip';
+      const result = await postAction(Object.assign({ action }, tripData));
+      if (result.ok) {
+        const t = state.trips.find(x => x.id === id);
+        if (t) { t.synced = true; persistTrips(); }
+        showSync('Viagem salva ✓');
+      } else {
+        showSync('Salvo offline', true);
+      }
+    } else {
+      showSync('Viagem salva (offline)', false);
+    }
+  });
+
+  $('tripFormDelete').addEventListener('click', async () => {
+    const id = $('tripFormId').value;
+    if (!id) return;
+    const trip = state.trips.find(t => t.id === id);
+    if (!trip) return;
+    const temGastos = state.entries.some(e => (e.viagemId || '') === id);
+    const msg = temGastos
+      ? `Excluir "${trip.nome}" E TODOS os ${state.entries.filter(e => (e.viagemId||'')===id).length} gastos desta viagem?\n\nEsta ação não pode ser desfeita.`
+      : `Excluir a viagem "${trip.nome}"?`;
+    if (!confirm(msg)) return;
+
+    if (!state.scriptUrl) {
+      showSync('Precisa estar online para excluir', true);
+      return;
+    }
+    showSync('Excluindo…', false, false);
+    // Exclui gastos da viagem primeiro
+    const gastosViagem = state.entries.filter(e => (e.viagemId || '') === id && e.synced !== false);
+    for (const g of gastosViagem) {
+      await postAction({ action: 'approveDelete', id: g.id });
+    }
+    const result = await postAction({ action: 'deleteTrip', id });
+    if (result.ok) {
+      state.trips = state.trips.filter(t => t.id !== id);
+      state.entries = state.entries.filter(e => (e.viagemId || '') !== id);
+      if (state.activeTripId === id) {
+        const first = state.trips.find(t => !t.arquivada);
+        state.activeTripId = first ? first.id : '';
+        persistActiveTrip();
+      }
+      persistTrips(); persist();
+      renderTripList();
+      hideTripForm();
+      render();
+      showSync('Viagem excluída ✓');
+    } else {
+      showSync('Erro: ' + (result.detail || 'falhou').slice(0, 60), true);
+    }
+  });
+
   // Initial render + sync on load
   render();
   if (state.scriptUrl) {
     setTimeout(syncAll, 600);
-  } else if (state.entries.length === 0) {
+  } else if (state.entries.length === 0 && state.trips.length === 0) {
     // Primeira vez: abre configurações
     setTimeout(() => modalBackdrop.classList.add('show'), 400);
+  }
+
+  // Se não tem viagem ativa mas tem viagens, seleciona a primeira não arquivada
+  if (!state.activeTripId && state.trips.length > 0) {
+    const first = state.trips.find(t => !t.arquivada) || state.trips[0];
+    if (first) {
+      state.activeTripId = first.id;
+      persistActiveTrip();
+      render();
+    }
   }
 
   // Auto-sync ao voltar para o app
