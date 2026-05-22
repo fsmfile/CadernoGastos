@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbf6ec"/>
+      <stop offset="100%" stop-color="#f5efe4"/>
+    </linearGradient>
+    <linearGradient id="cover" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#23234a"/>
+      <stop offset="100%" stop-color="#1b1b3a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+
+  <!-- Notebook -->
+  <g transform="translate(96, 84)">
+    <!-- Subtle shadow -->
+    <rect x="8" y="14" width="320" height="350" rx="18" fill="#1b1b3a" opacity="0.08"/>
+    <!-- Cover -->
+    <rect x="0" y="0" width="320" height="350" rx="18" fill="url(#cover)"/>
+    <!-- Page -->
+    <rect x="42" y="22" width="258" height="306" rx="8" fill="#fbf6ec"/>
+    <!-- Binding rings -->
+    <circle cx="22" cy="70" r="7" fill="#fbf6ec"/>
+    <circle cx="22" cy="175" r="7" fill="#fbf6ec"/>
+    <circle cx="22" cy="280" r="7" fill="#fbf6ec"/>
+    <!-- Lines on page -->
+    <rect x="72" y="76" width="170" height="7" rx="2.5" fill="#d9cfbf"/>
+    <rect x="72" y="106" width="140" height="7" rx="2.5" fill="#d9cfbf"/>
+    <rect x="72" y="136" width="155" height="7" rx="2.5" fill="#d9cfbf"/>
+    <!-- Accent line with check -->
+    <rect x="72" y="180" width="100" height="7" rx="2.5" fill="#1b1b3a"/>
+    <rect x="72" y="210" width="85" height="7" rx="2.5" fill="#d9cfbf"/>
+    <!-- Currency mark -->
+    <text x="231" y="282" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-style="italic" font-weight="600" fill="#c44d3e" text-anchor="middle">$</text>
+    <!-- Red bookmark ribbon -->
+    <path d="M 252 0 L 282 0 L 282 122 L 267 108 L 252 122 Z" fill="#c44d3e"/>
+  </g>
+</svg>
