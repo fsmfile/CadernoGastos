@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5efe4" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Gastos" />
+  <title>Caderno de Gastos</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..800,30..100&family=DM+Sans:opsz,wght@9..40,400..600&family=JetBrains+Mono:wght@500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📒%3C/text%3E%3C/svg%3E" />
+
+  <style>
+    :root {
+      --paper: #f5efe4;
+      --paper-light: #fbf6ec;
+      --ink: #1b1b3a;
+      --ink-soft: #4a4a5e;
+      --muted: #8a7e6d;
+      --line: #d9cfbf;
+      --accent: #c44d3e;
+      --accent-soft: #e8b4a8;
+      --debito: #5d6b3c;
+      --credito: #8a4a73;
+      --pending: #c98a2b;
+      --shadow: 0 1px 0 rgba(27, 27, 58, 0.04), 0 8px 24px -12px rgba(27, 27, 58, 0.12);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; }
+    html { background: var(--paper); }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100dvh;
+      font-size: 16px;
+      line-height: 1.5;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      font-feature-settings: 'ss01', 'cv11';
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle at 20% 10%, rgba(196, 77, 62, 0.04) 0, transparent 50%),
+                        radial-gradient(circle at 80% 90%, rgba(27, 27, 58, 0.03) 0, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app { max-width: 560px; margin: 0 auto; padding: 24px 22px 80px; position: relative; z-index: 1; }
+
+    /* ===== HEADER ===== */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+    .brand h1 {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 120, 'SOFT' 50;
+      font-weight: 500;
+      font-size: clamp(28px, 8vw, 38px);
+      line-height: 1;
+      margin: 0;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .brand h1 em {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+    .brand .sub {
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .icon-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: var(--paper-light);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: var(--ink-soft);
+      transition: transform .15s ease, background .15s ease;
+    }
+    .icon-btn:active { transform: scale(0.94); background: var(--paper); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    /* ===== TOTAL ===== */
+    .total-card {
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 22px 18px;
+      margin-bottom: 26px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .total-card::after {
+      content: '';
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+      opacity: 0.4;
+    }
+    .total-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .total-value {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 144, 'SOFT' 0;
+      font-weight: 400;
+      font-size: clamp(36px, 11vw, 48px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      font-feature-settings: 'tnum';
+    }
+    .total-value .cents { font-size: 0.55em; color: var(--ink-soft); }
+    .total-breakdown {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line);
+      font-size: 13px;
+    }
+    .total-breakdown div { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot.debito { background: var(--debito); }
+    .dot.credito { background: var(--credito); }
+
+    /* ===== FORM ===== */
+    .section-label {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 14;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 15px;
+      color: var(--muted);
+      margin: 0 0 12px 4px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    form { margin-bottom: 32px; }
+
+    .field {
+      margin-bottom: 12px;
+      position: relative;
+    }
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      font-family: inherit;
+      font-size: 16px; /* 16px+ evita zoom no iOS */
+      padding: 16px 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper-light);
+      color: var(--ink);
+      transition: border-color .15s ease, background .15s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--ink);
+      background: #fff;
+    }
+    input::placeholder { color: var(--muted); }
+
+    .valor-wrap { position: relative; }
+    .valor-wrap::before {
+      content: 'R$';
+      position: absolute;
+      left: 18px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-weight: 500;
+      pointer-events: none;
+    }
+    .valor-wrap input { padding-left: 46px; font-feature-settings: 'tnum'; font-variant-numeric: tabular-nums; }
+
+    /* Campo de data com botão Hoje */
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .date-row input[type="date"] {
+      font-family: inherit;
+      width: 100%;
+      font-size: 16px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper-light);
+      color: var(--ink);
+      -webkit-appearance: none;
+      appearance: none;
+      font-feature-settings: 'tnum';
+      min-height: 52px;
+    }
+    .date-row input[type="date"]:focus { outline: none; border-color: var(--ink); background: #fff; }
+    .date-row input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+    .today-btn {
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper-light);
+      color: var(--ink-soft);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s ease;
+    }
+    .today-btn:active { transform: scale(0.96); }
+    .today-btn.is-today { border-color: var(--debito); color: var(--debito); background: rgba(93,107,60,0.1); }
+
+    /* Footer com versão */
+    .app-footer {
+      text-align: center;
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px dashed var(--line);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .app-footer .dot-sep { margin: 0 8px; color: var(--line); }
+
+    /* ===== CATEGORIAS ===== */
+    .cat-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 22px 12px;
+      margin: 0 -22px 6px;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .cat-scroll::-webkit-scrollbar { display: none; }
+    .cat-chip {
+      flex: 0 0 auto;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 16px 10px 12px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all .15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      scroll-snap-align: start;
+      white-space: nowrap;
+    }
+    .cat-chip .emoji { font-size: 16px; line-height: 1; }
+    .cat-chip:active { transform: scale(0.95); }
+    .cat-chip.selected {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    /* Chip pequenino no histórico */
+    .chip.cat {
+      background: rgba(27,27,58,0.06);
+      color: var(--ink-soft);
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px 2px 6px;
+    }
+    .chip.cat .emoji { font-size: 12px; margin-right: 3px; }
+
+    /* Segmented toggle */
+    .toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .toggle button {
+      background: transparent;
+      border: none;
+      padding: 12px 0;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: color .2s ease;
+      position: relative;
+      z-index: 1;
+      letter-spacing: 0.02em;
+    }
+    .toggle button.active {
+      color: #fff;
+    }
+    .toggle .pill {
+      position: absolute;
+      top: 4px; bottom: 4px;
+      width: calc(50% - 4px);
+      border-radius: 10px;
+      background: var(--debito);
+      transition: transform .25s cubic-bezier(.4,0,.2,1), background .25s ease;
+      z-index: 0;
+    }
+    .toggle.credito .pill {
+      transform: translateX(100%);
+      background: var(--credito);
+    }
+
+    .submit {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 14px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .12s ease, background .15s ease;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .submit:active { transform: scale(0.98); }
+    .submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ===== LIST ===== */
+    .entries {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .entry {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 14px 4px;
+      border-bottom: 1px solid var(--line);
+      animation: slideIn .3s ease both;
+      align-items: start;
+    }
+    .entry:last-child { border-bottom: none; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .entry-main { min-width: 0; }
+    .entry-item {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 24;
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-bottom: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .entry-meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .entry-meta .local { color: var(--ink-soft); }
+    .entry-meta .sep { color: var(--line); }
+    .chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .chip.debito { background: rgba(93, 107, 60, 0.12); color: var(--debito); }
+    .chip.credito { background: rgba(138, 74, 115, 0.12); color: var(--credito); }
+    .chip.pending { background: rgba(201, 138, 43, 0.15); color: var(--pending); }
+
+    .entry-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .entry-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .entry-delete {
+      background: none; border: none;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+      padding: 4px 6px;
+      margin-right: -6px;
+      opacity: 0.6;
+    }
+    .entry-delete:active { opacity: 1; color: var(--accent); }
+
+    /* Estados de aprovação de remoção */
+    .entry.pending-removal {
+      background: rgba(201, 138, 43, 0.06);
+      border-radius: 10px;
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(201, 138, 43, 0.2);
+    }
+    .entry.pending-removal .entry-item { text-decoration: line-through; text-decoration-color: var(--pending); }
+
+    .approval-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(201, 138, 43, 0.3);
+    }
+    .approval-actions button {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+    .approval-actions button:active { transform: scale(0.97); }
+    .approval-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-approve {
+      background: var(--debito);
+      color: #fff;
+    }
+    .btn-reject {
+      background: transparent;
+      color: var(--ink-soft);
+      border: 1px solid var(--line) !important;
+    }
+    .btn-cancel-req {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line) !important;
+      flex: 1;
+    }
+    .req-info {
+      font-size: 12px;
+      color: var(--pending);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Banner de aprovações pendentes */
+    .approval-banner {
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn .3s ease both;
+    }
+    .approval-banner::before {
+      content: '🔔';
+      font-size: 18px;
+    }
+    .approval-banner strong { font-weight: 600; }
+
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-style: italic;
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 24;
+      font-size: 16px;
+    }
+    .empty::before {
+      content: '✦';
+      display: block;
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    /* ===== SYNC INDICATOR ===== */
+    .sync-bar {
+      position: fixed;
+      bottom: calc(16px + env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity .25s ease, transform .25s ease;
+      pointer-events: none;
+      box-shadow: 0 12px 28px -8px rgba(27,27,58,0.4);
+      z-index: 100;
+    }
+    .sync-bar.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .sync-bar.error { background: var(--accent); }
+    .sync-bar .spinner {
+      width: 12px; height: 12px;
+      border: 2px solid rgba(245,239,228,0.3);
+      border-top-color: var(--paper);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== MODAL ===== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(27, 27, 58, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn .2s ease both;
+    }
+    .modal-backdrop.show { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      background: var(--paper);
+      width: 100%;
+      max-width: 560px;
+      max-height: 90dvh;
+      border-radius: 24px 24px 0 0;
+      padding: 24px 22px calc(24px + env(safe-area-inset-bottom));
+      overflow-y: auto;
+      animation: slideUp .3s cubic-bezier(.4,0,.2,1) both;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: var(--line);
+      border-radius: 2px;
+      margin: 0 auto 18px;
+    }
+    .modal h2 {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 80;
+      font-weight: 500;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+    .modal p { color: var(--ink-soft); font-size: 14px; line-height: 1.6; margin: 0 0 16px; }
+
+    .modal-section { margin-bottom: 24px; }
+    .modal-section h3 {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 15px;
+      color: var(--muted);
+      margin: 0 0 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .modal-section h3 .num {
+      width: 22px; height: 22px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 11px;
+      font-family: 'DM Sans', sans-serif;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    .modal-section ol { padding-left: 18px; margin: 0; font-size: 14px; color: var(--ink-soft); }
+    .modal-section ol li { margin-bottom: 6px; }
+    .modal-section a { color: var(--accent); }
+
+    .code-block {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 16px;
+      border-radius: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      line-height: 1.55;
+      overflow-x: auto;
+      white-space: pre;
+      position: relative;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    .code-block #codeContent {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: rgba(245,239,228,0.12);
+      color: var(--paper);
+      border: 1px solid rgba(245,239,228,0.2);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .copy-btn:active { background: rgba(245,239,228,0.25); }
+
+    .url-input-wrap { display: flex; gap: 8px; }
+    .url-input-wrap input { flex: 1; }
+    .save-btn {
+      padding: 0 18px;
+      border: none;
+      border-radius: 14px;
+      background: var(--accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .save-btn:active { transform: scale(0.97); }
+
+    .diag-panel {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: var(--ink-soft);
+      white-space: pre-wrap;
+      word-break: break-word;
+      display: none;
+    }
+    .diag-panel.show { display: block; }
+    .diag-panel .ok { color: var(--debito); font-weight: 600; }
+    .diag-panel .err { color: var(--accent); font-weight: 600; }
+    .diag-panel .hint { color: var(--ink); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-family: 'DM Sans', sans-serif; font-size: 13px; }
+
+    .danger-btn {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    /* ===== ONBOARDING ===== */
+    .onboard {
+      text-align: center;
+      padding: 24px 0;
+    }
+    .onboard h2 {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 144;
+      font-weight: 400;
+      font-size: clamp(28px, 8vw, 36px);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 0 0 12px;
+    }
+    .onboard h2 em { color: var(--accent); font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <h1>Caderno<br /><em>de Gastos</em></h1>
+        <div class="sub">Diário da viagem</div>
+      </div>
+      <button class="icon-btn" id="settingsBtn" aria-label="Configurações">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- TOTAL CARD -->
+    <div class="total-card">
+      <div class="total-label">Total gasto</div>
+      <div class="total-value" id="totalValue">R$ 0<span class="cents">,00</span></div>
+      <div class="total-breakdown">
+        <div><span class="dot debito"></span>Débito <strong id="totalDebito">R$ 0,00</strong></div>
+        <div><span class="dot credito"></span>Crédito <strong id="totalCredito">R$ 0,00</strong></div>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <form id="form">
+      <div class="section-label">Novo lançamento</div>
+
+      <div class="field">
+        <input type="text" id="local" placeholder="Local da viagem" autocomplete="off" list="locais" required />
+        <datalist id="locais"></datalist>
+      </div>
+
+      <div class="field">
+        <input type="text" id="item" placeholder="O que foi?" autocomplete="off" required />
+      </div>
+
+      <div class="field valor-wrap">
+        <input type="number" id="valor" placeholder="0,00" inputmode="decimal" step="0.01" min="0" required />
+      </div>
+
+      <div class="date-row">
+        <input type="date" id="dataGasto" required />
+        <button type="button" class="today-btn" id="todayBtn">Hoje</button>
+      </div>
+
+      <div class="cat-scroll" id="catScroll"></div>
+
+      <div class="toggle" id="toggle">
+        <div class="pill"></div>
+        <button type="button" class="active" data-tipo="debito">Débito</button>
+        <button type="button" data-tipo="credito">Crédito</button>
+      </div>
+
+      <button type="submit" class="submit" id="submitBtn">Registrar</button>
+    </form>
+
+    <!-- LIST -->
+    <div id="approvalBanner"></div>
+    <div class="section-label">Histórico</div>
+    <div class="entries" id="entries"></div>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      Caderno de Gastos <span class="dot-sep">·</span> v<span id="appVersion">1.0.0</span>
+    </footer>
+
+  </div>
+
+  <!-- SYNC INDICATOR -->
+  <div class="sync-bar" id="syncBar">
+    <div class="spinner"></div>
+    <span id="syncText">Sincronizando…</span>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="modal">
+      <div class="modal-handle"></div>
+
+      <h2>Configurações</h2>
+      <p>Conecte uma planilha Google compartilhada para que dois aparelhos vejam os mesmos gastos.</p>
+
+      <div class="modal-section">
+        <h3><span class="num">1</span>Crie a planilha</h3>
+        <ol>
+          <li>Acesse <a href="https://sheets.new" target="_blank">sheets.new</a> e crie uma planilha em branco.</li>
+          <li>Compartilhe com a outra pessoa (botão <em>Compartilhar</em>).</li>
+        </ol>
+      </div>
+
+      <div class="modal-section">
+        <h3><span class="num">2</span>Adicione o script</h3>
+        <ol>
+          <li>Na planilha, clique em <strong>Extensões → Apps Script</strong>.</li>
+          <li>Apague o conteúdo e cole o código abaixo.</li>
+          <li>Salve (💾) e clique em <strong>Implantar → Nova implantação</strong>.</li>
+          <li>Tipo: <strong>App da Web</strong>. Acesso: <strong>Qualquer pessoa</strong>. Clique em <em>Implantar</em>.</li>
+          <li>Copie a URL gerada e cole no campo abaixo.</li>
+        </ol>
+        <div class="code-block">
+<button class="copy-btn" id="copyCode">Copiar</button><span id="codeContent">function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    ensureHeader(sheet);
+    const action = data.action || 'add';
+    if (action === 'add')           return addRow(sheet, data);
+    if (action === 'requestDelete') return setStatus(sheet, data.id, 'pendente', data.solicitadoPor || '');
+    if (action === 'cancelDelete')  return setStatus(sheet, data.id, '', '');
+    if (action === 'rejectDelete')  return setStatus(sheet, data.id, '', '');
+    if (action === 'approveDelete') return deleteRow(sheet, data.id);
+    return jsonErr('Ação desconhecida: ' + action);
+  } catch (err) { return jsonErr(err); }
+}
+
+function ensureHeader(sheet) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['ID','Registrado','DataGasto','Local','Item','Valor','Tipo','Categoria','StatusRemocao','SolicitadoPor']);
+    return;
+  }
+  const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  ['DataGasto','Categoria','StatusRemocao','SolicitadoPor'].forEach(col => {
+    if (head.indexOf(col) === -1) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
+    }
+  });
+}
+
+function addRow(sheet, data) {
+  const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const v = {
+    'ID': data.id,
+    'Registrado': new Date(data.data),
+    'Data': new Date(data.data),
+    'DataGasto': data.dataGasto ? new Date(data.dataGasto + 'T12:00:00') : new Date(data.data),
+    'Local': data.local, 'Item': data.item,
+    'Valor': Number(data.valor), 'Tipo': data.tipo,
+    'Categoria': data.categoria || '',
+    'StatusRemocao': '', 'SolicitadoPor': ''
+  };
+  sheet.appendRow(head.map(h => v[h] !== undefined ? v[h] : ''));
+  return jsonOk({});
+}
+
+function findRow(sheet, id) {
+  const vals = sheet.getDataRange().getValues();
+  for (let i = 1; i < vals.length; i++) {
+    if (String(vals[i][0]) === String(id)) return i + 1;
+  }
+  return -1;
+}
+
+function setStatus(sheet, id, status, por) {
+  const row = findRow(sheet, id);
+  if (row < 0) return jsonErr('ID não encontrado');
+  const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const cS = head.indexOf('StatusRemocao') + 1;
+  const cP = head.indexOf('SolicitadoPor') + 1;
+  if (cS > 0) sheet.getRange(row, cS).setValue(status);
+  if (cP > 0) sheet.getRange(row, cP).setValue(por);
+  return jsonOk({});
+}
+
+function deleteRow(sheet, id) {
+  const row = findRow(sheet, id);
+  if (row < 0) return jsonErr('ID não encontrado');
+  sheet.deleteRow(row);
+  return jsonOk({});
+}
+
+function jsonOk(extra) {
+  return ContentService.createTextOutput(JSON.stringify(Object.assign({ok:true}, extra)))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function jsonErr(err) {
+  return ContentService.createTextOutput(JSON.stringify({ok:false, error:String(err)}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const vals = sheet.getDataRange().getValues();
+  if (vals.length === 0) return jsonOk({data:[]});
+  const head = vals[0];
+  const idx = (n) => head.indexOf(n);
+  const rows = vals.slice(1).map(r => ({
+    id: r[idx('ID')],
+    data: r[idx('Registrado')] || r[idx('Data')],
+    dataGasto: idx('DataGasto') >= 0 ? r[idx('DataGasto')] : null,
+    local: r[idx('Local')], item: r[idx('Item')],
+    valor: r[idx('Valor')], tipo: r[idx('Tipo')],
+    categoria: idx('Categoria') >= 0 ? (r[idx('Categoria')] || '') : '',
+    statusRemocao: idx('StatusRemocao') >= 0 ? (r[idx('StatusRemocao')] || '') : '',
+    solicitadoPor: idx('SolicitadoPor') >= 0 ? (r[idx('SolicitadoPor')] || '') : ''
+  })).filter(r => r.id);
+  return jsonOk({data: rows});
+}</span></div>
+      </div>
+
+      <div class="modal-section">
+        <h3><span class="num">3</span>Cole a URL aqui</h3>
+        <div class="url-input-wrap">
+          <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec" />
+          <button class="save-btn" id="saveUrl">Salvar</button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3><span class="num">4</span>Seu nome</h3>
+        <p style="margin-bottom:10px;">Como você quer ser identificado(a) ao solicitar remoções? (ex: Fabio, Mari)</p>
+        <div class="url-input-wrap">
+          <input type="text" id="userName" placeholder="Seu nome" maxlength="20" />
+          <button class="save-btn" id="saveName">Salvar</button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3>Outras ações</h3>
+        <button class="submit" id="testConn" style="background: var(--pending); margin-bottom: 10px;">Testar conexão</button>
+        <div class="diag-panel" id="diagPanel"></div>
+        <button class="submit" id="syncNow" style="background: var(--debito); margin-top: 10px;">Sincronizar agora</button>
+        <button class="danger-btn" id="clearLocal">Limpar dados locais</button>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+
+  const APP_VERSION = '1.1.1';
+
+  const STORAGE_KEY = 'gastos_viagem_v1';
+  const URL_KEY = 'gastos_viagem_url_v1';
+  const TIPO_KEY = 'gastos_viagem_tipo_v1';
+  const LOCAL_KEY = 'gastos_viagem_local_v1';
+  const CAT_KEY = 'gastos_viagem_cat_v1';
+  const USER_KEY = 'gastos_viagem_user_v1';
+
+  // Categorias pré-cadastradas para viagem
+  const CATEGORIAS = [
+    { id: 'alimentacao', emoji: '🍽️', nome: 'Alimentação' },
+    { id: 'hospedagem',  emoji: '🛏️', nome: 'Hospedagem' },
+    { id: 'transporte',  emoji: '🚕', nome: 'Transporte' },
+    { id: 'combustivel', emoji: '⛽', nome: 'Combustível' },
+    { id: 'passeios',    emoji: '🎟️', nome: 'Passeios' },
+    { id: 'compras',     emoji: '🛍️', nome: 'Compras' },
+    { id: 'mercado',     emoji: '🛒', nome: 'Mercado' },
+    { id: 'estacionamento', emoji: '🅿️', nome: 'Estacionamento' },
+    { id: 'pedagio',     emoji: '🛣️', nome: 'Pedágio' },
+    { id: 'saude',       emoji: '💊', nome: 'Saúde' },
+    { id: 'lazer',       emoji: '🍺', nome: 'Lazer' },
+    { id: 'outros',      emoji: '📌', nome: 'Outros' }
+  ];
+  const CAT_BY_ID = Object.fromEntries(CATEGORIAS.map(c => [c.id, c]));
+
+  // ===== STATE =====
+  let state = {
+    entries: JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'),
+    scriptUrl: localStorage.getItem(URL_KEY) || '',
+    tipo: localStorage.getItem(TIPO_KEY) || 'debito',
+    lastLocal: localStorage.getItem(LOCAL_KEY) || '',
+    categoria: localStorage.getItem(CAT_KEY) || 'alimentacao',
+    userName: localStorage.getItem(USER_KEY) || ''
+  };
+
+  // Migração: entries antigos sem categoria viram "outros"; sem dataGasto usa data do timestamp
+  state.entries.forEach(e => {
+    if (!e.categoria) e.categoria = 'outros';
+    if (!e.dataGasto) e.dataGasto = toDateOnly(e.data);
+    if (!e.statusRemocao) e.statusRemocao = '';
+    if (!e.solicitadoPor) e.solicitadoPor = '';
+  });
+
+  // ===== DOM =====
+  const $ = (id) => document.getElementById(id);
+  const form = $('form');
+  const localInput = $('local');
+  const itemInput = $('item');
+  const valorInput = $('valor');
+  const toggle = $('toggle');
+  const catScroll = $('catScroll');
+  const entriesEl = $('entries');
+  const dataGastoInput = $('dataGasto');
+  const todayBtn = $('todayBtn');
+  const totalValueEl = $('totalValue');
+  const totalDebitoEl = $('totalDebito');
+  const totalCreditoEl = $('totalCredito');
+  const locaisDatalist = $('locais');
+  const syncBar = $('syncBar');
+  const syncText = $('syncText');
+  const modalBackdrop = $('modalBackdrop');
+  const scriptUrlInput = $('scriptUrl');
+
+  // ===== FORMATTERS =====
+  const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const fmtMoney = (v) => brl.format(Number(v) || 0);
+
+  function fmtMoneyParts(v) {
+    const parts = brl.formatToParts(Number(v) || 0);
+    let main = '', cents = '';
+    let sawDecimal = false;
+    for (const p of parts) {
+      if (p.type === 'decimal') { sawDecimal = true; cents += p.value; continue; }
+      if (sawDecimal) cents += p.value; else main += p.value;
+    }
+    return { main, cents };
+  }
+
+  function fmtTime(iso) {
+    try {
+      return new Date(iso).toLocaleString('pt-BR', {
+        day: '2-digit', month: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+    } catch { return ''; }
+  }
+
+  // Retorna a data atual no formato YYYY-MM-DD (timezone local)
+  function todayISO() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Formata data YYYY-MM-DD para "21 mai" ou "21/05/24" se for outro ano
+  function fmtDateShort(iso) {
+    if (!iso) return '';
+    try {
+      const [y, m, d] = iso.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      const now = new Date();
+      if (y === now.getFullYear()) {
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+      }
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    } catch { return iso; }
+  }
+
+  // Converte qualquer entrada (ISO timestamp, Date, ou YYYY-MM-DD) para YYYY-MM-DD local
+  function toDateOnly(input) {
+    if (!input) return '';
+    if (typeof input === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
+    try {
+      const d = new Date(input);
+      if (isNaN(d.getTime())) return '';
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    } catch { return ''; }
+  }
+
+  // ===== STORAGE =====
+  const persist = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state.entries));
+
+  // ===== RENDER =====
+  function renderTotal() {
+    const debito = state.entries
+      .filter(e => e.tipo === 'debito' && !e.deleted)
+      .reduce((s, e) => s + Number(e.valor), 0);
+    const credito = state.entries
+      .filter(e => e.tipo === 'credito' && !e.deleted)
+      .reduce((s, e) => s + Number(e.valor), 0);
+    const total = debito + credito;
+
+    const { main, cents } = fmtMoneyParts(total);
+    totalValueEl.innerHTML = `${main}<span class="cents">${cents}</span>`;
+    totalDebitoEl.textContent = fmtMoney(debito);
+    totalCreditoEl.textContent = fmtMoney(credito);
+  }
+
+  function renderCategorias() {
+    catScroll.innerHTML = CATEGORIAS.map(c => `
+      <button type="button" class="cat-chip${c.id === state.categoria ? ' selected' : ''}" data-cat="${c.id}">
+        <span class="emoji">${c.emoji}</span>${c.nome}
+      </button>
+    `).join('');
+  }
+
+  function renderEntries() {
+    const list = state.entries
+      .filter(e => !e.deleted)
+      .sort((a, b) => {
+        const da = a.dataGasto || toDateOnly(a.data);
+        const db = b.dataGasto || toDateOnly(b.data);
+        if (db !== da) return db.localeCompare(da);
+        return (b.data || '').localeCompare(a.data || '');
+      });
+
+    if (list.length === 0) {
+      entriesEl.innerHTML = '<div class="empty">Nenhum gasto ainda.<br/>Comece registrando seu primeiro.</div>';
+      return;
+    }
+
+    const myName = (state.userName || '').trim().toLowerCase();
+
+    entriesEl.innerHTML = list.map(e => {
+      const cat = CAT_BY_ID[e.categoria] || CAT_BY_ID.outros;
+      const dataExibida = fmtDateShort(e.dataGasto || toDateOnly(e.data));
+      const isPending = e.statusRemocao === 'pendente';
+      const iRequested = isPending && (e.solicitadoPor || '').trim().toLowerCase() === myName;
+      const otherRequested = isPending && !iRequested;
+
+      let bottomBlock = '';
+      if (iRequested) {
+        bottomBlock = `
+          <div class="approval-actions">
+            <span class="req-info">🕐 Aguardando aprovação</span>
+            <button class="btn-cancel-req" data-action="cancel" data-id="${e.id}">Cancelar pedido</button>
+          </div>`;
+      } else if (otherRequested) {
+        const who = escapeHtml(e.solicitadoPor || 'alguém');
+        bottomBlock = `
+          <div class="approval-actions">
+            <button class="btn-reject" data-action="reject" data-id="${e.id}">Rejeitar</button>
+            <button class="btn-approve" data-action="approve" data-id="${e.id}">Aprovar (${who})</button>
+          </div>`;
+      }
+
+      const deleteBtn = isPending ? '' : `<button class="entry-delete" data-del="${e.id}">remover</button>`;
+
+      return `
+      <div class="entry ${isPending ? 'pending-removal' : ''}" data-id="${e.id}">
+        <div class="entry-main">
+          <div class="entry-item">${escapeHtml(e.item)}</div>
+          <div class="entry-meta">
+            <span class="local">${escapeHtml(e.local)}</span>
+            <span class="sep">·</span>
+            <span class="chip cat"><span class="emoji">${cat.emoji}</span>${cat.nome}</span>
+            <span class="chip ${e.tipo}">${e.tipo}</span>
+            ${e.synced === false ? '<span class="chip pending">pendente</span>' : ''}
+            <span class="sep">·</span>
+            <span>${dataExibida}</span>
+          </div>
+        </div>
+        <div class="entry-right">
+          <div class="entry-amount">${fmtMoney(e.valor)}</div>
+          ${deleteBtn}
+        </div>
+        ${bottomBlock}
+      </div>
+    `;}).join('');
+  }
+
+  function renderApprovalBanner() {
+    const banner = $('approvalBanner');
+    const myName = (state.userName || '').trim().toLowerCase();
+    const pendentes = state.entries.filter(e =>
+      e.statusRemocao === 'pendente' &&
+      (e.solicitadoPor || '').trim().toLowerCase() !== myName &&
+      !e.deleted
+    );
+    if (pendentes.length === 0) {
+      banner.innerHTML = '';
+      return;
+    }
+    const txt = pendentes.length === 1
+      ? '1 remoção esperando sua aprovação'
+      : `${pendentes.length} remoções esperando sua aprovação`;
+    banner.innerHTML = `<div class="approval-banner"><div><strong>${txt}</strong></div></div>`;
+  }
+
+  function renderLocais() {
+    const locais = [...new Set(state.entries.filter(e => !e.deleted).map(e => e.local))];
+    locaisDatalist.innerHTML = locais.map(l => `<option value="${escapeHtml(l)}">`).join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+  }
+
+  function render() {
+    renderTotal();
+    renderEntries();
+    renderLocais();
+    renderCategorias();
+    renderApprovalBanner();
+  }
+
+  // ===== SYNC =====
+  let syncTimeout;
+  function showSync(text, error = false, autohide = true) {
+    syncText.textContent = text;
+    syncBar.classList.toggle('error', error);
+    syncBar.classList.add('show');
+    syncBar.querySelector('.spinner').style.display = autohide && !error ? 'none' : '';
+    clearTimeout(syncTimeout);
+    if (autohide) {
+      syncTimeout = setTimeout(() => syncBar.classList.remove('show'), 2200);
+    }
+  }
+  function hideSync() {
+    syncBar.classList.remove('show');
+  }
+
+  // Faz POST genérico ao Apps Script. payload é o corpo (com ou sem action)
+  async function postAction(payload) {
+    if (!state.scriptUrl) return { ok: false, reason: 'no-url' };
+    try {
+      const res = await fetch(state.scriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      });
+      const text = await res.text();
+      if (text.trim().startsWith('<')) {
+        return { ok: false, reason: 'html', detail: 'Recebeu HTML em vez de JSON. Provavelmente o deploy está com acesso restrito.' };
+      }
+      let json;
+      try { json = JSON.parse(text); }
+      catch { return { ok: false, reason: 'parse', detail: 'Resposta não é JSON: ' + text.slice(0, 120) }; }
+      if (!json.ok) return { ok: false, reason: 'server', detail: json.error || 'Erro no script' };
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, reason: 'network', detail: String(err.message || err) };
+    }
+  }
+
+  async function pushEntry(entry) {
+    // Default: add
+    return postAction({
+      action: 'add',
+      id: entry.id, data: entry.data, dataGasto: entry.dataGasto,
+      local: entry.local, item: entry.item, valor: entry.valor,
+      tipo: entry.tipo, categoria: entry.categoria
+    });
+  }
+
+  async function pullEntries() {
+    if (!state.scriptUrl) return { ok: false, reason: 'no-url' };
+    try {
+      const res = await fetch(state.scriptUrl, { method: 'GET', redirect: 'follow' });
+      const text = await res.text();
+      if (text.trim().startsWith('<')) {
+        return { ok: false, reason: 'html', detail: 'Recebeu HTML em vez de JSON. O deploy provavelmente está com acesso restrito a "Apenas eu".' };
+      }
+      let json;
+      try { json = JSON.parse(text); }
+      catch { return { ok: false, reason: 'parse', detail: 'Resposta inválida: ' + text.slice(0, 120) }; }
+      if (!json.ok) return { ok: false, reason: 'server', detail: json.error || 'Erro no script' };
+      return { ok: true, data: json.data || [] };
+    } catch (err) {
+      return { ok: false, reason: 'network', detail: String(err.message || err) };
+    }
+  }
+
+  async function syncAll() {
+    if (!state.scriptUrl) {
+      showSync('Configure a planilha primeiro', true);
+      return;
+    }
+    showSync('Sincronizando…', false, false);
+    syncBar.querySelector('.spinner').style.display = '';
+
+    // 1) Push pendentes (apenas adds)
+    const pending = state.entries.filter(e => e.synced === false && !e.deleted);
+    let pushFailed = null;
+    for (const entry of pending) {
+      const result = await pushEntry(entry);
+      if (result.ok) {
+        entry.synced = true;
+        persist();
+      } else {
+        pushFailed = result;
+        break;
+      }
+    }
+
+    // 2) Pull do servidor — fonte da verdade para itens existentes e status
+    const remote = await pullEntries();
+    if (remote.ok) {
+      const remoteById = new Map();
+      for (const r of remote.data) {
+        if (r.id) remoteById.set(String(r.id), r);
+      }
+
+      // 2a) Atualiza/adiciona com base no remoto
+      const localById = new Map(state.entries.map(e => [e.id, e]));
+      for (const [rid, r] of remoteById) {
+        const catId = String(r.categoria || '').toLowerCase().trim();
+        const dataReg = r.data ? new Date(r.data).toISOString() : new Date().toISOString();
+        const status = String(r.statusRemocao || '').toLowerCase().trim();
+        const por = String(r.solicitadoPor || '');
+        if (localById.has(rid)) {
+          const e = localById.get(rid);
+          e.statusRemocao = status;
+          e.solicitadoPor = por;
+        } else {
+          state.entries.push({
+            id: rid,
+            data: dataReg,
+            dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
+            local: String(r.local || ''),
+            item: String(r.item || ''),
+            valor: Number(r.valor) || 0,
+            tipo: r.tipo === 'credito' ? 'credito' : 'debito',
+            categoria: CAT_BY_ID[catId] ? catId : 'outros',
+            statusRemocao: status,
+            solicitadoPor: por,
+            synced: true
+          });
+        }
+      }
+
+      // 2b) Remove localmente itens que sumiram da planilha (foram aprovados)
+      state.entries = state.entries.filter(e => {
+        if (e.synced === false) return true; // ainda não foi enviado
+        return remoteById.has(e.id);
+      });
+
+      persist();
+      render();
+      if (pushFailed) {
+        showSync('Leitura ok, envio falhou', true);
+      } else {
+        showSync('Tudo sincronizado ✓');
+      }
+    } else {
+      showSync('Erro: ' + (remote.detail || 'falha de conexão').slice(0, 60), true);
+    }
+  }
+
+  // ===== EVENTS =====
+  // Categorias
+  catScroll.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-cat]');
+    if (!btn) return;
+    state.categoria = btn.dataset.cat;
+    localStorage.setItem(CAT_KEY, state.categoria);
+    catScroll.querySelectorAll('.cat-chip').forEach(c => {
+      c.classList.toggle('selected', c.dataset.cat === state.categoria);
+    });
+  });
+
+  // Data: inicializa em "hoje" e atualiza visual do botão
+  function updateTodayBtnState() {
+    todayBtn.classList.toggle('is-today', dataGastoInput.value === todayISO());
+  }
+  dataGastoInput.value = todayISO();
+  updateTodayBtnState();
+  dataGastoInput.addEventListener('change', updateTodayBtnState);
+  todayBtn.addEventListener('click', () => {
+    dataGastoInput.value = todayISO();
+    updateTodayBtnState();
+  });
+
+  // Versão visível no footer
+  $('appVersion').textContent = APP_VERSION;
+
+  // Toggle débito/crédito
+  toggle.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.tipo = btn.dataset.tipo;
+      localStorage.setItem(TIPO_KEY, state.tipo);
+      toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+      toggle.classList.toggle('credito', state.tipo === 'credito');
+    });
+  });
+  // Estado inicial do toggle
+  if (state.tipo === 'credito') {
+    toggle.classList.add('credito');
+    toggle.querySelector('[data-tipo="debito"]').classList.remove('active');
+    toggle.querySelector('[data-tipo="credito"]').classList.add('active');
+  }
+
+  // Lembra último local digitado
+  if (state.lastLocal) localInput.value = state.lastLocal;
+
+  // Submit
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const local = localInput.value.trim();
+    const item = itemInput.value.trim();
+    const valor = parseFloat(valorInput.value);
+    const dataGasto = dataGastoInput.value || todayISO();
+    if (!local || !item || !valor || valor <= 0) return;
+
+    const entry = {
+      id: crypto.randomUUID ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2)),
+      data: new Date().toISOString(),
+      dataGasto,
+      local, item, valor,
+      tipo: state.tipo,
+      categoria: state.categoria,
+      synced: false
+    };
+    state.entries.push(entry);
+    persist();
+    state.lastLocal = local;
+    localStorage.setItem(LOCAL_KEY, local);
+
+    // Limpa apenas item/valor; mantém local, data e categoria
+    itemInput.value = '';
+    valorInput.value = '';
+    itemInput.focus();
+    render();
+
+    // Tenta sincronizar
+    if (state.scriptUrl) {
+      showSync('Salvando…', false, false);
+      const result = await pushEntry(entry);
+      if (result.ok) {
+        entry.synced = true;
+        persist();
+        render();
+        showSync('Salvo na planilha ✓');
+      } else {
+        showSync('Salvo offline — toque em ⚙ Testar conexão', true);
+      }
+    } else {
+      showSync('Salvo localmente · configure a planilha', true);
+    }
+  });
+
+  // Helpers para mostrar status durante ações
+  function requireOnline() {
+    if (!state.scriptUrl) {
+      showSync('Configure a planilha primeiro', true);
+      return false;
+    }
+    return true;
+  }
+  function requireName() {
+    if (!state.userName.trim()) {
+      showSync('Coloque seu nome em ⚙️ Configurações', true);
+      modalBackdrop.classList.add('show');
+      $('userName').focus();
+      return false;
+    }
+    return true;
+  }
+
+  // Solicitar / aprovar / rejeitar / cancelar
+  entriesEl.addEventListener('click', async (e) => {
+    const delBtn = e.target.closest('[data-del]');
+    const actBtn = e.target.closest('[data-action]');
+
+    // SOLICITAR REMOÇÃO
+    if (delBtn) {
+      const id = delBtn.dataset.del;
+      const entry = state.entries.find(en => en.id === id);
+      if (!entry) return;
+      if (!requireOnline() || !requireName()) return;
+      if (!confirm(`Solicitar remoção de "${entry.item}"?\n\nA outra pessoa precisará aprovar antes do gasto sumir da planilha.`)) return;
+
+      showSync('Enviando solicitação…', false, false);
+      const result = await postAction({
+        action: 'requestDelete', id,
+        solicitadoPor: state.userName.trim()
+      });
+      if (result.ok) {
+        entry.statusRemocao = 'pendente';
+        entry.solicitadoPor = state.userName.trim();
+        persist();
+        render();
+        showSync('Solicitação enviada ✓');
+      } else {
+        showSync('Erro: ' + (result.detail || 'falhou').slice(0, 60), true);
+      }
+      return;
+    }
+
+    // Ações: cancel, approve, reject
+    if (actBtn) {
+      const action = actBtn.dataset.action;
+      const id = actBtn.dataset.id;
+      const entry = state.entries.find(en => en.id === id);
+      if (!entry) return;
+      if (!requireOnline()) return;
+
+      let serverAction, confirmMsg, optimistic;
+
+      if (action === 'cancel') {
+        serverAction = 'cancelDelete';
+        confirmMsg = 'Cancelar a solicitação de remoção?';
+        optimistic = () => { entry.statusRemocao = ''; entry.solicitadoPor = ''; };
+      } else if (action === 'reject') {
+        serverAction = 'rejectDelete';
+        confirmMsg = `Rejeitar a remoção solicitada por ${entry.solicitadoPor || 'alguém'}?`;
+        optimistic = () => { entry.statusRemocao = ''; entry.solicitadoPor = ''; };
+      } else if (action === 'approve') {
+        serverAction = 'approveDelete';
+        confirmMsg = `Aprovar a remoção solicitada por ${entry.solicitadoPor || 'alguém'}?\n\n"${entry.item}" será apagado da planilha permanentemente.`;
+        optimistic = () => { state.entries = state.entries.filter(en => en.id !== id); };
+      } else return;
+
+      if (!confirm(confirmMsg)) return;
+
+      // Desabilita o botão durante a requisição
+      actBtn.disabled = true;
+      showSync('Processando…', false, false);
+      const result = await postAction({ action: serverAction, id });
+      if (result.ok) {
+        optimistic();
+        persist();
+        render();
+        showSync(action === 'approve' ? 'Removido ✓' : 'Feito ✓');
+      } else {
+        actBtn.disabled = false;
+        showSync('Erro: ' + (result.detail || 'falhou').slice(0, 60), true);
+      }
+    }
+  });
+
+  // Settings modal
+  $('settingsBtn').addEventListener('click', () => {
+    scriptUrlInput.value = state.scriptUrl;
+    $('userName').value = state.userName;
+    modalBackdrop.classList.add('show');
+  });
+  modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === modalBackdrop) modalBackdrop.classList.remove('show');
+  });
+
+  $('saveUrl').addEventListener('click', () => {
+    const url = scriptUrlInput.value.trim();
+    if (!url.startsWith('https://script.google.com/')) {
+      alert('Cole a URL completa do Apps Script (começa com https://script.google.com/...)');
+      return;
+    }
+    state.scriptUrl = url;
+    localStorage.setItem(URL_KEY, url);
+    showSync('URL salva ✓');
+    setTimeout(syncAll, 400);
+  });
+
+  $('saveName').addEventListener('click', () => {
+    const name = $('userName').value.trim();
+    if (!name) { alert('Coloque um nome (qualquer um, só pra identificar suas solicitações).'); return; }
+    state.userName = name;
+    localStorage.setItem(USER_KEY, name);
+    showSync(`Olá, ${name} ✓`);
+    render();
+  });
+
+  $('syncNow').addEventListener('click', () => {
+    modalBackdrop.classList.remove('show');
+    setTimeout(syncAll, 200);
+  });
+
+  // Teste de conexão com diagnóstico detalhado
+  $('testConn').addEventListener('click', async () => {
+    const diag = $('diagPanel');
+    diag.classList.add('show');
+    diag.innerHTML = 'Testando conexão...';
+
+    if (!state.scriptUrl) {
+      diag.innerHTML = '<span class="err">❌ Nenhuma URL configurada.</span>\n\nCole a URL do Apps Script no campo acima e salve.';
+      return;
+    }
+
+    const url = state.scriptUrl;
+    let report = `URL: ${url.slice(0, 60)}...\n\n`;
+
+    // Teste 1: GET (leitura)
+    report += '→ Teste 1: leitura (GET)\n';
+    diag.innerHTML = report + 'Aguarde...';
+    const pull = await pullEntries();
+
+    if (pull.ok) {
+      report += `<span class="ok">✓ OK — ${pull.data.length} registro(s) lidos da planilha</span>\n\n`;
+    } else {
+      report += `<span class="err">✗ FALHOU</span>\n  Motivo: ${pull.reason}\n  Detalhe: ${(pull.detail || '').slice(0, 200)}\n\n`;
+    }
+
+    // Teste 2: POST (escrita)
+    report += '→ Teste 2: escrita (POST)\n';
+    diag.innerHTML = report + 'Aguarde...';
+    const testEntry = {
+      id: 'teste-' + Date.now(),
+      data: new Date().toISOString(),
+      local: '__teste__',
+      item: '__teste de conexão__',
+      valor: 0.01,
+      tipo: 'debito'
+    };
+    const push = await pushEntry(testEntry);
+
+    if (push.ok) {
+      report += `<span class="ok">✓ OK — escrita funcionou</span>\n`;
+      report += `\n<span class="hint">Tudo funcionando! Apague a linha "__teste__" da planilha se quiser. Feche essa janela e use o app normalmente.</span>`;
+    } else {
+      report += `<span class="err">✗ FALHOU</span>\n  Motivo: ${push.reason}\n  Detalhe: ${(push.detail || '').slice(0, 200)}\n`;
+
+      // Hints específicos por tipo de erro
+      let hint = '';
+      if (push.reason === 'html' || pull.reason === 'html') {
+        hint = '🔑 O Google retornou uma página de login em vez de JSON.\n\nIsso quase sempre significa que o deploy está com acesso "Apenas eu". Vá em Apps Script → Implantar → Gerenciar implantações → ✏️ Editar → "Quem tem acesso" deve ser "Qualquer pessoa" (não "Qualquer pessoa do Google"). Depois clique em Implantar novamente.\n\nSe a URL mudou, cole a nova aqui.';
+      } else if (push.reason === 'network' || pull.reason === 'network') {
+        hint = '🌐 Falha de rede.\n\nVerifique se você está com internet. Se estiver, a URL pode estar errada ou o script foi excluído. Confirme a URL na tela "Gerenciar implantações" do Apps Script.';
+      } else if (push.reason === 'server' || pull.reason === 'server') {
+        hint = '⚠️ O script rodou mas retornou erro.\n\nVerifique se você colou o código correto no Apps Script e se a planilha tem pelo menos uma aba (sheet).';
+      } else if (push.reason === 'parse' || pull.reason === 'parse') {
+        hint = '🧩 Resposta não é JSON.\n\nProvavelmente o código do Apps Script está diferente do que deveria. Cole o código novamente (botão Copiar acima) e salve.';
+      }
+      if (hint) report += `\n<span class="hint">${hint}</span>`;
+    }
+
+    diag.innerHTML = report;
+  });
+
+  $('clearLocal').addEventListener('click', () => {
+    if (!confirm('Apagar todos os dados locais? A planilha não será afetada.')) return;
+    state.entries = [];
+    persist();
+    render();
+    modalBackdrop.classList.remove('show');
+    showSync('Dados locais apagados');
+  });
+
+  $('copyCode').addEventListener('click', async () => {
+    const code = $('codeContent').textContent;
+    const btn = $('copyCode');
+    const orig = btn.textContent;
+
+    const flash = (msg, ok) => {
+      btn.textContent = msg;
+      btn.style.background = ok ? 'var(--debito)' : 'var(--accent)';
+      btn.style.borderColor = ok ? 'var(--debito)' : 'var(--accent)';
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.style.background = '';
+        btn.style.borderColor = '';
+      }, 1800);
+    };
+
+    // 1) Tenta Clipboard API (HTTPS / contexto seguro)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(code);
+        flash('Copiado!', true);
+        return;
+      } catch (e) { /* segue pro fallback */ }
+    }
+
+    // 2) Fallback: textarea + execCommand (funciona em file:// e http://)
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = code;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      // iOS precisa de range selection, não só .select()
+      ta.contentEditable = 'true';
+      const range = document.createRange();
+      range.selectNodeContents(ta);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      ta.setSelectionRange(0, code.length);
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) { flash('Copiado!', true); return; }
+    } catch (e) { /* segue pro último fallback */ }
+
+    // 3) Último recurso: seleciona o texto pro usuário copiar manualmente
+    try {
+      const el = $('codeContent');
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      flash('Selecionado — toque e segure para copiar', false);
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+      flash('Falhou — copie manualmente', false);
+    }
+  });
+
+  // Initial render + sync on load
+  render();
+  if (state.scriptUrl) {
+    setTimeout(syncAll, 600);
+  } else if (state.entries.length === 0) {
+    // Primeira vez: abre configurações
+    setTimeout(() => modalBackdrop.classList.add('show'), 400);
+  }
+
+  // Auto-sync ao voltar para o app
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && state.scriptUrl) {
+      const pending = state.entries.some(e => e.synced === false);
+      if (pending) syncAll();
+    }
+  });
+})();
+</script>
+</body>
+</html>
