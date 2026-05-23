@@ -289,6 +289,146 @@
     }
     .balance-spent strong { color: var(--ink-soft); font-weight: 500; }
 
+    /* ===== SALDO DA CONTA (carteira real) ===== */
+    .wallet-card {
+      background: linear-gradient(135deg, var(--ink) 0%, #2a2a55 100%);
+      color: var(--paper);
+      border-radius: 18px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px -12px rgba(27, 27, 58, 0.4);
+    }
+    .wallet-card::before {
+      content: '';
+      position: absolute;
+      right: -30px; top: -30px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(196, 77, 62, 0.3) 0%, transparent 60%);
+    }
+    .wallet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .wallet-label {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245, 239, 228, 0.65);
+    }
+    .wallet-adjust {
+      background: rgba(245, 239, 228, 0.12);
+      color: var(--paper);
+      border: 1px solid rgba(245, 239, 228, 0.2);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background .15s ease;
+    }
+    .wallet-adjust:active { background: rgba(245, 239, 228, 0.22); }
+    .wallet-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      position: relative;
+    }
+    .wallet-cell-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245, 239, 228, 0.55);
+      margin-bottom: 4px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .wallet-cell-label::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .wallet-cell.debito .wallet-cell-label::before { background: #b4c285; }
+    .wallet-cell.credito .wallet-cell-label::before { background: #d0a3c1; }
+    .wallet-cell-value {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 80;
+      font-weight: 400;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      font-feature-settings: 'tnum';
+      line-height: 1.1;
+    }
+    .wallet-cell-value.negative { color: #ffb4a8; }
+    .wallet-cell-sub {
+      font-size: 10.5px;
+      color: rgba(245, 239, 228, 0.55);
+      margin-top: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ===== ADJUST MODAL ===== */
+    .adjust-current {
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .adjust-current-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .adjust-current-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 17px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+    .adjust-history {
+      max-height: 220px;
+      overflow-y: auto;
+      margin-top: 8px;
+    }
+    .adjust-history-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 12.5px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+    }
+    .adjust-history-item:last-child { border-bottom: none; }
+    .adjust-history-info { min-width: 0; flex: 1; }
+    .adjust-history-motivo { color: var(--ink); font-weight: 500; }
+    .adjust-history-meta { color: var(--muted); font-size: 10.5px; margin-top: 2px; }
+    .adjust-history-delta {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .adjust-history-delta.up { color: var(--debito); }
+    .adjust-history-delta.down { color: var(--accent); }
+    .adjust-empty {
+      text-align: center;
+      padding: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      font-style: italic;
+    }
+
     /* ===== VIAGENS MODAL ===== */
     .trip-list {
       display: flex;
@@ -705,6 +845,57 @@
       background: var(--credito);
     }
 
+    /* Toggle pessoal/viagem (3 cores) */
+    .scope-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .scope-toggle button {
+      background: transparent;
+      border: none;
+      padding: 11px 0;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: color .2s ease;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .scope-toggle button.active { color: #fff; }
+    .scope-toggle button .emoji { font-size: 14px; }
+    .scope-toggle .pill {
+      position: absolute;
+      top: 4px; bottom: 4px;
+      width: calc(50% - 4px);
+      border-radius: 10px;
+      background: var(--ink);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      z-index: 0;
+    }
+    .scope-toggle.pessoal .pill {
+      transform: translateX(100%);
+      background: #8a7e6d;
+    }
+
+    /* Chip "pessoal" no histórico */
+    .chip.pessoal {
+      background: rgba(138,126,109,0.15);
+      color: #6b5f4f;
+    }
+
     .submit {
       width: 100%;
       padding: 18px;
@@ -1117,6 +1308,26 @@
       </button>
     </header>
 
+    <!-- WALLET (saldo real da conta) -->
+    <div class="wallet-card">
+      <div class="wallet-header">
+        <div class="wallet-label">Saldo da conta</div>
+        <button class="wallet-adjust" id="walletAdjust">Ajustar</button>
+      </div>
+      <div class="wallet-split">
+        <div class="wallet-cell debito">
+          <div class="wallet-cell-label">Em conta</div>
+          <div class="wallet-cell-value" id="walletDebito">R$ 0,00</div>
+          <div class="wallet-cell-sub" id="walletDebitoSub">&nbsp;</div>
+        </div>
+        <div class="wallet-cell credito">
+          <div class="wallet-cell-label">Crédito usado</div>
+          <div class="wallet-cell-value" id="walletCredito">R$ 0,00</div>
+          <div class="wallet-cell-sub" id="walletCreditoSub">&nbsp;</div>
+        </div>
+      </div>
+    </div>
+
     <!-- TRIP SELECTOR -->
     <button class="trip-selector" id="tripSelector">
       <div class="trip-icon">🗺️</div>
@@ -1177,6 +1388,12 @@
 
       <div class="cat-scroll" id="catScroll"></div>
 
+      <div class="scope-toggle" id="scopeToggle">
+        <div class="pill"></div>
+        <button type="button" class="active" data-scope="viagem"><span class="emoji">🗺️</span>Da viagem</button>
+        <button type="button" data-scope="pessoal"><span class="emoji">🏠</span>Fora da viagem</button>
+      </div>
+
       <div class="toggle" id="toggle">
         <div class="pill"></div>
         <button type="button" class="active" data-tipo="debito">Débito</button>
@@ -1202,6 +1419,42 @@
   <div class="sync-bar" id="syncBar">
     <div class="spinner"></div>
     <span id="syncText">Sincronizando…</span>
+  </div>
+
+  <!-- ADJUST BALANCE MODAL -->
+  <div class="modal-backdrop" id="adjustBackdrop">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h2>Ajustar saldo</h2>
+      <p>Atualize o saldo da conta quando entrar dinheiro (salário, transferência) ou quando o app divergir do banco.</p>
+
+      <div class="adjust-current">
+        <div>
+          <div class="adjust-current-label" id="adjustTipoLabel">Em conta</div>
+          <div class="adjust-current-value" id="adjustCurrentValue">R$ 0,00</div>
+        </div>
+        <div class="scope-toggle" id="adjustTipoToggle" style="width:auto;min-width:200px;margin:0;">
+          <div class="pill"></div>
+          <button type="button" class="active" data-tipo="debito"><span class="emoji">💵</span>Conta</button>
+          <button type="button" data-tipo="credito"><span class="emoji">💳</span>Crédito</button>
+        </div>
+      </div>
+
+      <div class="field valor-wrap" style="margin-bottom:12px;">
+        <input type="number" id="adjustValue" placeholder="Novo saldo" inputmode="decimal" step="0.01" />
+      </div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <input type="text" id="adjustMotivo" placeholder="Motivo (opcional, ex: salário, transferência)" maxlength="60" />
+      </div>
+
+      <button type="button" class="submit" id="adjustSave">Salvar ajuste</button>
+
+      <div class="modal-section" style="margin-top:20px;">
+        <h3>Histórico</h3>
+        <div class="adjust-history" id="adjustHistory"></div>
+      </div>
+    </div>
   </div>
 
   <!-- TRIPS MODAL -->
@@ -1291,6 +1544,7 @@
     if (action === 'addTrip')       return addViagem(ss, data);
     if (action === 'updateTrip')    return updateViagem(ss, data);
     if (action === 'deleteTrip')    return deleteViagem(ss, data.id);
+    if (action === 'adjustBalance') return addAjuste(ss, data);
     return jsonErr('Ação desconhecida: ' + action);
   } catch (err) { return jsonErr(err); }
 }
@@ -1299,8 +1553,10 @@ function doGet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const gSheet = getGastosSheet(ss);
   const vSheet = getViagensSheet(ss);
+  const sSheet = getSaldosSheet(ss);
   ensureGastosHeader(gSheet);
   ensureViagensHeader(vSheet);
+  ensureSaldosHeader(sSheet);
 
   const gv = gSheet.getDataRange().getValues();
   const gh = gv[0] || [];
@@ -1308,6 +1564,7 @@ function doGet() {
   const gastos = gv.slice(1).map(r => ({
     id: r[gi('ID')],
     viagemId: gi('ViagemId') >= 0 ? r[gi('ViagemId')] : '',
+    scope: gi('Scope') >= 0 ? (r[gi('Scope')] || '') : '',
     data: r[gi('Registrado')] || r[gi('Data')],
     dataGasto: gi('DataGasto') >= 0 ? r[gi('DataGasto')] : null,
     local: r[gi('Local')], item: r[gi('Item')],
@@ -1330,15 +1587,28 @@ function doGet() {
     arquivada: vi('Arquivada') >= 0 ? !!r[vi('Arquivada')] : false
   })).filter(r => r.id);
 
-  return jsonOk({ data: gastos, viagens: viagens });
+  const sv = sSheet.getDataRange().getValues();
+  const sh = sv[0] || [];
+  const si = (n) => sh.indexOf(n);
+  const ajustes = sv.slice(1).map(r => ({
+    id: r[si('ID')],
+    data: r[si('Data')],
+    tipo: r[si('Tipo')],
+    valorAntes: Number(r[si('ValorAntes')]) || 0,
+    valorDepois: Number(r[si('ValorDepois')]) || 0,
+    motivo: r[si('Motivo')] || '',
+    por: r[si('Por')] || ''
+  })).filter(r => r.id);
+
+  return jsonOk({ data: gastos, viagens: viagens, ajustes: ajustes });
 }
 
 function getGastosSheet(ss) {
   let s = ss.getSheetByName('Gastos');
   if (!s) {
     s = ss.getSheets()[0];
-    if (s.getName() !== 'Gastos' && s.getName() !== 'Viagens') s.setName('Gastos');
-    else if (s.getName() === 'Viagens') s = ss.insertSheet('Gastos', 0);
+    if (s.getName() !== 'Gastos' && s.getName() !== 'Viagens' && s.getName() !== 'Saldos') s.setName('Gastos');
+    else if (s.getName() !== 'Gastos') s = ss.insertSheet('Gastos', 0);
   }
   return s;
 }
@@ -1349,13 +1619,19 @@ function getViagensSheet(ss) {
   return s;
 }
 
+function getSaldosSheet(ss) {
+  let s = ss.getSheetByName('Saldos');
+  if (!s) s = ss.insertSheet('Saldos');
+  return s;
+}
+
 function ensureGastosHeader(sheet) {
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID','ViagemId','Registrado','DataGasto','Local','Item','Valor','Tipo','Categoria','StatusRemocao','SolicitadoPor']);
+    sheet.appendRow(['ID','ViagemId','Scope','Registrado','DataGasto','Local','Item','Valor','Tipo','Categoria','StatusRemocao','SolicitadoPor']);
     return;
   }
   const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  ['ViagemId','DataGasto','Categoria','StatusRemocao','SolicitadoPor'].forEach(col => {
+  ['ViagemId','Scope','DataGasto','Categoria','StatusRemocao','SolicitadoPor'].forEach(col => {
     if (head.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
     }
@@ -1368,12 +1644,31 @@ function ensureViagensHeader(sheet) {
   }
 }
 
+function ensureSaldosHeader(sheet) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['ID','Data','Tipo','ValorAntes','ValorDepois','Motivo','Por']);
+  }
+}
+
+function addAjuste(ss, data) {
+  const sheet = getSaldosSheet(ss);
+  ensureSaldosHeader(sheet);
+  sheet.appendRow([
+    data.id, new Date(data.data),
+    data.tipo, Number(data.valorAntes) || 0,
+    Number(data.valorDepois) || 0,
+    data.motivo || '', data.por || ''
+  ]);
+  return jsonOk({});
+}
+
 function addGasto(ss, data) {
   const sheet = getGastosSheet(ss);
   ensureGastosHeader(sheet);
   const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const v = {
     'ID': data.id, 'ViagemId': data.viagemId || '',
+    'Scope': data.scope || 'viagem',
     'Registrado': new Date(data.data), 'Data': new Date(data.data),
     'DataGasto': data.dataGasto ? new Date(data.dataGasto + 'T12:00:00') : new Date(data.data),
     'Local': data.local, 'Item': data.item,
@@ -1501,7 +1796,7 @@ function jsonErr(err) {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.3.0';
+  const APP_VERSION = '1.4.0';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -1511,6 +1806,8 @@ function jsonErr(err) {
   const USER_KEY = 'gastos_viagem_user_v1';
   const TRIPS_KEY = 'gastos_viagem_trips_v1';
   const ACTIVE_TRIP_KEY = 'gastos_viagem_active_trip_v1';
+  const SCOPE_KEY = 'gastos_viagem_scope_v1';
+  const AJUSTES_KEY = 'gastos_viagem_ajustes_v1';
 
   // Categorias pré-cadastradas para viagem
   const CATEGORIAS = [
@@ -1537,9 +1834,11 @@ function jsonErr(err) {
   let state = {
     entries: JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'),
     trips: JSON.parse(localStorage.getItem(TRIPS_KEY) || '[]'),
+    ajustes: JSON.parse(localStorage.getItem(AJUSTES_KEY) || '[]'),
     activeTripId: localStorage.getItem(ACTIVE_TRIP_KEY) || '',
     scriptUrl: localStorage.getItem(URL_KEY) || '',
     tipo: localStorage.getItem(TIPO_KEY) || 'debito',
+    scope: localStorage.getItem(SCOPE_KEY) || 'viagem',
     lastLocal: localStorage.getItem(LOCAL_KEY) || '',
     categoria: localStorage.getItem(CAT_KEY) || 'alimentacao',
     userName: localStorage.getItem(USER_KEY) || ''
@@ -1552,6 +1851,8 @@ function jsonErr(err) {
     if (!e.statusRemocao) e.statusRemocao = '';
     if (!e.solicitadoPor) e.solicitadoPor = '';
     if (e.viagemId === undefined) e.viagemId = '';
+    // Se tem viagemId => é da viagem; senão fica como "pessoal"
+    if (e.scope === undefined) e.scope = e.viagemId ? 'viagem' : 'pessoal';
   });
   // Migração: trips sem synced viram synced=true (já existiam antes)
   state.trips.forEach(t => {
@@ -1644,6 +1945,28 @@ function jsonErr(err) {
   const persist = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state.entries));
   const persistTrips = () => localStorage.setItem(TRIPS_KEY, JSON.stringify(state.trips));
   const persistActiveTrip = () => localStorage.setItem(ACTIVE_TRIP_KEY, state.activeTripId || '');
+  const persistAjustes = () => localStorage.setItem(AJUSTES_KEY, JSON.stringify(state.ajustes));
+
+  // ===== WALLET (saldo da conta) =====
+  // Saldo atual = último ajuste do tipo - gastos depois dele
+  function getWalletState(tipo) {
+    // Pega o ajuste mais recente desse tipo
+    const ajustesTipo = state.ajustes
+      .filter(a => a.tipo === tipo)
+      .sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+    const ultimo = ajustesTipo[0];
+    const ancoraValor = ultimo ? Number(ultimo.valorDepois) : 0;
+    const ancoraData = ultimo ? ultimo.data : null;
+
+    // Gastos do tipo, posteriores ao ajuste-âncora
+    const gastosDepois = state.entries
+      .filter(e => !e.deleted && e.tipo === tipo)
+      .filter(e => !ancoraData || (e.data || '') > ancoraData)
+      .reduce((s, e) => s + Number(e.valor), 0);
+
+    const saldo = ancoraValor - gastosDepois;
+    return { saldo, ancoraValor, gastoDesdeAncora: gastosDepois, temAncora: !!ultimo };
+  }
 
   // ===== VIAGENS =====
   function getActiveTrip() {
@@ -1651,7 +1974,12 @@ function jsonErr(err) {
   }
   function entriesOfActiveTrip() {
     const tripId = state.activeTripId;
-    return state.entries.filter(e => !e.deleted && (e.viagemId || '') === (tripId || ''));
+    if (!tripId) return [];
+    return state.entries.filter(e =>
+      !e.deleted &&
+      (e.scope || 'viagem') === 'viagem' &&
+      (e.viagemId || '') === tripId
+    );
   }
   function setActiveTrip(id) {
     state.activeTripId = id || '';
@@ -1670,6 +1998,39 @@ function jsonErr(err) {
     } else {
       sel.classList.remove('empty');
       nameEl.textContent = trip.nome;
+    }
+  }
+
+  function renderWallet() {
+    const debito = getWalletState('debito');
+    const credito = getWalletState('credito');
+
+    const wD = $('walletDebito');
+    const wC = $('walletCredito');
+    wD.textContent = fmtMoney(debito.saldo);
+    wD.classList.toggle('negative', debito.saldo < 0);
+
+    // "Crédito usado" = quanto foi gasto desde o último ajuste
+    // O "valor" do ajuste de crédito representa o quanto JÁ foi usado da fatura
+    // Saldo = ancoraValor + gastoDesdeAncora (gastos somam no usado)
+    const creditoUsado = credito.ancoraValor + credito.gastoDesdeAncora;
+    wC.textContent = fmtMoney(creditoUsado);
+    wC.classList.toggle('negative', false);
+
+    // Sublabels
+    if (debito.temAncora) {
+      $('walletDebitoSub').textContent = debito.gastoDesdeAncora > 0
+        ? `−${fmtMoney(debito.gastoDesdeAncora)} desde último ajuste`
+        : 'sincronizado';
+    } else {
+      $('walletDebitoSub').textContent = 'toque em Ajustar';
+    }
+    if (credito.temAncora || credito.gastoDesdeAncora > 0) {
+      $('walletCreditoSub').textContent = credito.gastoDesdeAncora > 0
+        ? `+${fmtMoney(credito.gastoDesdeAncora)} desde último ajuste`
+        : 'sincronizado';
+    } else {
+      $('walletCreditoSub').textContent = 'toque em Ajustar';
     }
   }
 
@@ -1737,7 +2098,13 @@ function jsonErr(err) {
   function renderEntries() {
     const tripId = state.activeTripId || '';
     const list = state.entries
-      .filter(e => !e.deleted && (e.viagemId || '') === tripId)
+      .filter(e => !e.deleted)
+      .filter(e => {
+        const scope = e.scope || 'viagem';
+        // Mostra gastos da viagem ativa OU gastos pessoais (que aparecem sempre)
+        if (scope === 'pessoal') return true;
+        return (e.viagemId || '') === tripId;
+      })
       .sort((a, b) => {
         const da = a.dataGasto || toDateOnly(a.data);
         const db = b.dataGasto || toDateOnly(b.data);
@@ -1761,6 +2128,7 @@ function jsonErr(err) {
       const isPending = e.statusRemocao === 'pendente';
       const iRequested = isPending && (e.solicitadoPor || '').trim().toLowerCase() === myName;
       const otherRequested = isPending && !iRequested;
+      const isPessoal = (e.scope || 'viagem') === 'pessoal';
 
       let bottomBlock = '';
       if (iRequested) {
@@ -1789,6 +2157,7 @@ function jsonErr(err) {
             <span class="sep">·</span>
             <span class="chip cat"><span class="emoji">${cat.emoji}</span>${cat.nome}</span>
             <span class="chip ${e.tipo}">${e.tipo}</span>
+            ${isPessoal ? '<span class="chip pessoal">🏠 fora da viagem</span>' : ''}
             ${e.synced === false ? '<span class="chip pending">pendente</span>' : ''}
             <span class="sep">·</span>
             <span>${dataExibida}</span>
@@ -1833,6 +2202,7 @@ function jsonErr(err) {
   }
 
   function render() {
+    renderWallet();
     renderTripSelector();
     renderBalance();
     renderEntries();
@@ -1885,6 +2255,7 @@ function jsonErr(err) {
     return postAction({
       action: 'add',
       id: entry.id, viagemId: entry.viagemId || '',
+      scope: entry.scope || 'viagem',
       data: entry.data, dataGasto: entry.dataGasto,
       local: entry.local, item: entry.item, valor: entry.valor,
       tipo: entry.tipo, categoria: entry.categoria
@@ -1903,7 +2274,14 @@ function jsonErr(err) {
   async function pullEntries() {
     if (!state.scriptUrl) return { ok: false, reason: 'no-url' };
     try {
-      const res = await fetch(state.scriptUrl, { method: 'GET', redirect: 'follow' });
+      // Cache-busting: adiciona timestamp pra evitar cache agressivo do Safari iOS
+      const sep = state.scriptUrl.includes('?') ? '&' : '?';
+      const urlNoCache = state.scriptUrl + sep + '_t=' + Date.now();
+      const res = await fetch(urlNoCache, {
+        method: 'GET',
+        redirect: 'follow',
+        cache: 'no-store'
+      });
       const text = await res.text();
       if (text.trim().startsWith('<')) {
         return { ok: false, reason: 'html', detail: 'Recebeu HTML em vez de JSON. O deploy provavelmente está com acesso restrito a "Apenas eu".' };
@@ -1941,6 +2319,21 @@ function jsonErr(err) {
       for (const entry of pending) {
         const result = await pushEntry(entry);
         if (result.ok) { entry.synced = true; persist(); }
+        else { pushFailed = result; break; }
+      }
+    }
+
+    // 2.5) Push ajustes de saldo pendentes
+    if (!pushFailed) {
+      const pendingAj = state.ajustes.filter(a => a.synced === false);
+      for (const aj of pendingAj) {
+        const result = await postAction({
+          action: 'adjustBalance',
+          id: aj.id, data: aj.data, tipo: aj.tipo,
+          valorAntes: aj.valorAntes, valorDepois: aj.valorDepois,
+          motivo: aj.motivo, por: aj.por
+        });
+        if (result.ok) { aj.synced = true; persistAjustes(); }
         else { pushFailed = result; break; }
       }
     }
@@ -1991,15 +2384,18 @@ function jsonErr(err) {
         const dataReg = r.data ? new Date(r.data).toISOString() : new Date().toISOString();
         const status = String(r.statusRemocao || '').toLowerCase().trim();
         const por = String(r.solicitadoPor || '');
+        const remoteScope = String(r.scope || '').trim() || (r.viagemId ? 'viagem' : 'pessoal');
         if (localById.has(rid)) {
           const e = localById.get(rid);
           e.statusRemocao = status;
           e.solicitadoPor = por;
           if (!e.viagemId && r.viagemId) e.viagemId = String(r.viagemId);
+          if (!e.scope) e.scope = remoteScope;
         } else {
           state.entries.push({
             id: rid,
             viagemId: String(r.viagemId || ''),
+            scope: remoteScope,
             data: dataReg,
             dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
             local: String(r.local || ''),
@@ -2014,6 +2410,29 @@ function jsonErr(err) {
         }
       }
       state.entries = state.entries.filter(e => e.synced === false || remoteById.has(e.id));
+
+      // 3c) Mescla ajustes de saldo
+      if (Array.isArray(remote.ajustes)) {
+        const remoteAjustesById = new Map();
+        for (const a of remote.ajustes) { if (a.id) remoteAjustesById.set(String(a.id), a); }
+        const localAjustesById = new Map(state.ajustes.map(a => [a.id, a]));
+        for (const [aid, a] of remoteAjustesById) {
+          if (!localAjustesById.has(aid)) {
+            state.ajustes.push({
+              id: aid,
+              data: a.data ? new Date(a.data).toISOString() : new Date().toISOString(),
+              tipo: a.tipo === 'credito' ? 'credito' : 'debito',
+              valorAntes: Number(a.valorAntes) || 0,
+              valorDepois: Number(a.valorDepois) || 0,
+              motivo: String(a.motivo || ''),
+              por: String(a.por || ''),
+              synced: true
+            });
+          }
+        }
+        state.ajustes = state.ajustes.filter(a => a.synced === false || remoteAjustesById.has(a.id));
+        persistAjustes();
+      }
 
       // Se a viagem ativa sumiu, seleciona a primeira disponível
       if (state.activeTripId && !state.trips.find(t => t.id === state.activeTripId)) {
@@ -2077,6 +2496,22 @@ function jsonErr(err) {
     toggle.querySelector('[data-tipo="credito"]').classList.add('active');
   }
 
+  // Toggle pessoal/viagem (scope)
+  const scopeToggle = $('scopeToggle');
+  scopeToggle.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.scope = btn.dataset.scope;
+      localStorage.setItem(SCOPE_KEY, state.scope);
+      scopeToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+      scopeToggle.classList.toggle('pessoal', state.scope === 'pessoal');
+    });
+  });
+  if (state.scope === 'pessoal') {
+    scopeToggle.classList.add('pessoal');
+    scopeToggle.querySelector('[data-scope="viagem"]').classList.remove('active');
+    scopeToggle.querySelector('[data-scope="pessoal"]').classList.add('active');
+  }
+
   // Lembra último local digitado
   if (state.lastLocal) localInput.value = state.lastLocal;
 
@@ -2089,9 +2524,10 @@ function jsonErr(err) {
     const dataGasto = dataGastoInput.value || todayISO();
     if (!local || !item || !valor || valor <= 0) return;
 
-    // Garante viagem ativa
+    // Se for "da viagem", precisa de viagem ativa
     const trip = getActiveTrip();
-    if (!trip) {
+    const isViagem = state.scope === 'viagem';
+    if (isViagem && !trip) {
       showSync('Crie uma viagem primeiro 🗺️', true);
       openTripsModal();
       return;
@@ -2099,7 +2535,8 @@ function jsonErr(err) {
 
     const entry = {
       id: makeId(),
-      viagemId: trip.id,
+      viagemId: isViagem ? trip.id : '',
+      scope: state.scope,
       data: new Date().toISOString(),
       dataGasto,
       local, item, valor,
@@ -2112,7 +2549,7 @@ function jsonErr(err) {
     state.lastLocal = local;
     localStorage.setItem(LOCAL_KEY, local);
 
-    // Limpa apenas item/valor; mantém local, data e categoria
+    // Limpa apenas item/valor; mantém local, data, categoria e scope
     itemInput.value = '';
     valorInput.value = '';
     itemInput.focus();
@@ -2394,6 +2831,121 @@ function jsonErr(err) {
     }
   });
 
+  // ============ AJUSTE DE SALDO ============
+  const adjustBackdrop = $('adjustBackdrop');
+  let adjustTipo = 'debito'; // tipo selecionado no modal
+
+  function openAdjustModal(tipoInicial) {
+    adjustTipo = tipoInicial || 'debito';
+    updateAdjustUI();
+    $('adjustValue').value = '';
+    $('adjustMotivo').value = '';
+    renderAdjustHistory();
+    adjustBackdrop.classList.add('show');
+    setTimeout(() => $('adjustValue').focus(), 100);
+  }
+
+  function updateAdjustUI() {
+    const w = getWalletState(adjustTipo);
+    const valor = adjustTipo === 'debito' ? w.saldo : (w.ancoraValor + w.gastoDesdeAncora);
+    $('adjustCurrentValue').textContent = fmtMoney(valor);
+    $('adjustTipoLabel').textContent = adjustTipo === 'debito' ? 'Em conta agora' : 'Crédito usado agora';
+    // Atualiza toggle visual
+    const t = $('adjustTipoToggle');
+    t.classList.toggle('pessoal', adjustTipo === 'credito');
+    t.querySelectorAll('button').forEach(b => {
+      b.classList.toggle('active', b.dataset.tipo === adjustTipo);
+    });
+  }
+
+  function renderAdjustHistory() {
+    const list = $('adjustHistory');
+    const items = state.ajustes
+      .filter(a => a.tipo === adjustTipo)
+      .sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+    if (items.length === 0) {
+      list.innerHTML = '<div class="adjust-empty">Nenhum ajuste ainda</div>';
+      return;
+    }
+    list.innerHTML = items.map(a => {
+      const delta = Number(a.valorDepois) - Number(a.valorAntes);
+      const isUp = delta >= 0;
+      const data = new Date(a.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="adjust-history-item">
+          <div class="adjust-history-info">
+            <div class="adjust-history-motivo">${escapeHtml(a.motivo || 'Sem motivo')}</div>
+            <div class="adjust-history-meta">${data}${a.por ? ' · ' + escapeHtml(a.por) : ''} · ${fmtMoney(a.valorAntes)} → ${fmtMoney(a.valorDepois)}</div>
+          </div>
+          <div class="adjust-history-delta ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${fmtMoney(delta)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  $('walletAdjust').addEventListener('click', () => openAdjustModal('debito'));
+
+  $('adjustTipoToggle').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-tipo]');
+    if (!btn) return;
+    adjustTipo = btn.dataset.tipo;
+    updateAdjustUI();
+    renderAdjustHistory();
+  });
+
+  adjustBackdrop.addEventListener('click', (e) => {
+    if (e.target === adjustBackdrop) adjustBackdrop.classList.remove('show');
+  });
+
+  $('adjustSave').addEventListener('click', async () => {
+    const novoValor = parseFloat($('adjustValue').value);
+    if (isNaN(novoValor)) { alert('Digite o novo valor'); return; }
+    const motivo = $('adjustMotivo').value.trim();
+    const w = getWalletState(adjustTipo);
+    const valorAntes = adjustTipo === 'debito' ? w.saldo : (w.ancoraValor + w.gastoDesdeAncora);
+
+    if (Math.abs(novoValor - valorAntes) < 0.005) {
+      alert('Esse já é o valor atual — nada para ajustar.');
+      return;
+    }
+
+    const ajuste = {
+      id: makeId(),
+      data: new Date().toISOString(),
+      tipo: adjustTipo,
+      valorAntes,
+      valorDepois: novoValor,
+      motivo,
+      por: state.userName || '',
+      synced: false
+    };
+    state.ajustes.push(ajuste);
+    persistAjustes();
+    render();
+    renderAdjustHistory();
+    $('adjustValue').value = '';
+    $('adjustMotivo').value = '';
+
+    if (state.scriptUrl) {
+      showSync('Salvando ajuste…', false, false);
+      const result = await postAction({
+        action: 'adjustBalance',
+        id: ajuste.id, data: ajuste.data, tipo: ajuste.tipo,
+        valorAntes: ajuste.valorAntes, valorDepois: ajuste.valorDepois,
+        motivo: ajuste.motivo, por: ajuste.por
+      });
+      if (result.ok) {
+        ajuste.synced = true;
+        persistAjustes();
+        showSync('Saldo ajustado ✓');
+      } else {
+        showSync('Salvo offline', true);
+      }
+    } else {
+      showSync('Saldo ajustado (offline)');
+    }
+    updateAdjustUI();
+  });
+
   // ============ VIAGENS ============
   function openTripsModal() {
     renderTripList();
@@ -2497,9 +3049,25 @@ function jsonErr(err) {
     } else {
       state.trips.push(tripData);
       // Primeira viagem: já ativa
+      const isPrimeiraViagem = state.trips.length === 1;
       if (!state.activeTripId) {
         state.activeTripId = id;
         persistActiveTrip();
+      }
+      // Se é a primeira viagem, oferece migrar gastos antigos para ela
+      if (isPrimeiraViagem) {
+        const orfaos = state.entries.filter(e => !e.deleted && !e.viagemId && (e.scope || 'viagem') === 'viagem');
+        if (orfaos.length > 0) {
+          if (confirm(`Encontrei ${orfaos.length} gasto(s) sem viagem. Mover para "${tripData.nome}"?`)) {
+            orfaos.forEach(o => {
+              o.viagemId = id;
+              o.scope = 'viagem';
+              // Não marca synced=false: a planilha vai precisar ser corrigida manualmente
+              // ou em versão futura. Local fica certo.
+            });
+            persist();
+          }
+        }
       }
     }
     persistTrips();
