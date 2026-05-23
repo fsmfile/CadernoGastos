@@ -289,6 +289,273 @@
     }
     .balance-spent strong { color: var(--ink-soft); font-weight: 500; }
 
+    /* ===== ALERT BAR (saldo da conta apertado) ===== */
+    .balance-alert {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      position: relative;
+    }
+    .balance-alert.warning {
+      background: rgba(201, 138, 43, 0.1);
+      color: #8a5b16;
+      border: 1px solid rgba(201, 138, 43, 0.25);
+    }
+    .balance-alert.danger {
+      background: rgba(196, 77, 62, 0.1);
+      color: #8a3a2e;
+      border: 1px solid rgba(196, 77, 62, 0.3);
+    }
+    .balance-alert .icon { font-size: 14px; flex-shrink: 0; line-height: 1.2; }
+    .balance-alert strong { font-weight: 600; }
+
+    /* Card alt: "real possível" pequeno abaixo do total */
+    .balance-real-mini {
+      margin-top: 8px;
+      font-size: 12.5px;
+      color: var(--muted);
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .balance-real-mini strong { color: var(--ink); font-weight: 600; }
+    .balance-real-mini.danger strong { color: var(--accent); }
+    .balance-real-mini.warning strong { color: var(--pending); }
+
+    /* ===== MÉDIA DE GASTOS ===== */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .stat-tile {
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all .15s ease;
+      text-align: left;
+      font-family: inherit;
+    }
+    .stat-tile:active { transform: scale(0.98); background: #fff; }
+    .stat-tile-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .stat-tile-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .stat-tile-sub {
+      font-size: 10.5px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .stat-tile.tappable .stat-tile-label::after {
+      content: '›';
+      margin-left: auto;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* ===== MODAL CATEGORIAS ===== */
+    .cat-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .cat-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all .15s ease;
+      font-family: inherit;
+      text-align: left;
+    }
+    .cat-row:active { transform: scale(0.99); background: #fff; }
+    .cat-row.open { background: #fff; border-color: var(--ink); }
+    .cat-row-emoji {
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      background: rgba(27,27,58,0.05);
+      border-radius: 50%;
+    }
+    .cat-row-info { min-width: 0; }
+    .cat-row-name {
+      font-family: 'Fraunces', serif;
+      font-variation-settings: 'opsz' 24;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+    .cat-row-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .cat-row-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      text-align: right;
+    }
+    .cat-row-pct {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .cat-detail {
+      background: var(--paper);
+      border-left: 2px solid var(--ink);
+      margin: -2px 0 8px 14px;
+      padding: 8px 14px;
+      border-radius: 0 8px 8px 0;
+    }
+    .cat-detail-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 13px;
+    }
+    .cat-detail-item:last-child { border-bottom: none; }
+    .cat-detail-name {
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .cat-detail-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .cat-detail-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .cat-scope-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .cat-scope-toggle button {
+      background: transparent;
+      border: none;
+      padding: 10px 0;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+      transition: color .2s ease;
+    }
+    .cat-scope-toggle button.active { color: var(--paper); }
+    .cat-scope-toggle .pill {
+      position: absolute;
+      top: 4px; bottom: 4px;
+      width: calc(50% - 4px);
+      border-radius: 8px;
+      background: var(--ink);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      z-index: 0;
+    }
+    .cat-scope-toggle.todos .pill { transform: translateX(100%); }
+
+    /* Display mode radio (settings) */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--paper-light);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .radio-option:active { transform: scale(0.99); }
+    .radio-option.selected {
+      border-color: var(--ink);
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(27,27,58,0.05);
+    }
+    .radio-dot {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      flex-shrink: 0;
+      margin-top: 1px;
+      position: relative;
+    }
+    .radio-option.selected .radio-dot {
+      border-color: var(--ink);
+    }
+    .radio-option.selected .radio-dot::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: var(--ink);
+      border-radius: 50%;
+    }
+    .radio-text { flex: 1; min-width: 0; }
+    .radio-title {
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    .radio-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
     /* ===== SALDO DA CONTA (carteira real) ===== */
     .wallet-card {
       background: linear-gradient(135deg, var(--ink) 0%, #2a2a55 100%);
@@ -1344,6 +1611,7 @@
     <div class="balance-card" id="balanceCard">
       <div class="balance-label">Saldo disponível</div>
       <div class="balance-total" id="balanceTotal">R$ 0<span class="cents">,00</span></div>
+      <div class="balance-real-mini" id="balanceRealMini" style="display:none;"></div>
       <div class="balance-split">
         <div class="balance-cell">
           <div class="balance-cell-label"><span class="dot debito"></span>Em conta</div>
@@ -1362,6 +1630,21 @@
         <span>Total gasto</span>
         <strong id="totalGasto">R$ 0,00</strong>
       </div>
+      <div class="balance-alert" id="balanceAlert" style="display:none;"></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-strip" id="statsStrip">
+      <button type="button" class="stat-tile" id="statMedia">
+        <div class="stat-tile-label">📊 Média diária</div>
+        <div class="stat-tile-value" id="statMediaValue">R$ 0,00</div>
+        <div class="stat-tile-sub" id="statMediaSub">sem hospedagem</div>
+      </button>
+      <button type="button" class="stat-tile tappable" id="statCategorias">
+        <div class="stat-tile-label">🏷️ Por categoria</div>
+        <div class="stat-tile-value" id="statCategoriasValue">—</div>
+        <div class="stat-tile-sub">ver detalhes</div>
+      </button>
     </div>
 
     <!-- FORM -->
@@ -1454,6 +1737,23 @@
         <h3>Histórico</h3>
         <div class="adjust-history" id="adjustHistory"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES DETAIL MODAL -->
+  <div class="modal-backdrop" id="catDetailBackdrop">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h2>Gastos por categoria</h2>
+      <p id="catDetailSubtitle">—</p>
+
+      <div class="cat-scope-toggle" id="catScopeToggle">
+        <div class="pill"></div>
+        <button type="button" class="active" data-cat-scope="viagem">Da viagem</button>
+        <button type="button" data-cat-scope="todos">Tudo (com pessoais)</button>
+      </div>
+
+      <div class="cat-summary" id="catSummary"></div>
     </div>
   </div>
 
@@ -1782,6 +2082,33 @@ function jsonErr(err) {
       </div>
 
       <div class="modal-section">
+        <h3>Como exibir o saldo da viagem</h3>
+        <div class="radio-group" id="balanceModeGroup">
+          <label class="radio-option" data-mode="orcamento">
+            <div class="radio-dot"></div>
+            <div class="radio-text">
+              <div class="radio-title">📋 Pelo orçamento</div>
+              <div class="radio-desc">Mostra quanto sobrou do orçamento da viagem. Avisa se a conta apertar.</div>
+            </div>
+          </label>
+          <label class="radio-option" data-mode="real">
+            <div class="radio-dot"></div>
+            <div class="radio-text">
+              <div class="radio-title">💵 Pela conta</div>
+              <div class="radio-desc">Mostra quanto você realmente pode gastar (mínimo entre orçamento e conta).</div>
+            </div>
+          </label>
+          <label class="radio-option" data-mode="ambos">
+            <div class="radio-dot"></div>
+            <div class="radio-text">
+              <div class="radio-title">✦ Os dois</div>
+              <div class="radio-desc">Mostra o orçamento como número grande e o limite real abaixo.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-section">
         <h3>Outras ações</h3>
         <button class="submit" id="testConn" style="background: var(--pending); margin-bottom: 10px;">Testar conexão</button>
         <div class="diag-panel" id="diagPanel"></div>
@@ -1796,7 +2123,7 @@ function jsonErr(err) {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.4.0';
+  const APP_VERSION = '1.5.0';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -1808,6 +2135,7 @@ function jsonErr(err) {
   const ACTIVE_TRIP_KEY = 'gastos_viagem_active_trip_v1';
   const SCOPE_KEY = 'gastos_viagem_scope_v1';
   const AJUSTES_KEY = 'gastos_viagem_ajustes_v1';
+  const BALANCE_MODE_KEY = 'gastos_viagem_balance_mode_v1';
 
   // Categorias pré-cadastradas para viagem
   const CATEGORIAS = [
@@ -1841,7 +2169,9 @@ function jsonErr(err) {
     scope: localStorage.getItem(SCOPE_KEY) || 'viagem',
     lastLocal: localStorage.getItem(LOCAL_KEY) || '',
     categoria: localStorage.getItem(CAT_KEY) || 'alimentacao',
-    userName: localStorage.getItem(USER_KEY) || ''
+    userName: localStorage.getItem(USER_KEY) || '',
+    // 'orcamento' | 'real' | 'ambos'
+    balanceMode: localStorage.getItem(BALANCE_MODE_KEY) || 'ambos'
   };
 
   // Migração: entries antigos sem categoria viram "outros"; sem dataGasto usa data do timestamp
@@ -1968,6 +2298,49 @@ function jsonErr(err) {
     return { saldo, ancoraValor, gastoDesdeAncora: gastosDepois, temAncora: !!ultimo };
   }
 
+  // Média diária da viagem ativa, excluindo hospedagem
+  function getMediaDiariaViagem() {
+    const trip = getActiveTrip();
+    if (!trip) return { media: 0, dias: 0, total: 0 };
+    const entries = entriesOfActiveTrip().filter(e => e.categoria !== 'hospedagem');
+    if (entries.length === 0) return { media: 0, dias: 0, total: 0 };
+
+    const datasUnicas = new Set(entries.map(e => e.dataGasto || toDateOnly(e.data)).filter(Boolean));
+    const dias = Math.max(1, datasUnicas.size);
+    const total = entries.reduce((s, e) => s + Number(e.valor), 0);
+    return { media: total / dias, dias, total };
+  }
+
+  // Agrupa gastos por categoria
+  function getGastosPorCategoria(includePessoais) {
+    const trip = getActiveTrip();
+    const tripId = trip ? trip.id : '';
+
+    const list = state.entries.filter(e => {
+      if (e.deleted) return false;
+      const scope = e.scope || 'viagem';
+      if (scope === 'pessoal') return includePessoais;
+      return (e.viagemId || '') === tripId;
+    });
+
+    const groups = {};
+    list.forEach(e => {
+      const cat = e.categoria || 'outros';
+      if (!groups[cat]) groups[cat] = { total: 0, entries: [] };
+      groups[cat].total += Number(e.valor);
+      groups[cat].entries.push(e);
+    });
+
+    return Object.entries(groups)
+      .map(([id, g]) => ({
+        catId: id,
+        cat: CAT_BY_ID[id] || CAT_BY_ID.outros,
+        total: g.total,
+        entries: g.entries.sort((a, b) => (b.dataGasto || b.data).localeCompare(a.dataGasto || a.data))
+      }))
+      .sort((a, b) => b.total - a.total);
+  }
+
   // ===== VIAGENS =====
   function getActiveTrip() {
     return state.trips.find(t => t.id === state.activeTripId) || null;
@@ -2047,30 +2420,61 @@ function jsonErr(err) {
       .filter(e => e.tipo === 'credito')
       .reduce((s, e) => s + Number(e.valor), 0);
 
-    const saldoDebito = orcDebito - gastoDebito;
-    const saldoCredito = orcCredito - gastoCredito;
-    const saldoTotal = saldoDebito + saldoCredito;
+    const saldoOrcDebito = orcDebito - gastoDebito;
+    const saldoOrcCredito = orcCredito - gastoCredito;
+    const saldoOrcTotal = saldoOrcDebito + saldoOrcCredito;
     const totalGasto = gastoDebito + gastoCredito;
 
-    // Saldo total
-    const balTotalEl = $('balanceTotal');
-    const { main, cents } = fmtMoneyParts(saldoTotal);
-    balTotalEl.innerHTML = `${main}<span class="cents">${cents}</span>`;
-    balTotalEl.classList.toggle('negative', saldoTotal < 0);
+    // Saldo real possível = mínimo entre orçamento restante e conta disponível
+    const wDeb = getWalletState('debito');
+    const contaDisponivel = wDeb.saldo; // saldo atual da conta
+    const saldoRealDebito = Math.min(saldoOrcDebito, contaDisponivel);
+    // Crédito: o orçamento já é o "limite restante", sem ajuste tem só ele
+    const saldoRealCredito = saldoOrcCredito; // limite de crédito é virtual; aceita estouro do orçamento
+    const saldoRealTotal = saldoRealDebito + saldoRealCredito;
 
-    // Em conta
+    // Aplica modo
+    const mode = state.balanceMode || 'ambos';
+    const valorPrincipal = mode === 'real' ? saldoRealTotal : saldoOrcTotal;
+
+    // Saldo total (número grande)
+    const balTotalEl = $('balanceTotal');
+    const { main, cents } = fmtMoneyParts(valorPrincipal);
+    balTotalEl.innerHTML = `${main}<span class="cents">${cents}</span>`;
+    balTotalEl.classList.toggle('negative', valorPrincipal < 0);
+
+    // Linha "real possível" abaixo (modo "ambos")
+    const realMiniEl = $('balanceRealMini');
+    const contaApertada = wDeb.temAncora && contaDisponivel < saldoOrcDebito;
+    const contaNegativa = wDeb.temAncora && contaDisponivel < 0;
+
+    if (mode === 'ambos' && wDeb.temAncora && contaApertada) {
+      realMiniEl.style.display = 'flex';
+      const limiteReal = saldoRealTotal;
+      realMiniEl.innerHTML = `Mas a conta só permite gastar <strong>${fmtMoney(limiteReal)}</strong>`;
+      realMiniEl.classList.toggle('danger', limiteReal < 0);
+      realMiniEl.classList.toggle('warning', limiteReal >= 0);
+    } else if (mode === 'orcamento' && contaNegativa) {
+      // No modo orçamento, apenas avisa que conta está no vermelho via alerta abaixo
+      realMiniEl.style.display = 'none';
+    } else {
+      realMiniEl.style.display = 'none';
+    }
+
+    // Em conta (cells)
     const sDebEl = $('saldoDebito');
-    sDebEl.textContent = fmtMoney(saldoDebito);
-    sDebEl.classList.toggle('negative', saldoDebito < 0);
+    const valorExibirDebito = mode === 'real' ? saldoRealDebito : saldoOrcDebito;
+    sDebEl.textContent = fmtMoney(valorExibirDebito);
+    sDebEl.classList.toggle('negative', valorExibirDebito < 0);
     $('orcamentoDebito').textContent = `de ${fmtMoney(orcDebito)}`;
 
     // Crédito
     const sCredEl = $('saldoCredito');
-    sCredEl.textContent = fmtMoney(saldoCredito);
-    sCredEl.classList.toggle('negative', saldoCredito < 0);
+    sCredEl.textContent = fmtMoney(saldoOrcCredito);
+    sCredEl.classList.toggle('negative', saldoOrcCredito < 0);
     $('orcamentoCredito').textContent = `de ${fmtMoney(orcCredito)}`;
 
-    // Progress bars (percentual gasto)
+    // Progress bars
     const pctDeb = orcDebito > 0 ? Math.min(100, (gastoDebito / orcDebito) * 100) : 0;
     const pctCred = orcCredito > 0 ? Math.min(100, (gastoCredito / orcCredito) * 100) : 0;
     const barD = $('barDebito');
@@ -2079,12 +2483,50 @@ function jsonErr(err) {
     barC.style.width = pctCred + '%';
     barD.classList.remove('warning','danger');
     barC.classList.remove('warning','danger');
-    if (pctDeb >= 100 || saldoDebito < 0) barD.classList.add('danger');
-    else if (pctDeb >= 80) barD.classList.add('warning');
-    if (pctCred >= 100 || saldoCredito < 0) barC.classList.add('danger');
+    if (pctDeb >= 100 || saldoOrcDebito < 0 || contaNegativa) barD.classList.add('danger');
+    else if (pctDeb >= 80 || contaApertada) barD.classList.add('warning');
+    if (pctCred >= 100 || saldoOrcCredito < 0) barC.classList.add('danger');
     else if (pctCred >= 80) barC.classList.add('warning');
 
     $('totalGasto').textContent = fmtMoney(totalGasto);
+
+    // Alerta de inconsistência: orçamento positivo mas conta negativa
+    const alertEl = $('balanceAlert');
+    alertEl.classList.remove('warning', 'danger');
+    alertEl.style.display = 'none';
+    if (wDeb.temAncora) {
+      if (contaNegativa) {
+        alertEl.classList.add('danger');
+        alertEl.innerHTML = `<span class="icon">⚠️</span><div>Conta no <strong>vermelho em ${fmtMoney(-contaDisponivel)}</strong>. Qualquer gasto extra vira dívida, mesmo que o orçamento da viagem ainda tenha sobra.</div>`;
+        alertEl.style.display = 'flex';
+      } else if (contaApertada) {
+        alertEl.classList.add('warning');
+        const podeGastar = Math.max(0, contaDisponivel);
+        alertEl.innerHTML = `<span class="icon">💡</span><div>O orçamento mostra <strong>${fmtMoney(saldoOrcDebito)}</strong>, mas na conta há apenas <strong>${fmtMoney(podeGastar)}</strong> disponíveis.</div>`;
+        alertEl.style.display = 'flex';
+      }
+    }
+  }
+
+  function renderStats() {
+    const m = getMediaDiariaViagem();
+    const mediaEl = $('statMediaValue');
+    const mediaSubEl = $('statMediaSub');
+    mediaEl.textContent = fmtMoney(m.media);
+    if (m.dias > 0 && m.total > 0) {
+      mediaSubEl.textContent = `${m.dias} dia${m.dias > 1 ? 's' : ''} · sem hospedagem`;
+    } else {
+      mediaSubEl.textContent = 'sem hospedagem';
+    }
+
+    const cats = getGastosPorCategoria(false);
+    const catVal = $('statCategoriasValue');
+    if (cats.length === 0) {
+      catVal.textContent = '—';
+    } else {
+      const top = cats[0];
+      catVal.innerHTML = `${top.cat.emoji} ${fmtMoney(top.total)}`;
+    }
   }
 
   function renderCategorias() {
@@ -2205,6 +2647,7 @@ function jsonErr(err) {
     renderWallet();
     renderTripSelector();
     renderBalance();
+    renderStats();
     renderEntries();
     renderLocais();
     renderCategorias();
@@ -2666,6 +3109,7 @@ function jsonErr(err) {
   $('settingsBtn').addEventListener('click', () => {
     scriptUrlInput.value = state.scriptUrl;
     $('userName').value = state.userName;
+    renderBalanceModeRadio();
     modalBackdrop.classList.add('show');
   });
   modalBackdrop.addEventListener('click', (e) => {
@@ -2691,6 +3135,22 @@ function jsonErr(err) {
     localStorage.setItem(USER_KEY, name);
     showSync(`Olá, ${name} ✓`);
     render();
+  });
+
+  // Modo de exibição do saldo
+  function renderBalanceModeRadio() {
+    $('balanceModeGroup').querySelectorAll('.radio-option').forEach(o => {
+      o.classList.toggle('selected', o.dataset.mode === state.balanceMode);
+    });
+  }
+  $('balanceModeGroup').addEventListener('click', (e) => {
+    const opt = e.target.closest('[data-mode]');
+    if (!opt) return;
+    state.balanceMode = opt.dataset.mode;
+    localStorage.setItem(BALANCE_MODE_KEY, state.balanceMode);
+    renderBalanceModeRadio();
+    render();
+    showSync('Preferência salva ✓');
   });
 
   $('syncNow').addEventListener('click', () => {
@@ -2830,6 +3290,99 @@ function jsonErr(err) {
       flash('Falhou — copie manualmente', false);
     }
   });
+
+  // ============ CATEGORIAS DETAIL ============
+  const catDetailBackdrop = $('catDetailBackdrop');
+  let catDetailScope = 'viagem'; // 'viagem' ou 'todos'
+  let catDetailOpen = null; // id da categoria expandida
+
+  function openCatDetail() {
+    catDetailOpen = null;
+    renderCatDetail();
+    const trip = getActiveTrip();
+    $('catDetailSubtitle').textContent = trip
+      ? `Viagem: ${trip.nome}`
+      : 'Nenhuma viagem ativa';
+    catDetailBackdrop.classList.add('show');
+  }
+
+  function renderCatDetail() {
+    const includePessoais = catDetailScope === 'todos';
+    const cats = getGastosPorCategoria(includePessoais);
+    const totalGeral = cats.reduce((s, c) => s + c.total, 0);
+    const summaryEl = $('catSummary');
+
+    if (cats.length === 0) {
+      summaryEl.innerHTML = '<div class="empty">Nenhum gasto registrado.</div>';
+      return;
+    }
+
+    summaryEl.innerHTML = cats.map(c => {
+      const pct = totalGeral > 0 ? (c.total / totalGeral * 100).toFixed(0) : 0;
+      const isOpen = catDetailOpen === c.catId;
+      const rowHtml = `
+        <button type="button" class="cat-row ${isOpen ? 'open' : ''}" data-cat-id="${c.catId}">
+          <div class="cat-row-emoji">${c.cat.emoji}</div>
+          <div class="cat-row-info">
+            <div class="cat-row-name">${c.cat.nome}</div>
+            <div class="cat-row-meta">${c.entries.length} ${c.entries.length === 1 ? 'lançamento' : 'lançamentos'}</div>
+          </div>
+          <div>
+            <div class="cat-row-value">${fmtMoney(c.total)}</div>
+            <div class="cat-row-pct">${pct}%</div>
+          </div>
+        </button>
+      `;
+      if (!isOpen) return rowHtml;
+
+      const detailHtml = `
+        <div class="cat-detail">
+          ${c.entries.map(e => {
+            const data = fmtDateShort(e.dataGasto || toDateOnly(e.data));
+            const isPessoal = (e.scope || 'viagem') === 'pessoal';
+            return `
+              <div class="cat-detail-item">
+                <div>
+                  <div class="cat-detail-name">${escapeHtml(e.item)}</div>
+                  <div class="cat-detail-meta">${escapeHtml(e.local)} · ${data} · ${e.tipo}${isPessoal ? ' · 🏠 fora da viagem' : ''}</div>
+                </div>
+                <div class="cat-detail-value">${fmtMoney(e.valor)}</div>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
+      return rowHtml + detailHtml;
+    }).join('');
+  }
+
+  $('statCategorias').addEventListener('click', openCatDetail);
+
+  catDetailBackdrop.addEventListener('click', (e) => {
+    if (e.target === catDetailBackdrop) catDetailBackdrop.classList.remove('show');
+  });
+
+  $('catScopeToggle').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-cat-scope]');
+    if (!btn) return;
+    catDetailScope = btn.dataset.catScope;
+    catDetailOpen = null;
+    $('catScopeToggle').classList.toggle('todos', catDetailScope === 'todos');
+    $('catScopeToggle').querySelectorAll('button').forEach(b => {
+      b.classList.toggle('active', b.dataset.catScope === catDetailScope);
+    });
+    renderCatDetail();
+  });
+
+  $('catSummary').addEventListener('click', (e) => {
+    const row = e.target.closest('[data-cat-id]');
+    if (!row) return;
+    const id = row.dataset.catId;
+    catDetailOpen = (catDetailOpen === id) ? null : id;
+    renderCatDetail();
+  });
+
+  // Atalho: clicar em "Média diária" também abre o modal
+  $('statMedia').addEventListener('click', openCatDetail);
 
   // ============ AJUSTE DE SALDO ============
   const adjustBackdrop = $('adjustBackdrop');
