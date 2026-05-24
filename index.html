@@ -2260,6 +2260,7 @@ function repararPlanilha() {
         <button class="submit" id="syncNow" style="background: var(--debito); margin-top: 10px;">Sincronizar agora</button>
         <button class="submit" id="repairData" style="background: #6b5f4f; margin-top: 10px;">🔧 Reparar dados</button>
         <button class="submit" id="forceRefresh" style="background: #8a4a73; margin-top: 10px;">🔄 Limpar cache do app</button>
+        <button class="submit" id="showState" style="background: #4a4a5e; margin-top: 10px;">🔍 Mostrar estado interno</button>
         <button class="danger-btn" id="clearLocal">Limpar dados locais</button>
       </div>
 
@@ -2270,7 +2271,7 @@ function repararPlanilha() {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.5.5';
+  const APP_VERSION = '1.5.6';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -3017,26 +3018,24 @@ function repararPlanilha() {
       }
       state.entries = state.entries.filter(e => e.synced === false || remoteById.has(e.id));
 
-      // 3c) Mescla ajustes de saldo
+      // 3c) Mescla ajustes de saldo — PLANILHA É FONTE DA VERDADE
+      // Substitui completamente os ajustes locais pelos remotos,
+      // mantendo apenas os locais que ainda não foram enviados (synced === false).
       if (Array.isArray(remote.ajustes)) {
-        const remoteAjustesById = new Map();
-        for (const a of remote.ajustes) { if (a.id) remoteAjustesById.set(String(a.id), a); }
-        const localAjustesById = new Map(state.ajustes.map(a => [a.id, a]));
-        for (const [aid, a] of remoteAjustesById) {
-          if (!localAjustesById.has(aid)) {
-            state.ajustes.push({
-              id: aid,
-              data: a.data ? new Date(a.data).toISOString() : new Date().toISOString(),
-              tipo: a.tipo === 'credito' ? 'credito' : 'debito',
-              valorAntes: Number(a.valorAntes) || 0,
-              valorDepois: Number(a.valorDepois) || 0,
-              motivo: String(a.motivo || ''),
-              por: String(a.por || ''),
-              synced: true
-            });
-          }
-        }
-        state.ajustes = state.ajustes.filter(a => a.synced === false || remoteAjustesById.has(a.id));
+        const pendentesLocais = state.ajustes.filter(a => a.synced === false);
+        state.ajustes = remote.ajustes
+          .filter(a => a.id)
+          .map(a => ({
+            id: String(a.id),
+            data: a.data ? new Date(a.data).toISOString() : new Date().toISOString(),
+            tipo: a.tipo === 'credito' ? 'credito' : 'debito',
+            valorAntes: Number(a.valorAntes) || 0,
+            valorDepois: Number(a.valorDepois) || 0,
+            motivo: String(a.motivo || ''),
+            por: String(a.por || ''),
+            synced: true
+          }))
+          .concat(pendentesLocais);
         persistAjustes();
       }
 
@@ -3546,6 +3545,55 @@ function repararPlanilha() {
     } catch (err) {
       alert('Falha ao limpar: ' + err.message);
     }
+  });
+
+  // Botão "Mostrar estado interno" — para debug entre aparelhos
+  $('showState').addEventListener('click', async () => {
+    let report = `═══ ESTADO INTERNO ═══\n`;
+    report += `Versão: ${APP_VERSION}\n`;
+    report += `Aparelho: ${navigator.userAgent.includes('iPhone') ? 'iPhone' : navigator.userAgent.includes('Android') ? 'Android' : 'Outro'}\n\n`;
+
+    report += `LOCAL STORAGE:\n`;
+    report += `• Gastos: ${state.entries.length}\n`;
+    report += `• Viagens: ${state.trips.length}\n`;
+    report += `• Ajustes: ${state.ajustes.length}\n\n`;
+
+    if (state.ajustes.length > 0) {
+      report += `AJUSTES LOCAIS:\n`;
+      state.ajustes.forEach((a, i) => {
+        const data = new Date(a.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        report += `${i+1}. [${a.tipo}] ${fmtMoney(a.valorAntes)} → ${fmtMoney(a.valorDepois)}\n`;
+        report += `   ${data} · ${a.motivo || '(sem motivo)'} · ${a.synced ? 'sync' : '⚠ PENDENTE'}\n`;
+        report += `   id: ${a.id.slice(0, 8)}…\n`;
+      });
+      report += `\n`;
+    }
+
+    // Pega o que tem na planilha agora
+    if (state.scriptUrl) {
+      report += `BUSCANDO NA PLANILHA…\n`;
+      try {
+        const pull = await pullEntries();
+        if (pull.ok) {
+          report += `\nPLANILHA AGORA:\n`;
+          report += `• Gastos: ${(pull.data || []).length}\n`;
+          report += `• Viagens: ${(pull.viagens || []).length}\n`;
+          report += `• Ajustes: ${(pull.ajustes || []).length}\n`;
+          if ((pull.ajustes || []).length > 0) {
+            report += `\nAJUSTES NA PLANILHA:\n`;
+            pull.ajustes.forEach((a, i) => {
+              report += `${i+1}. [${a.tipo}] ${fmtMoney(a.valorAntes)} → ${fmtMoney(a.valorDepois)} · ${a.motivo || '(sem motivo)'}\n`;
+            });
+          }
+        } else {
+          report += `Erro ao ler planilha: ${pull.detail || pull.reason}\n`;
+        }
+      } catch (e) {
+        report += `Erro: ${e.message}\n`;
+      }
+    }
+
+    alert(report);
   });
 
   $('copyCode').addEventListener('click', async () => {
