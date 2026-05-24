@@ -1846,6 +1846,7 @@
     if (action === 'deleteTrip')    return deleteViagem(ss, data.id);
     if (action === 'adjustBalance') return addAjuste(ss, data);
     if (action === 'assignTrip')    return assignTripToGastos(ss, data);
+    if (action === 'ping')          return jsonOk({pong: true});
     return jsonErr('Ação desconhecida: ' + action);
   } catch (err) { return jsonErr(err); }
 }
@@ -1927,14 +1928,20 @@ function getSaldosSheet(ss) {
 }
 
 function ensureGastosHeader(sheet) {
+  // Esquema completo desejado (ordem importa só para planilhas novas)
+  var SCHEMA = ['ID','ViagemId','Scope','Registrado','DataGasto','Local','Item','Valor','Tipo','Categoria','StatusRemocao','SolicitadoPor'];
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID','ViagemId','Scope','Registrado','DataGasto','Local','Item','Valor','Tipo','Categoria','StatusRemocao','SolicitadoPor']);
+    sheet.appendRow(SCHEMA);
     return;
   }
-  const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  ['ViagemId','Scope','DataGasto','Categoria','StatusRemocao','SolicitadoPor'].forEach(col => {
+  var lastCol = sheet.getLastColumn();
+  var head = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  // Adiciona apenas colunas que AINDA NÃO existem
+  // (indexOf ignora as duplicadas, mas evita adicionar uma terceira)
+  SCHEMA.forEach(function(col) {
     if (head.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
+      head.push(col);
     }
   });
 }
@@ -2091,6 +2098,114 @@ function jsonOk(extra) {
 function jsonErr(err) {
   return ContentService.createTextOutput(JSON.stringify({ok:false, error:String(err)}))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ==========================================================================
+// FUNÇÃO DE REPARO — executar UMA VEZ direto no editor do Apps Script:
+//   1) Selecione "repararPlanilha" no dropdown
+//   2) Clique em ▶ Executar
+//   3) Autorize quando pedir
+// O que faz:
+//   - Remove colunas "Scope" duplicadas no cabeçalho
+//   - Atribui ViagemId e Scope=viagem aos gastos órfãos (sem ViagemId)
+//     usando a primeira viagem ativa da aba Viagens
+//   - Remove linhas de teste de conexão (__teste__)
+// ==========================================================================
+function repararPlanilha() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var gSheet = getGastosSheet(ss);
+  var vSheet = getViagensSheet(ss);
+  var log = [];
+
+  // 1) Remove colunas duplicadas no header
+  var lastCol = gSheet.getLastColumn();
+  var head = gSheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  var seen = {};
+  var colsToDelete = [];
+  for (var i = 0; i < head.length; i++) {
+    var name = String(head[i] || '').trim();
+    if (!name) continue;
+    if (seen[name] !== undefined) {
+      colsToDelete.push(i + 1); // 1-indexed
+    } else {
+      seen[name] = i + 1;
+    }
+  }
+  // Apaga de trás pra frente pra não bagunçar índices
+  colsToDelete.sort(function(a,b){return b-a;}).forEach(function(c){
+    gSheet.deleteColumn(c);
+    log.push('Coluna duplicada removida: posição ' + c);
+  });
+
+  // 2) Remove linhas de teste
+  var vals = gSheet.getDataRange().getValues();
+  head = vals[0];
+  var cId = head.indexOf('ID');
+  var cItem = head.indexOf('Item');
+  var cLocal = head.indexOf('Local');
+  var rowsToDelete = [];
+  for (var r = 1; r < vals.length; r++) {
+    var id = String(vals[r][cId] || '');
+    var item = String(vals[r][cItem] || '');
+    var local = String(vals[r][cLocal] || '');
+    if (id.indexOf('teste-') === 0 || item.indexOf('__teste') === 0 || local === '__teste__') {
+      rowsToDelete.push(r + 1);
+    }
+  }
+  rowsToDelete.sort(function(a,b){return b-a;}).forEach(function(rr){
+    gSheet.deleteRow(rr);
+    log.push('Linha de teste removida: ' + rr);
+  });
+
+  // 3) Atribui ViagemId aos órfãos
+  var viagens = vSheet.getDataRange().getValues();
+  var vHead = viagens[0] || [];
+  var vIdCol = vHead.indexOf('ID');
+  var vArqCol = vHead.indexOf('Arquivada');
+  var viagemAtivaId = null;
+  for (var vi = 1; vi < viagens.length; vi++) {
+    var arq = vArqCol >= 0 ? viagens[vi][vArqCol] : false;
+    if (!arq && viagens[vi][vIdCol]) {
+      viagemAtivaId = String(viagens[vi][vIdCol]);
+      break;
+    }
+  }
+  if (!viagemAtivaId) {
+    log.push('Nenhuma viagem ativa encontrada para atribuir órfãos.');
+  } else {
+    log.push('Viagem ativa: ' + viagemAtivaId);
+    // Recarrega dados após deletar linhas
+    vals = gSheet.getDataRange().getValues();
+    head = vals[0];
+    var cV = head.indexOf('ViagemId') + 1;
+    var cS = head.indexOf('Scope') + 1;
+    if (cV === 0) {
+      gSheet.getRange(1, gSheet.getLastColumn() + 1).setValue('ViagemId');
+      cV = gSheet.getLastColumn();
+    }
+    if (cS === 0) {
+      gSheet.getRange(1, gSheet.getLastColumn() + 1).setValue('Scope');
+      cS = gSheet.getLastColumn();
+    }
+    var cVidx = cV - 1;
+    var cSidx = cS - 1;
+    var migrados = 0;
+    for (var rr = 1; rr < vals.length; rr++) {
+      var vid = String(vals[rr][cVidx] || '').trim();
+      var sc = String(vals[rr][cSidx] || '').trim().toLowerCase();
+      if (!vid && sc !== 'pessoal') {
+        gSheet.getRange(rr + 1, cV).setValue(viagemAtivaId);
+        gSheet.getRange(rr + 1, cS).setValue('viagem');
+        migrados++;
+      }
+    }
+    log.push('Gastos migrados para a viagem ativa: ' + migrados);
+  }
+
+  // Mostra resultado num diálogo
+  var msg = 'REPARO CONCLUÍDO\n\n' + log.join('\n');
+  Logger.log(msg);
+  try { SpreadsheetApp.getUi().alert(msg); } catch (e) { /* sem UI quando rodado fora */ }
 }</span></div>
       </div>
 
@@ -2154,7 +2269,7 @@ function jsonErr(err) {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.5.2';
+  const APP_VERSION = '1.5.3';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -3230,22 +3345,14 @@ function jsonErr(err) {
       report += `<span class="err">✗ FALHOU</span>\n  Motivo: ${pull.reason}\n  Detalhe: ${(pull.detail || '').slice(0, 200)}\n\n`;
     }
 
-    // Teste 2: POST (escrita)
-    report += '→ Teste 2: escrita (POST)\n';
+    // Teste 2: POST (ping — não escreve nada na planilha)
+    report += '→ Teste 2: escrita (POST ping)\n';
     diag.innerHTML = report + 'Aguarde...';
-    const testEntry = {
-      id: 'teste-' + Date.now(),
-      data: new Date().toISOString(),
-      local: '__teste__',
-      item: '__teste de conexão__',
-      valor: 0.01,
-      tipo: 'debito'
-    };
-    const push = await pushEntry(testEntry);
+    const push = await postAction({ action: 'ping' });
 
     if (push.ok) {
       report += `<span class="ok">✓ OK — escrita funcionou</span>\n`;
-      report += `\n<span class="hint">Tudo funcionando! Apague a linha "__teste__" da planilha se quiser. Feche essa janela e use o app normalmente.</span>`;
+      report += `\n<span class="hint">Tudo funcionando! Feche essa janela e use o app normalmente.</span>`;
     } else {
       report += `<span class="err">✗ FALHOU</span>\n  Motivo: ${push.reason}\n  Detalhe: ${(push.detail || '').slice(0, 200)}\n`;
 
@@ -3256,7 +3363,7 @@ function jsonErr(err) {
       } else if (push.reason === 'network' || pull.reason === 'network') {
         hint = '🌐 Falha de rede.\n\nVerifique se você está com internet. Se estiver, a URL pode estar errada ou o script foi excluído. Confirme a URL na tela "Gerenciar implantações" do Apps Script.';
       } else if (push.reason === 'server' || pull.reason === 'server') {
-        hint = '⚠️ O script rodou mas retornou erro.\n\nVerifique se você colou o código correto no Apps Script e se a planilha tem pelo menos uma aba (sheet).';
+        hint = '⚠️ O script rodou mas retornou erro.\n\nVerifique se você colou o código correto no Apps Script (versão 1.5.3 ou superior).';
       } else if (push.reason === 'parse' || pull.reason === 'parse') {
         hint = '🧩 Resposta não é JSON.\n\nProvavelmente o código do Apps Script está diferente do que deveria. Cole o código novamente (botão Copiar acima) e salve.';
       }
