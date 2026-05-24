@@ -2269,7 +2269,7 @@ function repararPlanilha() {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.5.3';
+  const APP_VERSION = '1.5.4';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -3390,13 +3390,20 @@ function repararPlanilha() {
       alert('Crie ou selecione uma viagem antes de reparar.');
       return;
     }
-    if (!confirm(`Reparar dados:\n\n1) Limpar dados locais e re-baixar tudo da planilha\n2) Mover gastos órfãos para "${trip.nome}"\n\nA planilha será atualizada. Continuar?`)) return;
+    if (!confirm(`Reparar dados:\n\n1) Limpar dados locais e re-baixar tudo da planilha (gastos, viagens e ajustes)\n2) Mover gastos órfãos para "${trip.nome}"\n\nA planilha será atualizada. Continuar?`)) return;
 
     showSync('Reparando…', false, false);
 
-    // 1) Limpa local
+    // 1) Limpa local — TUDO que vem da planilha
     state.entries = [];
+    state.ajustes = [];
+    // Mantém apenas as viagens locais não sincronizadas (improvável aqui),
+    // o resto vai voltar do pull
+    const tripsPendentes = state.trips.filter(t => t.synced === false);
+    state.trips = tripsPendentes.slice();
     persist();
+    persistAjustes();
+    persistTrips();
     render();
 
     // 2) Re-baixa da planilha
@@ -3406,7 +3413,7 @@ function repararPlanilha() {
       return;
     }
 
-    // Coloca tudo no state (mesma lógica do sync, mas simplificada)
+    // Gastos
     for (const r of pull.data) {
       if (!r.id) continue;
       const catId = String(r.categoria || '').toLowerCase().trim();
@@ -3431,6 +3438,43 @@ function repararPlanilha() {
     }
     persist();
 
+    // Ajustes (foi o que estava sumindo!)
+    if (Array.isArray(pull.ajustes)) {
+      for (const a of pull.ajustes) {
+        if (!a.id) continue;
+        state.ajustes.push({
+          id: String(a.id),
+          data: a.data ? new Date(a.data).toISOString() : new Date().toISOString(),
+          tipo: a.tipo === 'credito' ? 'credito' : 'debito',
+          valorAntes: Number(a.valorAntes) || 0,
+          valorDepois: Number(a.valorDepois) || 0,
+          motivo: String(a.motivo || ''),
+          por: String(a.por || ''),
+          synced: true
+        });
+      }
+      persistAjustes();
+    }
+
+    // Viagens
+    if (Array.isArray(pull.viagens)) {
+      const existingIds = new Set(state.trips.map(t => t.id));
+      for (const v of pull.viagens) {
+        if (!v.id || existingIds.has(String(v.id))) continue;
+        state.trips.push({
+          id: String(v.id),
+          nome: String(v.nome || 'Sem nome'),
+          inicio: v.inicio ? toDateOnly(v.inicio) : '',
+          fim: v.fim ? toDateOnly(v.fim) : '',
+          orcamentoDebito: Number(v.orcamentoDebito) || 0,
+          orcamentoCredito: Number(v.orcamentoCredito) || 0,
+          arquivada: !!v.arquivada,
+          synced: true
+        });
+      }
+      persistTrips();
+    }
+
     // 3) Encontra órfãos e migra
     const orfaos = state.entries.filter(e => !e.viagemId && e.scope !== 'pessoal');
     if (orfaos.length > 0) {
@@ -3445,13 +3489,13 @@ function repararPlanilha() {
         orfaos.forEach(o => { o.viagemId = trip.id; o.scope = 'viagem'; });
         persist();
         render();
-        showSync(`✓ Reparado: ${orfaos.length} gasto(s) migrado(s)`);
+        showSync(`✓ Reparado: ${orfaos.length} gasto(s) migrado(s) + ${state.ajustes.length} ajuste(s)`);
       } else {
         showSync('Falha ao migrar: ' + (r.detail || '').slice(0, 50), true);
       }
     } else {
       render();
-      showSync('✓ Tudo já estava certo!');
+      showSync(`✓ Reparado: ${state.entries.length} gasto(s) + ${state.ajustes.length} ajuste(s)`);
     }
   });
 

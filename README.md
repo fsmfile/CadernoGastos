@@ -2,7 +2,7 @@
 
 PWA leve para registro compartilhado de gastos de viagem, com sincronização via Google Sheets.
 
-**Versão atual:** 1.5.3
+**Versão atual:** 1.5.4
 
 ## Funcionalidades
 
@@ -73,6 +73,7 @@ Tudo client-side: HTML + CSS + Vanilla JS. Sem build, sem dependências, sem fra
 
 ## Histórico de versões
 
+- **1.5.4** — "Reparar dados" agora também recarrega ajustes de saldo e viagens da planilha (corrige saldo divergente entre aparelhos)
 - **1.5.3** — Função `repararPlanilha()` (remove colunas duplicadas, atribui órfãos, limpa testes) + teste de conexão sem deixar lixo (action `ping`)
 - **1.5.2** — Saldo da conta usa dataGasto (consistência entre aparelhos)
 - **1.5.1** — Planilha como fonte da verdade (corrige divergência entre aparelhos) + botão "Reparar dados"
