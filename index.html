@@ -2154,7 +2154,7 @@ function jsonErr(err) {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.5.1';
+  const APP_VERSION = '1.5.2';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -2309,20 +2309,28 @@ function jsonErr(err) {
   const persistAjustes = () => localStorage.setItem(AJUSTES_KEY, JSON.stringify(state.ajustes));
 
   // ===== WALLET (saldo da conta) =====
-  // Saldo atual = último ajuste do tipo - gastos depois dele
+  // Saldo = último ajuste − gastos cuja dataGasto seja >= data do ajuste.
+  // Usa dataGasto (não o timestamp de registro) pra que os dois aparelhos
+  // calculem o mesmo valor independentemente de quando cadastraram.
+  // Regra (opção A): gasto NA MESMA DATA do ajuste TAMBÉM abate.
   function getWalletState(tipo) {
-    // Pega o ajuste mais recente desse tipo
+    // Pega o ajuste mais recente desse tipo (ordena por data do ajuste)
     const ajustesTipo = state.ajustes
       .filter(a => a.tipo === tipo)
       .sort((a, b) => (b.data || '').localeCompare(a.data || ''));
     const ultimo = ajustesTipo[0];
     const ancoraValor = ultimo ? Number(ultimo.valorDepois) : 0;
-    const ancoraData = ultimo ? ultimo.data : null;
+    // Data do ajuste em YYYY-MM-DD (só a data, sem hora)
+    const ancoraDataDia = ultimo ? toDateOnly(ultimo.data) : null;
 
-    // Gastos do tipo, posteriores ao ajuste-âncora
+    // Gastos do tipo cujo dataGasto seja >= dia do ajuste
     const gastosDepois = state.entries
       .filter(e => !e.deleted && e.tipo === tipo)
-      .filter(e => !ancoraData || (e.data || '') > ancoraData)
+      .filter(e => {
+        if (!ancoraDataDia) return true; // sem âncora: tudo conta
+        const dg = e.dataGasto || toDateOnly(e.data);
+        return dg && dg >= ancoraDataDia; // opção A: mesma data abate
+      })
       .reduce((s, e) => s + Number(e.valor), 0);
 
     const saldo = ancoraValor - gastosDepois;
