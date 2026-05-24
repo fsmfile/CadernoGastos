@@ -1845,6 +1845,7 @@
     if (action === 'updateTrip')    return updateViagem(ss, data);
     if (action === 'deleteTrip')    return deleteViagem(ss, data.id);
     if (action === 'adjustBalance') return addAjuste(ss, data);
+    if (action === 'assignTrip')    return assignTripToGastos(ss, data);
     return jsonErr('Ação desconhecida: ' + action);
   } catch (err) { return jsonErr(err); }
 }
@@ -1960,6 +1961,35 @@ function addAjuste(ss, data) {
     data.motivo || '', data.por || ''
   ]);
   return jsonOk({});
+}
+
+// Atribui em massa: para cada id em data.ids, define ViagemId e Scope.
+// Usado pela migração de gastos órfãos e pelo botão "Reparar dados".
+function assignTripToGastos(ss, data) {
+  const sheet = getGastosSheet(ss);
+  ensureGastosHeader(sheet);
+  const ids = Array.isArray(data.ids) ? data.ids.map(String) : [];
+  if (ids.length === 0) return jsonOk({ updated: 0 });
+  const viagemId = String(data.viagemId || '');
+  const scope = String(data.scope || 'viagem');
+
+  const vals = sheet.getDataRange().getValues();
+  const head = vals[0];
+  const cId = head.indexOf('ID');
+  const cV = head.indexOf('ViagemId') + 1;
+  const cS = head.indexOf('Scope') + 1;
+  if (cId < 0 || cV === 0) return jsonErr('Colunas ID/ViagemId não encontradas');
+
+  const idSet = new Set(ids);
+  let updated = 0;
+  for (let i = 1; i < vals.length; i++) {
+    if (idSet.has(String(vals[i][cId]))) {
+      sheet.getRange(i + 1, cV).setValue(viagemId);
+      if (cS > 0) sheet.getRange(i + 1, cS).setValue(scope);
+      updated++;
+    }
+  }
+  return jsonOk({ updated: updated });
 }
 
 function addGasto(ss, data) {
@@ -2113,6 +2143,7 @@ function jsonErr(err) {
         <button class="submit" id="testConn" style="background: var(--pending); margin-bottom: 10px;">Testar conexão</button>
         <div class="diag-panel" id="diagPanel"></div>
         <button class="submit" id="syncNow" style="background: var(--debito); margin-top: 10px;">Sincronizar agora</button>
+        <button class="submit" id="repairData" style="background: #6b5f4f; margin-top: 10px;">🔧 Reparar dados</button>
         <button class="danger-btn" id="clearLocal">Limpar dados locais</button>
       </div>
 
@@ -2123,7 +2154,7 @@ function jsonErr(err) {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.5.0';
+  const APP_VERSION = '1.5.1';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -2827,17 +2858,25 @@ function jsonErr(err) {
         const dataReg = r.data ? new Date(r.data).toISOString() : new Date().toISOString();
         const status = String(r.statusRemocao || '').toLowerCase().trim();
         const por = String(r.solicitadoPor || '');
-        const remoteScope = String(r.scope || '').trim() || (r.viagemId ? 'viagem' : 'pessoal');
+        const remoteViagemId = String(r.viagemId || '');
+        // Regra: planilha é fonte da verdade.
+        // - Se tem scope explícito na planilha, usa.
+        // - Senão: viagemId preenchido => 'viagem'. Vazio => 'pessoal'.
+        // (Antes essa lógica rodava só na criação local, então um sync feito
+        //  pré-v1.4 poderia ter classificado errado e travado o estado.)
+        const remoteScope = String(r.scope || '').trim() || (remoteViagemId ? 'viagem' : 'pessoal');
         if (localById.has(rid)) {
           const e = localById.get(rid);
           e.statusRemocao = status;
           e.solicitadoPor = por;
-          if (!e.viagemId && r.viagemId) e.viagemId = String(r.viagemId);
-          if (!e.scope) e.scope = remoteScope;
+          // Sobrescreve scope/viagemId do local pelos da planilha
+          // (fonte da verdade — corrige iPhones que vieram com dados antigos)
+          e.viagemId = remoteViagemId;
+          e.scope = remoteScope;
         } else {
           state.entries.push({
             id: rid,
-            viagemId: String(r.viagemId || ''),
+            viagemId: remoteViagemId,
             scope: remoteScope,
             data: dataReg,
             dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
@@ -3228,6 +3267,79 @@ function jsonErr(err) {
     showSync('Dados locais apagados');
   });
 
+  // Reparar dados: re-puxa tudo da planilha e arruma gastos sem viagem
+  $('repairData').addEventListener('click', async () => {
+    if (!state.scriptUrl) { showSync('Configure a planilha primeiro', true); return; }
+    const trip = getActiveTrip();
+    if (!trip) {
+      alert('Crie ou selecione uma viagem antes de reparar.');
+      return;
+    }
+    if (!confirm(`Reparar dados:\n\n1) Limpar dados locais e re-baixar tudo da planilha\n2) Mover gastos órfãos para "${trip.nome}"\n\nA planilha será atualizada. Continuar?`)) return;
+
+    showSync('Reparando…', false, false);
+
+    // 1) Limpa local
+    state.entries = [];
+    persist();
+    render();
+
+    // 2) Re-baixa da planilha
+    const pull = await pullEntries();
+    if (!pull.ok) {
+      showSync('Erro ao baixar: ' + (pull.detail || '').slice(0, 60), true);
+      return;
+    }
+
+    // Coloca tudo no state (mesma lógica do sync, mas simplificada)
+    for (const r of pull.data) {
+      if (!r.id) continue;
+      const catId = String(r.categoria || '').toLowerCase().trim();
+      const dataReg = r.data ? new Date(r.data).toISOString() : new Date().toISOString();
+      const remoteViagemId = String(r.viagemId || '');
+      const remoteScope = String(r.scope || '').trim() || (remoteViagemId ? 'viagem' : 'pessoal');
+      state.entries.push({
+        id: String(r.id),
+        viagemId: remoteViagemId,
+        scope: remoteScope,
+        data: dataReg,
+        dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
+        local: String(r.local || ''),
+        item: String(r.item || ''),
+        valor: Number(r.valor) || 0,
+        tipo: r.tipo === 'credito' ? 'credito' : 'debito',
+        categoria: CAT_BY_ID[catId] ? catId : 'outros',
+        statusRemocao: String(r.statusRemocao || '').toLowerCase().trim(),
+        solicitadoPor: String(r.solicitadoPor || ''),
+        synced: true
+      });
+    }
+    persist();
+
+    // 3) Encontra órfãos e migra
+    const orfaos = state.entries.filter(e => !e.viagemId && e.scope !== 'pessoal');
+    if (orfaos.length > 0) {
+      const ids = orfaos.map(o => o.id);
+      const r = await postAction({
+        action: 'assignTrip',
+        ids: ids,
+        viagemId: trip.id,
+        scope: 'viagem'
+      });
+      if (r.ok) {
+        orfaos.forEach(o => { o.viagemId = trip.id; o.scope = 'viagem'; });
+        persist();
+        render();
+        showSync(`✓ Reparado: ${orfaos.length} gasto(s) migrado(s)`);
+      } else {
+        showSync('Falha ao migrar: ' + (r.detail || '').slice(0, 50), true);
+      }
+    } else {
+      render();
+      showSync('✓ Tudo já estava certo!');
+    }
+  });
+
   $('copyCode').addEventListener('click', async () => {
     const code = $('codeContent').textContent;
     const btn = $('copyCode');
@@ -3615,10 +3727,25 @@ function jsonErr(err) {
             orfaos.forEach(o => {
               o.viagemId = id;
               o.scope = 'viagem';
-              // Não marca synced=false: a planilha vai precisar ser corrigida manualmente
-              // ou em versão futura. Local fica certo.
             });
             persist();
+            // Pede ao Apps Script para também atualizar essas linhas na planilha
+            // (será disparado junto com o push da viagem abaixo)
+            const idsParaMigrar = orfaos.map(o => o.id);
+            if (state.scriptUrl && idsParaMigrar.length > 0) {
+              // Roda em background depois que a viagem foi criada
+              setTimeout(async () => {
+                showSync('Migrando gastos antigos…', false, false);
+                const r = await postAction({
+                  action: 'assignTrip',
+                  ids: idsParaMigrar,
+                  viagemId: id,
+                  scope: 'viagem'
+                });
+                if (r.ok) showSync('Gastos migrados ✓');
+                else showSync('Migração falhou — use "Reparar dados"', true);
+              }, 1500);
+            }
           }
         }
       }

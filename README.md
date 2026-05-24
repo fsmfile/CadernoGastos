@@ -2,7 +2,7 @@
 
 PWA leve para registro compartilhado de gastos de viagem, com sincronização via Google Sheets.
 
-**Versão atual:** 1.5.0
+**Versão atual:** 1.5.1
 
 ## Funcionalidades
 
@@ -73,6 +73,7 @@ Tudo client-side: HTML + CSS + Vanilla JS. Sem build, sem dependências, sem fra
 
 ## Histórico de versões
 
+- **1.5.1** — Planilha como fonte da verdade (corrige divergência entre aparelhos) + botão "Reparar dados"
 - **1.5.0** — Modo de saldo configurável + alertas + média diária + tela de gastos por categoria
 - **1.4.0** — Saldo real da conta com ajustes manuais + gastos fora da viagem
 - **1.3.1** — Cache-busting para iOS Safari (correção de sincronização)
