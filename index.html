@@ -2259,6 +2259,7 @@ function repararPlanilha() {
         <div class="diag-panel" id="diagPanel"></div>
         <button class="submit" id="syncNow" style="background: var(--debito); margin-top: 10px;">Sincronizar agora</button>
         <button class="submit" id="repairData" style="background: #6b5f4f; margin-top: 10px;">🔧 Reparar dados</button>
+        <button class="submit" id="forceRefresh" style="background: #8a4a73; margin-top: 10px;">🔄 Limpar cache do app</button>
         <button class="danger-btn" id="clearLocal">Limpar dados locais</button>
       </div>
 
@@ -2269,7 +2270,7 @@ function repararPlanilha() {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.5.4';
+  const APP_VERSION = '1.5.5';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -3384,118 +3385,166 @@ function repararPlanilha() {
 
   // Reparar dados: re-puxa tudo da planilha e arruma gastos sem viagem
   $('repairData').addEventListener('click', async () => {
-    if (!state.scriptUrl) { showSync('Configure a planilha primeiro', true); return; }
-    const trip = getActiveTrip();
-    if (!trip) {
-      alert('Crie ou selecione uma viagem antes de reparar.');
-      return;
-    }
-    if (!confirm(`Reparar dados:\n\n1) Limpar dados locais e re-baixar tudo da planilha (gastos, viagens e ajustes)\n2) Mover gastos órfãos para "${trip.nome}"\n\nA planilha será atualizada. Continuar?`)) return;
-
-    showSync('Reparando…', false, false);
-
-    // 1) Limpa local — TUDO que vem da planilha
-    state.entries = [];
-    state.ajustes = [];
-    // Mantém apenas as viagens locais não sincronizadas (improvável aqui),
-    // o resto vai voltar do pull
-    const tripsPendentes = state.trips.filter(t => t.synced === false);
-    state.trips = tripsPendentes.slice();
-    persist();
-    persistAjustes();
-    persistTrips();
-    render();
-
-    // 2) Re-baixa da planilha
-    const pull = await pullEntries();
-    if (!pull.ok) {
-      showSync('Erro ao baixar: ' + (pull.detail || '').slice(0, 60), true);
-      return;
-    }
-
-    // Gastos
-    for (const r of pull.data) {
-      if (!r.id) continue;
-      const catId = String(r.categoria || '').toLowerCase().trim();
-      const dataReg = r.data ? new Date(r.data).toISOString() : new Date().toISOString();
-      const remoteViagemId = String(r.viagemId || '');
-      const remoteScope = String(r.scope || '').trim() || (remoteViagemId ? 'viagem' : 'pessoal');
-      state.entries.push({
-        id: String(r.id),
-        viagemId: remoteViagemId,
-        scope: remoteScope,
-        data: dataReg,
-        dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
-        local: String(r.local || ''),
-        item: String(r.item || ''),
-        valor: Number(r.valor) || 0,
-        tipo: r.tipo === 'credito' ? 'credito' : 'debito',
-        categoria: CAT_BY_ID[catId] ? catId : 'outros',
-        statusRemocao: String(r.statusRemocao || '').toLowerCase().trim(),
-        solicitadoPor: String(r.solicitadoPor || ''),
-        synced: true
-      });
-    }
-    persist();
-
-    // Ajustes (foi o que estava sumindo!)
-    if (Array.isArray(pull.ajustes)) {
-      for (const a of pull.ajustes) {
-        if (!a.id) continue;
-        state.ajustes.push({
-          id: String(a.id),
-          data: a.data ? new Date(a.data).toISOString() : new Date().toISOString(),
-          tipo: a.tipo === 'credito' ? 'credito' : 'debito',
-          valorAntes: Number(a.valorAntes) || 0,
-          valorDepois: Number(a.valorDepois) || 0,
-          motivo: String(a.motivo || ''),
-          por: String(a.por || ''),
-          synced: true
-        });
+    try {
+      console.log('[REPAIR] iniciando…');
+      if (!state.scriptUrl) { showSync('Configure a planilha primeiro', true); return; }
+      const trip = getActiveTrip();
+      if (!trip) {
+        alert('Crie ou selecione uma viagem antes de reparar.');
+        return;
       }
+      if (!confirm(`Reparar dados:\n\n1) Limpar dados locais e re-baixar tudo da planilha (gastos, viagens e ajustes)\n2) Mover gastos órfãos para "${trip.nome}"\n\nA planilha será atualizada. Continuar?`)) return;
+
+      showSync('Reparando…', false, false);
+
+      // 1) Limpa local — TUDO que vem da planilha
+      state.entries = [];
+      state.ajustes = [];
+      // Mantém apenas as viagens locais não sincronizadas (improvável aqui),
+      // o resto vai voltar do pull
+      const tripsPendentes = state.trips.filter(t => t.synced === false);
+      state.trips = tripsPendentes.slice();
+      persist();
       persistAjustes();
-    }
+      persistTrips();
+      render();
+      console.log('[REPAIR] state limpo');
 
-    // Viagens
-    if (Array.isArray(pull.viagens)) {
-      const existingIds = new Set(state.trips.map(t => t.id));
-      for (const v of pull.viagens) {
-        if (!v.id || existingIds.has(String(v.id))) continue;
-        state.trips.push({
-          id: String(v.id),
-          nome: String(v.nome || 'Sem nome'),
-          inicio: v.inicio ? toDateOnly(v.inicio) : '',
-          fim: v.fim ? toDateOnly(v.fim) : '',
-          orcamentoDebito: Number(v.orcamentoDebito) || 0,
-          orcamentoCredito: Number(v.orcamentoCredito) || 0,
-          arquivada: !!v.arquivada,
+      // 2) Re-baixa da planilha
+      console.log('[REPAIR] chamando pullEntries…');
+      const pull = await pullEntries();
+      console.log('[REPAIR] resposta pull:', pull);
+      if (!pull.ok) {
+        alert('Erro ao baixar da planilha:\n\n' + (pull.detail || pull.reason || 'falha desconhecida'));
+        showSync('Erro ao baixar: ' + (pull.detail || '').slice(0, 60), true);
+        return;
+      }
+
+      console.log('[REPAIR] recebido:', {
+        gastos: (pull.data || []).length,
+        viagens: (pull.viagens || []).length,
+        ajustes: (pull.ajustes || []).length
+      });
+
+      // Gastos
+      for (const r of pull.data) {
+        if (!r.id) continue;
+        const catId = String(r.categoria || '').toLowerCase().trim();
+        const dataReg = r.data ? new Date(r.data).toISOString() : new Date().toISOString();
+        const remoteViagemId = String(r.viagemId || '');
+        const remoteScope = String(r.scope || '').trim() || (remoteViagemId ? 'viagem' : 'pessoal');
+        state.entries.push({
+          id: String(r.id),
+          viagemId: remoteViagemId,
+          scope: remoteScope,
+          data: dataReg,
+          dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
+          local: String(r.local || ''),
+          item: String(r.item || ''),
+          valor: Number(r.valor) || 0,
+          tipo: r.tipo === 'credito' ? 'credito' : 'debito',
+          categoria: CAT_BY_ID[catId] ? catId : 'outros',
+          statusRemocao: String(r.statusRemocao || '').toLowerCase().trim(),
+          solicitadoPor: String(r.solicitadoPor || ''),
           synced: true
         });
       }
-      persistTrips();
-    }
+      persist();
+      console.log('[REPAIR] gastos persistidos:', state.entries.length);
 
-    // 3) Encontra órfãos e migra
-    const orfaos = state.entries.filter(e => !e.viagemId && e.scope !== 'pessoal');
-    if (orfaos.length > 0) {
-      const ids = orfaos.map(o => o.id);
-      const r = await postAction({
-        action: 'assignTrip',
-        ids: ids,
-        viagemId: trip.id,
-        scope: 'viagem'
-      });
-      if (r.ok) {
-        orfaos.forEach(o => { o.viagemId = trip.id; o.scope = 'viagem'; });
-        persist();
-        render();
-        showSync(`✓ Reparado: ${orfaos.length} gasto(s) migrado(s) + ${state.ajustes.length} ajuste(s)`);
-      } else {
-        showSync('Falha ao migrar: ' + (r.detail || '').slice(0, 50), true);
+      // Ajustes (foi o que estava sumindo!)
+      if (Array.isArray(pull.ajustes)) {
+        for (const a of pull.ajustes) {
+          if (!a.id) continue;
+          state.ajustes.push({
+            id: String(a.id),
+            data: a.data ? new Date(a.data).toISOString() : new Date().toISOString(),
+            tipo: a.tipo === 'credito' ? 'credito' : 'debito',
+            valorAntes: Number(a.valorAntes) || 0,
+            valorDepois: Number(a.valorDepois) || 0,
+            motivo: String(a.motivo || ''),
+            por: String(a.por || ''),
+            synced: true
+          });
+        }
+        persistAjustes();
       }
-    } else {
-      render();
-      showSync(`✓ Reparado: ${state.entries.length} gasto(s) + ${state.ajustes.length} ajuste(s)`);
+      console.log('[REPAIR] ajustes persistidos:', state.ajustes.length);
+
+      // Viagens
+      if (Array.isArray(pull.viagens)) {
+        const existingIds = new Set(state.trips.map(t => t.id));
+        for (const v of pull.viagens) {
+          if (!v.id || existingIds.has(String(v.id))) continue;
+          state.trips.push({
+            id: String(v.id),
+            nome: String(v.nome || 'Sem nome'),
+            inicio: v.inicio ? toDateOnly(v.inicio) : '',
+            fim: v.fim ? toDateOnly(v.fim) : '',
+            orcamentoDebito: Number(v.orcamentoDebito) || 0,
+            orcamentoCredito: Number(v.orcamentoCredito) || 0,
+            arquivada: !!v.arquivada,
+            synced: true
+          });
+        }
+        persistTrips();
+      }
+      console.log('[REPAIR] viagens persistidas:', state.trips.length);
+
+      // 3) Encontra órfãos e migra
+      const orfaos = state.entries.filter(e => !e.viagemId && e.scope !== 'pessoal');
+      console.log('[REPAIR] órfãos encontrados:', orfaos.length);
+      if (orfaos.length > 0) {
+        const ids = orfaos.map(o => o.id);
+        const r = await postAction({
+          action: 'assignTrip',
+          ids: ids,
+          viagemId: trip.id,
+          scope: 'viagem'
+        });
+        if (r.ok) {
+          orfaos.forEach(o => { o.viagemId = trip.id; o.scope = 'viagem'; });
+          persist();
+          render();
+          const msg = `✓ Reparado: ${state.entries.length} gasto(s), ${orfaos.length} migrado(s), ${state.ajustes.length} ajuste(s)`;
+          alert(msg);
+          showSync(msg.slice(0, 60));
+        } else {
+          alert('Falha ao migrar: ' + (r.detail || 'erro desconhecido'));
+          showSync('Falha ao migrar', true);
+        }
+      } else {
+        render();
+        const msg = `✓ Reparado: ${state.entries.length} gasto(s), ${state.ajustes.length} ajuste(s), ${state.trips.length} viagem(ns)`;
+        alert(msg);
+        showSync(msg.slice(0, 60));
+      }
+    } catch (err) {
+      console.error('[REPAIR] erro:', err);
+      alert('Erro no reparo: ' + (err.message || String(err)));
+      showSync('Erro no reparo', true);
+    }
+  });
+
+  // Botão "Forçar atualização do app" — limpa service worker e cache
+  $('forceRefresh').addEventListener('click', async () => {
+    if (!confirm('Limpar cache do app e recarregar?\n\nIsso resolve quando o app não atualiza após uma nova versão. Os dados sincronizados na planilha não são afetados.')) return;
+    showSync('Limpando cache…', false, false);
+    try {
+      // Desregistra service workers
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) await r.unregister();
+      }
+      // Limpa caches da Cache API
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (const k of keys) await caches.delete(k);
+      }
+      // Reload forçado
+      window.location.reload(true);
+    } catch (err) {
+      alert('Falha ao limpar: ' + err.message);
     }
   });
 
