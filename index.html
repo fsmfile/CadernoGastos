@@ -2271,7 +2271,7 @@ function repararPlanilha() {
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.5.7';
+  const APP_VERSION = '1.5.8';
 
   const STORAGE_KEY = 'gastos_viagem_v1';
   const URL_KEY = 'gastos_viagem_url_v1';
@@ -2426,27 +2426,32 @@ function repararPlanilha() {
   const persistAjustes = () => localStorage.setItem(AJUSTES_KEY, JSON.stringify(state.ajustes));
 
   // ===== WALLET (saldo da conta) =====
-  // Saldo = último ajuste − gastos cuja dataGasto seja >= data do ajuste.
-  // Usa dataGasto (não o timestamp de registro) pra que os dois aparelhos
-  // calculem o mesmo valor independentemente de quando cadastraram.
-  // Regra (opção A): gasto NA MESMA DATA do ajuste TAMBÉM abate.
+  // Saldo = último ajuste − gastos registrados DEPOIS do ajuste.
+  //
+  // Usa o timestamp completo do ajuste (ISO, da planilha) e o timestamp
+  // de registro do gasto (campo `data`, também da planilha).
+  // Ambos vêm da planilha, então são idênticos em todos os aparelhos.
+  //
+  // Lógica: quando você ajusta o saldo, está dizendo "agora tenho R$ X".
+  // Esse valor já embute tudo que você gastou ATÉ este momento.
+  // Só gastos registrados DEPOIS do ajuste devem ser deduzidos.
   function getWalletState(tipo) {
-    // Pega o ajuste mais recente desse tipo (ordena por data do ajuste)
     const ajustesTipo = state.ajustes
       .filter(a => a.tipo === tipo)
       .sort((a, b) => (b.data || '').localeCompare(a.data || ''));
     const ultimo = ajustesTipo[0];
     const ancoraValor = ultimo ? Number(ultimo.valorDepois) : 0;
-    // Data do ajuste em YYYY-MM-DD (só a data, sem hora)
-    const ancoraDataDia = ultimo ? toDateOnly(ultimo.data) : null;
+    // Timestamp ISO completo do ajuste (ex: "2026-05-24T15:30:00.000Z")
+    const ancoraTs = ultimo ? (ultimo.data || null) : null;
 
-    // Gastos do tipo cujo dataGasto seja >= dia do ajuste
+    // Gastos do tipo registrados DEPOIS do ajuste
     const gastosDepois = state.entries
       .filter(e => !e.deleted && e.tipo === tipo)
       .filter(e => {
-        if (!ancoraDataDia) return true; // sem âncora: tudo conta
-        const dg = e.dataGasto || toDateOnly(e.data);
-        return dg && dg >= ancoraDataDia; // opção A: mesma data abate
+        if (!ancoraTs) return true; // sem âncora: tudo conta
+        // Usa o campo `data` (timestamp de registro, vindo da planilha)
+        const ts = e.data || '';
+        return ts > ancoraTs; // estritamente depois do ajuste
       })
       .reduce((s, e) => s + Number(e.valor), 0);
 
