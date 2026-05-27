@@ -4,7 +4,7 @@
 // - Chamadas ao Apps Script: SEMPRE rede (nunca cache — dados precisam estar frescos)
 // - Outros recursos: stale-while-revalidate
 
-const VERSION = 'v1.6.5';
+const VERSION = 'v1.7.0';
 const CACHE_NAME = `caderno-gastos-${VERSION}`;
 
 // Recursos essenciais para o app abrir offline
