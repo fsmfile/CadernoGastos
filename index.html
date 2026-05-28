@@ -2243,6 +2243,101 @@
     .tipo-selector button .tipo-emoji { font-size: 20px; }
     .tipo-selector button.active { border-color: var(--accent); color: var(--text); }
 
+    /* ===== WALLET CARD — filho ===== */
+    .wallet-parent-tag {
+      font-size: 11px; color: var(--text-muted);
+      letter-spacing: 0.06em; margin-bottom: 6px;
+    }
+    .wallet-parent-tag strong { color: var(--text); font-weight: 500; }
+
+    /* ===== PREVIEW DE TRANSFERÊNCIA NO MODAL ===== */
+    .transfer-preview {
+      padding: 12px 14px; border-radius: 12px;
+      margin-bottom: 12px; font-size: 13px; display: none;
+    }
+    .transfer-preview.show { display: block; }
+    .transfer-preview.ok   { background: rgba(50,215,75,0.1);  border: 1px solid rgba(50,215,75,0.3);  color: var(--debito); }
+    .transfer-preview.warn { background: rgba(255,214,10,0.12); border: 1px solid rgba(255,214,10,0.35); color: var(--pending); }
+    .transfer-preview.danger { background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.3); color: var(--credito); }
+    .transfer-preview-title  { font-weight: 600; margin-bottom: 3px; }
+    .transfer-preview-detail { font-size: 12px; opacity: 0.85; }
+
+    /* ===== SELETOR DE PAI NA CRIAÇÃO DE CARTEIRA ===== */
+    .parent-selector { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .parent-selector label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+    .parent-selector select {
+      width: 100%; padding: 10px 12px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: 12px; color: var(--text); font: inherit; font-size: 14px;
+      appearance: none; cursor: pointer;
+    }
+    .parent-selector select:focus { outline: none; border-color: var(--text); }
+    .alocacao-inicial-wrap { display: none; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .alocacao-inicial-wrap.show { display: flex; }
+    .alocacao-inicial-wrap label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+
+    /* ===== PEDIDOS DE TRANSFERÊNCIA ===== */
+    .pedido-banner {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; border-radius: 13px; margin-bottom: 14px;
+      background: rgba(100,210,255,0.1); border: 1px solid rgba(100,210,255,0.28);
+      cursor: pointer;
+    }
+    .pedido-banner-icon { font-size: 18px; flex-shrink: 0; }
+    .pedido-banner-text { flex: 1; font-size: 13px; color: var(--text); }
+    .pedido-banner-badge {
+      background: var(--credito); color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px;
+    }
+
+    /* Entrada / saída no histórico */
+    .entry-row.entrada { border-left: 3px solid var(--debito); }
+    .entry-row.saida   { border-left: 3px solid var(--accent); }
+    .entry-row.entrada .entry-valor { color: var(--debito); }
+    .entry-row.saida   .entry-valor { color: var(--accent); }
+
+    /* Modal de pedidos */
+    .pedido-section-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted); margin: 14px 0 8px;
+    }
+    .pedido-item {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: 13px; padding: 13px 14px; margin-bottom: 8px;
+    }
+    .pedido-item-header { display: flex; align-items: center; justify-content: space-between; }
+    .pedido-item-valor { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+    .pedido-item-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .pedido-item-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .pedido-btn-ok {
+      flex: 1; padding: 9px; border-radius: 10px; border: none;
+      background: var(--debito); color: #000; font: inherit; font-size: 13px;
+      font-weight: 600; cursor: pointer;
+    }
+    .pedido-btn-nao {
+      flex: 1; padding: 9px; border-radius: 10px; border: none;
+      background: var(--surface-light); color: var(--text-muted);
+      font: inherit; font-size: 13px; cursor: pointer;
+    }
+    .pedido-status-badge {
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: 8px; letter-spacing: 0.06em;
+    }
+    .pedido-status-badge.pendente { background: rgba(255,214,10,0.2); color: var(--pending); }
+    .pedido-status-badge.aprovado { background: rgba(50,215,75,0.15); color: var(--debito); }
+    .pedido-status-badge.rejeitado { background: rgba(255,69,58,0.12); color: var(--credito); }
+
+    /* Form novo pedido */
+    .novo-pedido-form { display: flex; flex-direction: column; gap: 10px; }
+    .novo-pedido-form select, .novo-pedido-form input[type=number], .novo-pedido-form input[type=text] {
+      width: 100%; padding: 10px 12px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: 12px; color: var(--text); font: inherit; font-size: 14px;
+    }
+    .novo-pedido-form label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px; }
+    .novo-pedido-form .field { display: flex; flex-direction: column; gap: 4px; }
+
     /* ===== BANNER "CRIAR CARTEIRA DE VIAGEM" (carteiras comuns) ===== */
     .viajando-banner {
       display: flex; align-items: center; justify-content: space-between;
@@ -2459,11 +2554,17 @@
       <button id="criarCarteiraViagemBtn">Criar carteira de viagem</button>
     </div>
 
-    <!-- WALLET (saldo real da conta) -->
+    <!-- WALLET (saldo real da conta / saldo alocado para filhos) -->
     <div class="wallet-card">
+      <div class="wallet-parent-tag" id="walletParentTag" style="display:none;">
+        Sub-carteira de <strong id="walletParentName">—</strong>
+      </div>
       <div class="wallet-header">
-        <div class="wallet-label">Saldo da conta</div>
-        <button class="wallet-adjust" id="walletAdjust">Ajustar</button>
+        <div class="wallet-label" id="walletCardLabel">Saldo da conta</div>
+        <div style="display:flex;gap:7px;">
+          <button class="wallet-adjust" id="pedirDinheiroBtn">Pedir</button>
+          <button class="wallet-adjust" id="walletAdjust">Ajustar</button>
+        </div>
       </div>
       <div class="wallet-split">
         <div class="wallet-cell debito">
@@ -2614,6 +2715,7 @@
 
     <!-- LIST -->
     <div id="approvalBanner"></div>
+    <div id="pedidosBanner"></div>
     
     <button type="button" class="section-toggle" id="toggleHistoryBtn">
       <span>📋 Histórico</span>
@@ -2651,8 +2753,8 @@
   <div class="modal-backdrop" id="adjustBackdrop">
     <div class="modal">
       <div class="modal-handle"></div>
-      <h2>Ajustar saldo</h2>
-      <p>Atualize o saldo da conta quando entrar dinheiro (salário, transferência) ou quando o app divergir do banco.</p>
+      <h2 id="adjustModalTitle">Ajustar saldo</h2>
+      <p id="adjustModalDesc">Atualize o saldo da conta quando entrar dinheiro (salário, transferência) ou quando o app divergir do banco.</p>
 
       <div class="adjust-current">
         <div>
@@ -2668,6 +2770,12 @@
 
       <div class="field valor-wrap" style="margin-bottom:12px;">
         <input type="number" id="adjustValue" placeholder="Novo saldo" inputmode="decimal" step="0.01" />
+      </div>
+
+      <!-- Preview de transferência do pai (carteiras filhas) -->
+      <div class="transfer-preview" id="transferPreview">
+        <div class="transfer-preview-title" id="transferPreviewTitle"></div>
+        <div class="transfer-preview-detail" id="transferPreviewDetail"></div>
       </div>
 
       <div class="field" style="margin-bottom:14px;">
@@ -2835,6 +2943,39 @@
     </div>
   </div>
 
+  <!-- PEDIDOS DE TRANSFERÊNCIA MODAL -->
+  <div class="modal-backdrop" id="pedidosBackdrop">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h2>Transferências</h2>
+
+      <!-- Form novo pedido -->
+      <div class="novo-pedido-form" id="novoPedidoForm">
+        <div class="field">
+          <label>Pedir de qual carteira?</label>
+          <select id="pedidoFonteSelect"></select>
+        </div>
+        <div class="field">
+          <label>Valor (R$)</label>
+          <input type="number" id="pedidoValor" placeholder="0,00" inputmode="decimal" step="0.01" min="0.01" />
+        </div>
+        <div class="field">
+          <label>Motivo (opcional)</label>
+          <input type="text" id="pedidoMotivo" placeholder="ex: reposição de saldo, emergência…" maxlength="80" />
+        </div>
+        <button type="button" class="submit" id="enviarPedidoBtn">Enviar pedido</button>
+      </div>
+
+      <!-- Pedidos recebidos (aguardando minha aprovação) -->
+      <div class="pedido-section-title" id="pedidosRecebidosTitle" style="display:none;">📥 Aguardando minha aprovação</div>
+      <div id="pedidosRecebidosList"></div>
+
+      <!-- Meus pedidos enviados -->
+      <div class="pedido-section-title" id="meusPedidosTitle" style="display:none;">📤 Meus pedidos</div>
+      <div id="meusPedidosList"></div>
+    </div>
+  </div>
+
   <!-- SETTINGS MODAL -->
   <!-- ===== TELA DE SELEÇÃO DE CARTEIRA ===== -->
   <div class="login-screen" id="carteiraScreen">
@@ -2860,6 +3001,16 @@
         <div class="login-field">
           <label for="carteiraNameInput">Nome da carteira</label>
           <input type="text" id="carteiraNameInput" placeholder="Ex: Família Matos" maxlength="50" />
+        </div>
+        <div class="parent-selector" id="parentSelectorWrap" style="display:none;">
+          <label>Sub-carteira de</label>
+          <select id="parentCarteiraSelect">
+            <option value="">— Independente (sem pai) —</option>
+          </select>
+        </div>
+        <div class="alocacao-inicial-wrap" id="alocacaoInicialWrap">
+          <label>Alocação inicial da carteira pai (opcional)</label>
+          <input type="number" id="alocacaoInicialInput" placeholder="R$ 0,00 (define depois)" inputmode="decimal" step="0.01" min="0" style="width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--text);font:inherit;font-size:14px;" />
         </div>
         <button class="login-btn" id="confirmCreateCarteiraBtn">Criar carteira</button>
         <button id="cancelCreateCarteiraBtn" style="background:none;border:none;color:var(--muted);font:inherit;font-size:14px;cursor:pointer;padding:6px;text-align:center;">Cancelar</button>
@@ -2977,7 +3128,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.9.0';
+  const APP_VERSION = '1.9.2';
 
   const SUPABASE_URL      = 'https://bhjvbkidtnggzxbtsqdp.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_-PsK3cq1p2pXG85ExwaUng_pSyw6MCi';
@@ -2998,6 +3149,7 @@
   const TOTAL_SCOPE_KEY = 'gastos_viagem_total_scope_v1';
   const CAT_FILTER_KEY = 'gastos_viagem_cat_filter_v1';
   const LOCAL_FILTER_KEY = 'gastos_viagem_local_filter_v1';
+  const PEDIDOS_KEY      = 'gastos_viagem_pedidos_v1';
 
   // Categorias pré-cadastradas para viagem
   // Categorias de viagem
@@ -3142,14 +3294,14 @@
     if (!user?.user) return [];
     const userId = user.user.id;
 
-    // Tenta com coluna tipo (requer migração); se falhar, usa query legada
+    // Tenta com colunas tipo e parent_id (requerem migração); se falhar, usa query legada
     let { data, error } = await sb
       .from('carteira_membros')
-      .select('carteira_id, nome_exibicao, carteiras(id, nome, owner_id, tipo)')
+      .select('carteira_id, nome_exibicao, carteiras(id, nome, owner_id, tipo, parent_id)')
       .eq('user_id', userId);
 
     if (error) {
-      // Coluna tipo ainda não existe — fallback sem ela
+      // Colunas novas ainda não existem — fallback sem elas
       ({ data, error } = await sb
         .from('carteira_membros')
         .select('carteira_id, nome_exibicao, carteiras(id, nome, owner_id)')
@@ -3161,6 +3313,7 @@
       id: m.carteiras.id,
       nome: m.carteiras.nome,
       tipo: m.carteiras.tipo || 'viagem',
+      parentId: m.carteiras.parent_id || null,
       ownerId: m.carteiras.owner_id,
       isOwner: m.carteiras.owner_id === userId,
       nomeExibicao: m.nome_exibicao
@@ -3190,12 +3343,14 @@
     return true;
   }
 
-  async function criarCarteira(nome, tipo = 'viagem') {
+  async function criarCarteira(nome, tipo = 'viagem', parentId = null) {
     if (!sb || !nome.trim()) return { ok: false, detail: 'Nome inválido' };
     const { data: user } = await sb.auth.getUser();
     if (!user?.user) return { ok: false, detail: 'Não autenticado' };
+    const insertData = { nome: nome.trim(), owner_id: user.user.id, tipo };
+    if (parentId) insertData.parent_id = parentId;
     const { data: nova, error: e1 } = await sb.from('carteiras')
-      .insert({ nome: nome.trim(), owner_id: user.user.id, tipo })
+      .insert(insertData)
       .select().single();
     if (e1) return { ok: false, detail: e1.message };
     const { error: e2 } = await sb.from('carteira_membros').insert({
@@ -3226,7 +3381,7 @@
     updateCarteiraIndicator();
     hideCarteiraScreen();
     setupRealtime();
-    setTimeout(syncAll, 400);
+    setTimeout(() => { syncAll(); fetchPedidos(); }, 400);
   }
 
   async function checkInvitesAndCarteiras() {
@@ -3320,7 +3475,8 @@
     // 'orcamento' | 'real' | 'ambos'
     balanceMode: localStorage.getItem(BALANCE_MODE_KEY) || 'ambos',
     // 'viagem' | 'pessoal' | 'tudo'
-    totalScope: localStorage.getItem(TOTAL_SCOPE_KEY) || 'viagem'
+    totalScope: localStorage.getItem(TOTAL_SCOPE_KEY) || 'viagem',
+    pedidos: JSON.parse(localStorage.getItem(PEDIDOS_KEY) || '[]')
   };
 
   // Migração: entries antigos sem categoria viram "outros"; sem dataGasto usa data do timestamp
@@ -3428,6 +3584,7 @@
   const persistTrips = () => localStorage.setItem(TRIPS_KEY, JSON.stringify(state.trips));
   const persistActiveTrip = () => localStorage.setItem(ACTIVE_TRIP_KEY, state.activeTripId || '');
   const persistAjustes = () => localStorage.setItem(AJUSTES_KEY, JSON.stringify(state.ajustes));
+  const persistPedidos = () => localStorage.setItem(PEDIDOS_KEY, JSON.stringify(state.pedidos));
 
   // ===== WALLET (saldo da conta) =====
   // Saldo = último ajuste − gastos registrados DEPOIS do ajuste.
@@ -3445,22 +3602,24 @@
       .sort((a, b) => (b.data || '').localeCompare(a.data || ''));
     const ultimo = ajustesTipo[0];
     const ancoraValor = ultimo ? Number(ultimo.valorDepois) : 0;
-    // Timestamp ISO completo do ajuste (ex: "2026-05-24T15:30:00.000Z")
     const ancoraTs = ultimo ? (ultimo.data || null) : null;
 
-    // Gastos do tipo registrados DEPOIS do ajuste
+    const afterAnchor = e => !ancoraTs || (e.data || '') > ancoraTs;
+
+    // Gastos normais + saídas de transferência (tipo 'debito' ou 'saida')
     const gastosDepois = state.entries
-      .filter(e => !e.deleted && e.tipo === tipo)
-      .filter(e => {
-        if (!ancoraTs) return true; // sem âncora: tudo conta
-        // Usa o campo `data` (timestamp de registro, vindo da planilha)
-        const ts = e.data || '';
-        return ts > ancoraTs; // estritamente depois do ajuste
-      })
+      .filter(e => !e.deleted && (e.tipo === tipo || (tipo === 'debito' && e.tipo === 'saida')))
+      .filter(afterAnchor)
       .reduce((s, e) => s + Number(e.valor), 0);
 
-    const saldo = ancoraValor - gastosDepois;
-    return { saldo, ancoraValor, gastoDesdeAncora: gastosDepois, temAncora: !!ultimo };
+    // Entradas de transferência aumentam o saldo (apenas no 'debito')
+    const entradasDepois = tipo === 'debito'
+      ? state.entries.filter(e => !e.deleted && e.tipo === 'entrada').filter(afterAnchor)
+          .reduce((s, e) => s + Number(e.valor), 0)
+      : 0;
+
+    const saldo = ancoraValor - gastosDepois + entradasDepois;
+    return { saldo, ancoraValor, gastoDesdeAncora: gastosDepois - entradasDepois, temAncora: !!ultimo };
   }
 
   // Retorna locais únicos da viagem ativa
@@ -3526,8 +3685,61 @@
   }
   function isViagemCarteira() {
     const c = getActiveCarteira();
-    // Sem tipo definido (legado) = viagem por padrão
     return !c || !c.tipo || c.tipo === 'viagem';
+  }
+  function isCarteiraFilha() {
+    const c = getActiveCarteira();
+    return !!(c && c.parentId);
+  }
+  function getParentCarteira() {
+    const c = getActiveCarteira();
+    if (!c || !c.parentId) return null;
+    return state.carteiras.find(x => x.id === c.parentId) || null;
+  }
+
+  // Busca o saldo atual de uma carteira diretamente do Supabase (para carteiras não-ativas)
+  async function fetchRemoteWalletBalance(carteiraId, tipo = 'debito') {
+    if (!sb || !carteiraId) return null;
+    try {
+      const [ajustesRes, gastosRes] = await Promise.all([
+        sb.from('ajustes').select('valor_depois, data')
+          .eq('carteira_id', carteiraId).eq('tipo', tipo)
+          .order('data', { ascending: false }).limit(1),
+        sb.from('gastos').select('valor, data')
+          .eq('carteira_id', carteiraId).eq('tipo', tipo).eq('deleted', false)
+      ]);
+      if (ajustesRes.error || gastosRes.error) return null;
+      const anchor = ajustesRes.data?.[0] ? Number(ajustesRes.data[0].valor_depois) : 0;
+      const anchorTs = ajustesRes.data?.[0]?.data || null;
+      const spent = (gastosRes.data || [])
+        .filter(e => !anchorTs || e.data > anchorTs)
+        .reduce((s, e) => s + Number(e.valor), 0);
+      return anchor - spent;
+    } catch { return null; }
+  }
+
+  // Executa transferência: reduz saldo do pai e retorna o novo saldo para o filho
+  async function executeParentTransfer(parentId, parentCarteiraNome, transferAmount, childNome) {
+    showSync('Verificando saldo da carteira pai…', false, false);
+    const parentSaldo = await fetchRemoteWalletBalance(parentId, 'debito');
+    if (parentSaldo === null) return { ok: false, detail: 'Não foi possível verificar o saldo da carteira pai.' };
+    if (parentSaldo < transferAmount - 0.005) {
+      return { ok: false, detail: `${parentCarteiraNome} tem apenas ${fmtMoney(parentSaldo)} disponíveis.` };
+    }
+    const novoPaiSaldo = parentSaldo - transferAmount;
+    const ajustePai = {
+      id: makeId(),
+      carteira_id: parentId,
+      tipo: 'debito',
+      valor_antes: parentSaldo,
+      valor_depois: novoPaiSaldo,
+      motivo: `Transferência para ${childNome}`,
+      por: state.userName || '',
+      data: new Date().toISOString()
+    };
+    const { error } = await sb.from('ajustes').insert(ajustePai);
+    if (error) return { ok: false, detail: error.message };
+    return { ok: true, novoPaiSaldo };
   }
   function updateCarteiraIndicator() {
     const c = getActiveCarteira();
@@ -3537,7 +3749,8 @@
     ind.style.display = '';
 
     const { data: user } = {};  // userId resolvido abaixo via state
-    $('carteiraIndicatorNome').textContent = c.nome;
+    const parent = getParentCarteira();
+    $('carteiraIndicatorNome').textContent = parent ? `${parent.nome}  ›  ${c.nome}` : c.nome;
 
     const tipoBadge = $('carteiraIndicatorTipoBadge');
     const tipo = c.tipo || 'viagem';
@@ -3545,7 +3758,8 @@
     tipoBadge.className = `carteira-type-badge ${tipo}`;
 
     const roleBadge = $('carteiraIndicatorRoleBadge');
-    roleBadge.textContent = c.isOwner ? 'Dono' : 'Membro';
+    const roleText = c.isOwner ? 'Dono' : 'Membro';
+    roleBadge.textContent = parent ? `Sub-carteira · ${roleText}` : roleText;
 
     // Ajusta textos dinâmicos conforme tipo
     const brandSub = $('brandSub');
@@ -3565,6 +3779,204 @@
     // Scope toggle
     const scopeEl = $('scopeToggle');
     if (scopeEl) scopeEl.style.display = tipo === 'comum' ? 'none' : '';
+  }
+
+  // ===== PEDIDOS DE TRANSFERÊNCIA =====
+
+  async function fetchPedidos() {
+    if (!sb || !state.activeCaerteiraId) return;
+    const cid = state.activeCaerteiraId;
+    const { data, error } = await sb
+      .from('pedidos_transferencia')
+      .select('*')
+      .or(`solicitante_id.eq.${cid},fonte_id.eq.${cid}`)
+      .order('criado_em', { ascending: false });
+    if (error || !data) return;
+    state.pedidos = data.map(r => ({
+      id: r.id,
+      solicitanteId: r.solicitante_id,
+      solicitanteNome: r.solicitante_nome || '—',
+      fonteId: r.fonte_id,
+      fonteNome: r.fonte_nome || '—',
+      valor: Number(r.valor),
+      motivo: r.motivo || '',
+      status: r.status || 'pendente',
+      solicitadoPor: r.solicitado_por || '',
+      respondidoPor: r.respondido_por || '',
+      criadoEm: r.criado_em
+    }));
+    persistPedidos();
+    renderPedidosBanner();
+  }
+
+  async function criarPedido(fonteId, valor, motivo) {
+    if (!sb || !state.activeCaerteiraId) return { ok: false, detail: 'Sem conexão' };
+    const cid = state.activeCaerteiraId;
+    const solicitanteNome = getActiveCarteira()?.nome || '—';
+    const fonteNome = state.carteiras.find(c => c.id === fonteId)?.nome || '—';
+    const { data, error } = await sb.from('pedidos_transferencia').insert({
+      solicitante_id: cid,
+      fonte_id: fonteId,
+      valor,
+      motivo: motivo || '',
+      solicitante_nome: solicitanteNome,
+      fonte_nome: fonteNome,
+      solicitado_por: state.userName || '',
+      status: 'pendente'
+    }).select().single();
+    if (error) return { ok: false, detail: error.message };
+    await fetchPedidos();
+    return { ok: true };
+  }
+
+  async function aprovarPedido(pedidoId) {
+    if (!sb) return { ok: false, detail: 'Sem conexão' };
+    const pedido = state.pedidos.find(p => p.id === pedidoId);
+    if (!pedido) return { ok: false, detail: 'Pedido não encontrado' };
+
+    const { valor, solicitanteId, solicitanteNome, fonteId, fonteNome } = pedido;
+    showSync('Verificando saldo para transferência…', false, false);
+
+    // Saldo da FONTE (carteira ativa)
+    const fonteSaldo = getWalletState('debito').saldo;
+    if (fonteSaldo < valor - 0.005) {
+      showSync(`Saldo insuficiente. Disponível: ${fmtMoney(fonteSaldo)}`, true);
+      return { ok: false, detail: 'Saldo insuficiente' };
+    }
+
+    const now = new Date().toISOString();
+
+    // 1. Atualiza status do pedido
+    await sb.from('pedidos_transferencia').update({
+      status: 'aprovado',
+      respondido_por: state.userName || '',
+      respondido_em: now
+    }).eq('id', pedidoId);
+
+    // 2. Cria entry 'saida' na carteira FONTE (ativa) — reduz saldo local
+    const saidaEntry = {
+      id: makeId(), data: now, dataGasto: now.slice(0,10),
+      local: `Transferência para ${solicitanteNome}`,
+      item: `Para: ${solicitanteNome}`,
+      estabelecimento: '', gps: '', mapsLink: '',
+      valor, tipo: 'saida', categoria: 'transferencia',
+      scope: 'pessoal', viagemId: '', synced: false
+    };
+    state.entries.push(saidaEntry);
+    persist();
+    await sb.from('gastos').insert({
+      id: saidaEntry.id, carteira_id: fonteId,
+      data: now, data_gasto: saidaEntry.dataGasto,
+      local: saidaEntry.local, item: saidaEntry.item,
+      valor, tipo: 'saida', categoria: 'transferencia',
+      scope: 'pessoal', viagem_id: ''
+    });
+
+    // 3. Cria entry 'entrada' na carteira SOLICITANTE (remote only)
+    await sb.from('gastos').insert({
+      id: makeId(), carteira_id: solicitanteId,
+      data: now, data_gasto: now.slice(0,10),
+      local: `Transferência de ${fonteNome}`,
+      item: `De: ${fonteNome}`,
+      valor, tipo: 'entrada', categoria: 'transferencia',
+      scope: 'pessoal', viagem_id: ''
+    });
+
+    await fetchPedidos();
+    render();
+    showSync(`✓ ${fmtMoney(valor)} transferido para "${solicitanteNome}"`);
+    return { ok: true };
+  }
+
+  async function rejeitarPedido(pedidoId) {
+    if (!sb) return { ok: false, detail: 'Sem conexão' };
+    const now = new Date().toISOString();
+    await sb.from('pedidos_transferencia').update({
+      status: 'rejeitado',
+      respondido_por: state.userName || '',
+      respondido_em: now
+    }).eq('id', pedidoId);
+    await fetchPedidos();
+    renderPedidosModal();
+    showSync('Pedido rejeitado');
+    return { ok: true };
+  }
+
+  function renderPedidosBanner() {
+    const banner = $('pedidosBanner');
+    if (!banner) return;
+    const cid = state.activeCaerteiraId;
+    // Pedidos recebidos = alguém pediu dinheiro DA minha carteira
+    const recebidos = state.pedidos.filter(p => p.fonteId === cid && p.status === 'pendente');
+    if (recebidos.length === 0) { banner.innerHTML = ''; return; }
+    const txt = recebidos.length === 1
+      ? '1 pedido de transferência aguardando sua aprovação'
+      : `${recebidos.length} pedidos de transferência aguardando aprovação`;
+    banner.innerHTML = `
+      <div class="pedido-banner" id="pedidosBannerBtn">
+        <span class="pedido-banner-icon">💸</span>
+        <span class="pedido-banner-text">${txt}</span>
+        <span class="pedido-banner-badge">${recebidos.length}</span>
+      </div>`;
+    banner.querySelector('#pedidosBannerBtn').addEventListener('click', openPedidosModal);
+  }
+
+  function renderPedidosModal() {
+    const cid = state.activeCaerteiraId;
+    const recebidos = state.pedidos.filter(p => p.fonteId === cid);
+    const enviados  = state.pedidos.filter(p => p.solicitanteId === cid);
+
+    const recTitle = $('pedidosRecebidosTitle');
+    const recList  = $('pedidosRecebidosList');
+    const envTitle = $('meusPedidosTitle');
+    const envList  = $('meusPedidosList');
+
+    if (recTitle) recTitle.style.display = recebidos.length ? '' : 'none';
+    if (recList)  recList.innerHTML = recebidos.map(p => pedidoItemHtml(p, true)).join('');
+    if (envTitle) envTitle.style.display = enviados.length ? '' : 'none';
+    if (envList)  envList.innerHTML = enviados.map(p => pedidoItemHtml(p, false)).join('');
+
+    // Preenche o select de fontes
+    preencherPedidoFonteSelect();
+  }
+
+  function pedidoItemHtml(p, podeResponder) {
+    const statusMap = { pendente: 'Pendente', aprovado: 'Aprovado ✓', rejeitado: 'Rejeitado' };
+    const badge = `<span class="pedido-status-badge ${p.status}">${statusMap[p.status] || p.status}</span>`;
+    const de  = p.solicitanteNome;
+    const para = p.fonteNome;
+    const data = p.criadoEm ? new Date(p.criadoEm).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '—';
+    const motivo = p.motivo ? ` · ${escapeHtml(p.motivo)}` : '';
+    const actions = (podeResponder && p.status === 'pendente') ? `
+      <div class="pedido-item-actions">
+        <button class="pedido-btn-nao" data-pedido-rejeitar="${p.id}">Rejeitar</button>
+        <button class="pedido-btn-ok" data-pedido-aprovar="${p.id}">Aprovar</button>
+      </div>` : '';
+    return `
+      <div class="pedido-item">
+        <div class="pedido-item-header">
+          <div>
+            <div class="pedido-item-valor">${fmtMoney(p.valor)}</div>
+            <div class="pedido-item-meta">${podeResponder ? de : para} · ${data}${motivo}</div>
+          </div>
+          ${badge}
+        </div>
+        ${actions}
+      </div>`;
+  }
+
+  function preencherPedidoFonteSelect() {
+    const sel = $('pedidoFonteSelect');
+    if (!sel) return;
+    const outras = state.carteiras.filter(c => c.id !== state.activeCaerteiraId);
+    sel.innerHTML = outras.length === 0
+      ? '<option value="">— Nenhuma outra carteira disponível —</option>'
+      : outras.map(c => `<option value="${c.id}">${escapeHtml(c.nome)} ${c.tipo === 'comum' ? '🏠' : '✈️'}</option>`).join('');
+  }
+
+  function openPedidosModal() {
+    renderPedidosModal();
+    $('pedidosBackdrop').classList.add('show');
   }
 
   // ===== VIAGENS =====
@@ -3601,6 +4013,25 @@
   }
 
   function renderWallet() {
+    // Tag de sub-carteira
+    const parentTag = $('walletParentTag');
+    const walletLabelEl = $('walletCardLabel');
+    const parent = getParentCarteira();
+    if (parent && parentTag) {
+      parentTag.style.display = '';
+      $('walletParentName').textContent = parent.nome;
+    } else if (parentTag) {
+      parentTag.style.display = 'none';
+    }
+    if (walletLabelEl) {
+      walletLabelEl.textContent = parent ? 'Saldo alocado' : 'Saldo da conta';
+    }
+    // Labels das células
+    const celDebLabel = document.querySelector('.wallet-cell.debito .wallet-cell-label');
+    const celCredLabel = document.querySelector('.wallet-cell.credito .wallet-cell-label');
+    if (celDebLabel) celDebLabel.textContent = parent ? 'Disponível' : 'Em conta';
+    if (celCredLabel) celCredLabel.textContent = parent ? 'Crédito alocado' : 'Crédito usado';
+
     const debito = getWalletState('debito');
     const credito = getWalletState('credito');
 
@@ -3646,9 +4077,8 @@
     const orcCredito = trip ? Number(trip.orcamentoCredito) || 0 : 0;
 
     const entries = entriesParaBalance;
-    const gastoDebito = entries
-      .filter(e => e.tipo === 'debito')
-      .reduce((s, e) => s + Number(e.valor), 0);
+    const gastoDebito = entries.filter(e => e.tipo === 'debito' || e.tipo === 'saida').reduce((s, e) => s + Number(e.valor), 0)
+      - entries.filter(e => e.tipo === 'entrada').reduce((s, e) => s + Number(e.valor), 0);
     const gastoCredito = entries
       .filter(e => e.tipo === 'credito')
       .reduce((s, e) => s + Number(e.valor), 0);
@@ -3884,10 +4314,15 @@
           </div>`;
       }
 
-      const deleteBtn = isPending ? '' : `<button class="entry-delete" data-del="${e.id}">remover</button>`;
+      // Entradas e saídas de transferência — visual especial
+      const isEntrada = e.tipo === 'entrada';
+      const isSaida   = e.tipo === 'saida';
+      const isTransfer = isEntrada || isSaida;
+      const deleteBtn = (isPending || isTransfer) ? '' : `<button class="entry-delete" data-del="${e.id}">remover</button>`;
+      const tipoLabel = isEntrada ? '↑ entrada' : isSaida ? '↓ saída' : e.tipo;
 
       return `
-      <div class="entry ${isPending ? 'pending-removal' : ''}" data-id="${e.id}">
+      <div class="entry ${isPending ? 'pending-removal' : ''} ${isEntrada ? 'entrada' : ''} ${isSaida ? 'saida' : ''}" data-id="${e.id}">
         <div class="entry-main">
           <div class="entry-item">${escapeHtml(e.item)}</div>
           <div class="entry-meta">
@@ -3895,15 +4330,15 @@
             ${e.estabelecimento ? `<span class="sep">·</span><span class="chip estab" data-estab-id="${e.id}">📍 ${escapeHtml(e.estabelecimento)}</span>` : ''}
             <span class="sep">·</span>
             <span class="chip cat"><span class="emoji">${cat.emoji}</span>${cat.nome}</span>
-            <span class="chip ${e.tipo}">${e.tipo}</span>
-            ${isPessoal ? '<span class="chip pessoal">🏠 fora da viagem</span>' : ''}
+            <span class="chip ${e.tipo}">${tipoLabel}</span>
+            ${isPessoal && !isTransfer ? '<span class="chip pessoal">🏠 fora da viagem</span>' : ''}
             ${e.synced === false ? '<span class="chip pending">pendente</span>' : ''}
             <span class="sep">·</span>
             <span>${dataExibida}</span>
           </div>
         </div>
         <div class="entry-right">
-          <div class="entry-amount">${fmtMoney(e.valor)}</div>
+          <div class="entry-amount">${isEntrada ? '+' : ''}${fmtMoney(e.valor)}</div>
           ${deleteBtn}
         </div>
         ${bottomBlock}
@@ -3949,6 +4384,7 @@
     renderLocais();
     renderCategorias();
     renderApprovalBanner();
+    renderPedidosBanner();
   }
 
   // ===== SYNC =====
@@ -4146,9 +4582,10 @@
     if (realtimeChannel) { sb.removeChannel(realtimeChannel); }
     realtimeChannel = sb
       .channel('db-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos' },   () => syncAll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'viagens' },  () => syncAll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes' },  () => syncAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos' },                () => syncAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'viagens' },               () => syncAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ajustes' },               () => syncAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos_transferencia' }, () => fetchPedidos())
       .subscribe();
   }
 
@@ -5337,9 +5774,29 @@ tr:last-child td{border-bottom:none}
     const carteira = state.carteiras.find(c => c.id === item.dataset.cid);
     if (carteira) selectCarteira(carteira);
   });
+  function preencherParentSelect() {
+    const sel = $('parentCarteiraSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Independente (sem pai) —</option>';
+    state.carteiras.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.nome + (c.tipo === 'comum' ? ' 🏠' : ' ✈️');
+      sel.appendChild(opt);
+    });
+    const wrap = $('parentSelectorWrap');
+    if (wrap) wrap.style.display = state.carteiras.length > 0 ? '' : 'none';
+    // Mostrar/ocultar alocação inicial conforme pai selecionado
+    sel.addEventListener('change', () => {
+      const alocWrap = $('alocacaoInicialWrap');
+      if (alocWrap) alocWrap.classList.toggle('show', !!sel.value);
+    });
+  }
+
   $('showCreateCarteiraBtn').addEventListener('click', () => {
     $('createCarteiraSection').style.display = 'none';
     $('createCarteiraForm').style.display = 'flex';
+    preencherParentSelect();
     $('carteiraNameInput').focus();
   });
   $('cancelCreateCarteiraBtn').addEventListener('click', () => {
@@ -5359,11 +5816,41 @@ tr:last-child td{border-bottom:none}
     if (!nome) { alert('Digite um nome para a carteira.'); return; }
     const tipoBtn = $('carteiraTypeSelector').querySelector('button.active');
     const tipo = tipoBtn ? tipoBtn.dataset.tipo : 'viagem';
+    const parentId = $('parentCarteiraSelect')?.value || null;
+    const alocacaoInicial = parseFloat($('alocacaoInicialInput')?.value || '0') || 0;
+
     $('confirmCreateCarteiraBtn').disabled = true;
     showSync('Criando carteira…', false, false);
-    const res = await criarCarteira(nome, tipo);
+    const res = await criarCarteira(nome, tipo, parentId || null);
+    if (!res.ok) {
+      showSync('Erro: ' + res.detail, true);
+      $('confirmCreateCarteiraBtn').disabled = false;
+      return;
+    }
+
+    // Alocação inicial: transfere do pai para a nova carteira
+    if (parentId && alocacaoInicial > 0 && sb) {
+      showSync('Alocando saldo inicial…', false, false);
+      const parentCarteira = state.carteiras.find(c => c.id === parentId);
+      const parentNome = parentCarteira ? parentCarteira.nome : '—';
+
+      // Cria ajuste inicial na nova carteira (ela parte com esse saldo)
+      await sb.from('ajustes').insert({
+        id: makeId(), carteira_id: res.carteira.id,
+        tipo: 'debito', valor_antes: 0, valor_depois: alocacaoInicial,
+        motivo: `Alocação inicial de ${parentNome}`,
+        por: state.userName || '', data: new Date().toISOString()
+      });
+
+      // Reduz saldo do pai
+      await executeParentTransfer(parentId, parentNome, alocacaoInicial, nome);
+    }
+
     $('confirmCreateCarteiraBtn').disabled = false;
-    if (!res.ok) { showSync('Erro: ' + res.detail, true); return; }
+    // Limpa campos
+    if ($('alocacaoInicialInput')) $('alocacaoInicialInput').value = '';
+    if ($('alocacaoInicialWrap')) $('alocacaoInicialWrap').classList.remove('show');
+
     const carteiras = await fetchCarteiras();
     state.carteiras = carteiras;
     const nova = carteiras.find(c => c.id === res.carteira.id);
@@ -5385,16 +5872,21 @@ tr:last-child td{border-bottom:none}
     modalBackdrop.classList.add('show');
   });
 
-  // Banner de viagem em carteiras comuns → cria carteira de viagem
+  // Banner de viagem em carteiras comuns → cria carteira de viagem filha
   $('criarCarteiraViagemBtn').addEventListener('click', () => {
-    // Abre tela de criação com tipo 'viagem' pré-selecionado
     showCarteiraScreen();
     $('createCarteiraSection').style.display = 'none';
     $('createCarteiraForm').style.display = 'flex';
-    // Pré-seleciona tipo viagem
     $('carteiraTypeSelector').querySelectorAll('button').forEach(b => {
       b.classList.toggle('active', b.dataset.tipo === 'viagem');
     });
+    preencherParentSelect();
+    // Pré-seleciona a carteira atual como pai
+    const sel = $('parentCarteiraSelect');
+    if (sel && state.activeCaerteiraId) {
+      sel.value = state.activeCaerteiraId;
+      $('alocacaoInicialWrap')?.classList.add('show');
+    }
     $('carteiraNameInput').value = '';
     $('carteiraNameInput').focus();
   });
@@ -6358,13 +6850,47 @@ tr:last-child td{border-bottom:none}
     const w = getWalletState(adjustTipo);
     const valor = adjustTipo === 'debito' ? w.saldo : (w.ancoraValor + w.gastoDesdeAncora);
     $('adjustCurrentValue').textContent = fmtMoney(valor);
-    $('adjustTipoLabel').textContent = adjustTipo === 'debito' ? 'Em conta agora' : 'Crédito usado agora';
+    const parent = getParentCarteira();
+    if (adjustTipo === 'debito') {
+      $('adjustTipoLabel').textContent = parent ? 'Disponível nesta carteira' : 'Em conta agora';
+    } else {
+      $('adjustTipoLabel').textContent = parent ? 'Crédito alocado agora' : 'Crédito usado agora';
+    }
+    // Título e descrição do modal
+    const titleEl = $('adjustModalTitle');
+    const descEl  = $('adjustModalDesc');
+    if (titleEl) titleEl.textContent = parent ? `Saldo de ${getActiveCarteira().nome}` : 'Ajustar saldo';
+    if (descEl)  descEl.textContent  = parent
+      ? `Atualize o saldo desta carteira. Se o novo valor for maior que o atual, a diferença será buscada automaticamente de "${parent.nome}".`
+      : 'Atualize o saldo da conta quando entrar dinheiro (salário, transferência) ou quando o app divergir do banco.';
+    // Oculta toggle Conta/Crédito em carteiras filhas (sem conta real)
+    const toggleWrap = $('adjustTipoToggle');
+    if (toggleWrap) toggleWrap.style.display = parent ? 'none' : '';
     // Atualiza toggle visual
     const t = $('adjustTipoToggle');
     t.classList.toggle('pessoal', adjustTipo === 'credito');
     t.querySelectorAll('button').forEach(b => {
       b.classList.toggle('active', b.dataset.tipo === adjustTipo);
     });
+    // Limpa preview
+    updateTransferPreview(NaN);
+  }
+
+  function updateTransferPreview(novoValor) {
+    const prev = $('transferPreview');
+    if (!prev) return;
+    const parent = getParentCarteira();
+    if (!parent || isNaN(novoValor)) { prev.classList.remove('show'); return; }
+    const w = getWalletState('debito');
+    const atual = w.saldo;
+    const diferenca = novoValor - atual;
+    if (diferenca <= 0.005) { prev.classList.remove('show'); return; }
+    prev.classList.add('show');
+    $('transferPreviewTitle').textContent = `Buscar ${fmtMoney(diferenca)} de "${parent.nome}"`;
+    // Estado: ok se pode-se buscar, danger se não
+    // Nota: saldo do pai não está carregado localmente; informamos ao usuário que será verificado
+    prev.className = 'transfer-preview show warn';
+    $('transferPreviewDetail').textContent = `O saldo do pai será verificado no momento de salvar. Se insuficiente, o ajuste será cancelado.`;
   }
 
   function renderAdjustHistory() {
@@ -6393,6 +6919,50 @@ tr:last-child td{border-bottom:none}
 
   $('walletAdjust').addEventListener('click', () => openAdjustModal('debito'));
 
+  // ===== PEDIDOS DE TRANSFERÊNCIA =====
+  $('pedirDinheiroBtn').addEventListener('click', openPedidosModal);
+
+  $('pedidosBackdrop').addEventListener('click', (e) => {
+    if (e.target === $('pedidosBackdrop')) $('pedidosBackdrop').classList.remove('show');
+  });
+
+  $('enviarPedidoBtn').addEventListener('click', async () => {
+    const fonteId = $('pedidoFonteSelect').value;
+    const valor   = parseFloat($('pedidoValor').value);
+    const motivo  = $('pedidoMotivo').value.trim();
+    if (!fonteId) { alert('Selecione de qual carteira deseja pedir.'); return; }
+    if (!valor || valor <= 0) { alert('Digite um valor válido.'); return; }
+    if (!sb) { showSync('Conecte ao Supabase primeiro', true); return; }
+    $('enviarPedidoBtn').disabled = true;
+    showSync('Enviando pedido…', false, false);
+    const res = await criarPedido(fonteId, valor, motivo);
+    $('enviarPedidoBtn').disabled = false;
+    if (!res.ok) { showSync('Erro: ' + res.detail, true); return; }
+    $('pedidoValor').value = '';
+    $('pedidoMotivo').value = '';
+    renderPedidosModal();
+    showSync('Pedido enviado ✓');
+  });
+
+  // Delegação de cliques nos botões de Aprovar/Rejeitar dos pedidos
+  document.addEventListener('click', async (e) => {
+    const aprovarBtn = e.target.closest('[data-pedido-aprovar]');
+    if (aprovarBtn) {
+      aprovarBtn.disabled = true;
+      await aprovarPedido(aprovarBtn.dataset.pedidoAprovar);
+      renderPedidosModal();
+      aprovarBtn.disabled = false;
+      return;
+    }
+    const rejeitarBtn = e.target.closest('[data-pedido-rejeitar]');
+    if (rejeitarBtn) {
+      rejeitarBtn.disabled = true;
+      await rejeitarPedido(rejeitarBtn.dataset.pedidoRejeitar);
+      rejeitarBtn.disabled = false;
+      return;
+    }
+  });
+
   // Toggle "Total gasto" — cicla: viagem → fora da viagem → tudo → viagem
   // (desabilitado em carteiras comuns, onde sempre mostra tudo)
   $('totalScopeBtn').addEventListener('click', () => {
@@ -6401,6 +6971,10 @@ tr:last-child td{border-bottom:none}
     state.totalScope = ciclo[state.totalScope] || 'viagem';
     localStorage.setItem(TOTAL_SCOPE_KEY, state.totalScope);
     renderBalance();
+  });
+
+  $('adjustValue').addEventListener('input', () => {
+    updateTransferPreview(parseFloat($('adjustValue').value));
   });
 
   $('adjustTipoToggle').addEventListener('click', (e) => {
@@ -6427,13 +7001,33 @@ tr:last-child td{border-bottom:none}
       return;
     }
 
+    // Carteira filha aumentando saldo → precisa buscar do pai
+    const parent = getParentCarteira();
+    const diferenca = novoValor - valorAntes;
+    if (parent && diferenca > 0.005 && adjustTipo === 'debito') {
+      if (!sb) {
+        showSync('Conecte ao Supabase para transferir do pai', true);
+        return;
+      }
+      $('adjustSave').disabled = true;
+      const transferResult = await executeParentTransfer(
+        parent.id, parent.nome, diferenca, getActiveCarteira().nome
+      );
+      $('adjustSave').disabled = false;
+      if (!transferResult.ok) {
+        showSync('Transferência cancelada: ' + transferResult.detail, true);
+        return;
+      }
+      showSync(`✓ ${fmtMoney(diferenca)} transferido de "${parent.nome}"`, false, false);
+    }
+
     const ajuste = {
       id: makeId(),
       data: new Date().toISOString(),
       tipo: adjustTipo,
       valorAntes,
       valorDepois: novoValor,
-      motivo,
+      motivo: motivo || (parent && diferenca > 0 ? `De ${parent.nome}` : motivo),
       por: state.userName || '',
       synced: false
     };
@@ -6443,9 +7037,10 @@ tr:last-child td{border-bottom:none}
     renderAdjustHistory();
     $('adjustValue').value = '';
     $('adjustMotivo').value = '';
+    $('transferPreview')?.classList.remove('show');
 
     if (sb) {
-      showSync('Salvando ajuste…', false, false);
+      if (!parent || diferenca <= 0) showSync('Salvando ajuste…', false, false);
       const result = await postAction({
         action: 'adjustBalance',
         id: ajuste.id, data: ajuste.data, tipo: ajuste.tipo,
