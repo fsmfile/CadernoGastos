@@ -47,6 +47,30 @@
       --credito: #ff453a;
       --pending: #ffd60a;
       --shadow: none;
+
+      --wallet-gradient-end: #1e1e2d;
+      --pill-active: #636366;
+      --pill-active-text: #ffffff;
+    }
+
+    /* ===== TEMA CLARO ===== */
+    :root.theme-light {
+      --bg: #f2f2f7;
+      --surface: #ffffff;
+      --surface-light: #e5e5ea;
+      --text: #000000;
+      --text-muted: #8e8e93;
+      --line: #c6c6c8;
+      --accent: #ff9f0a;
+      --accent-soft: rgba(255, 159, 10, 0.15);
+      --debito: #34c759;
+      --credito: #ff3b30;
+      --pending: #ffcc00;
+      --shadow: 0 4px 12px rgba(0,0,0,0.06);
+      
+      --wallet-gradient-end: #d1d1d6;
+      --pill-active: #ffffff;
+      --pill-active-text: #000000;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -519,7 +543,7 @@
       top: 4px; bottom: 4px;
       width: calc(50% - 4px);
       border-radius: 8px;
-      background: #636366;
+      background: var(--pill-active);
       transition: transform .25s cubic-bezier(.4,0,.2,1);
       z-index: 0;
     }
@@ -581,7 +605,7 @@
 
     /* ===== SALDO DA CONTA (carteira real) ===== */
     .wallet-card {
-      background: linear-gradient(135deg, var(--surface-light) 0%, #1e1e2d 100%);
+      background: linear-gradient(135deg, var(--surface-light) 0%, var(--wallet-gradient-end) 100%);
       color: var(--text);
       border-radius: 16px;
       padding: 20px 22px;
@@ -1139,13 +1163,13 @@
       z-index: 1;
       transition: color .2s;
     }
-    .local-chart-toggle button.active { color: #fff; }
+    .local-chart-toggle button.active { color: var(--pill-active-text); }
     .local-chart-toggle .pill {
       position: absolute;
       top: 3px; bottom: 3px;
       width: calc(50% - 3px);
       border-radius: 7px;
-      background: #636366;
+      background: var(--pill-active);
       transition: transform .25s cubic-bezier(.4,0,.2,1);
       z-index: 0;
     }
@@ -1736,7 +1760,7 @@
       transition: color 0.2s;
     }
     .toggle button.active {
-      color: #fff;
+      color: var(--pill-active-text);
     }
     .toggle .pill {
       position: absolute;
@@ -1781,14 +1805,14 @@
       justify-content: center;
       gap: 6px;
     }
-    .scope-toggle button.active { color: #fff; }
+    .scope-toggle button.active { color: var(--pill-active-text); }
     .scope-toggle button .emoji { font-size: 14px; }
     .scope-toggle .pill {
       position: absolute;
       top: 4px; bottom: 4px;
       width: calc(50% - 4px);
       border-radius: 16px;
-      background: #636366;
+      background: var(--pill-active);
       transition: transform .25s cubic-bezier(.4,0,.2,1);
       z-index: 0;
     }
@@ -2338,12 +2362,21 @@
         <h1>Caderno<br /><em>de Gastos</em></h1>
         <div class="sub">Diário da viagem</div>
       </div>
-      <button class="icon-btn" id="settingsBtn" aria-label="Configurações">
+      
+      <div style="display:flex; gap:10px;">
+        <button class="icon-btn" id="themeToggleBtn" aria-label="Alternar Tema">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <!-- Moon icon (default since it's dark mode) -->
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" id="settingsBtn" aria-label="Configurações">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       </button>
+      </div>
     </header>
 
     <!-- WALLET (saldo real da conta) -->
@@ -6404,6 +6437,41 @@ tr:last-child td{border-bottom:none}
   });
 })();
 
+
+
+// ===== THEME TOGGLE =====
+function setupTheme() {
+  const toggleBtn = document.getElementById('themeToggleBtn');
+  const themeIcon = document.getElementById('themeIcon');
+  if (!toggleBtn || !themeIcon) return;
+
+  const sunPath = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+  const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+
+  function applyTheme(isLight) {
+    if (isLight) {
+      document.documentElement.classList.add('theme-light');
+      themeIcon.innerHTML = sunPath;
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f2f2f7');
+    } else {
+      document.documentElement.classList.remove('theme-light');
+      themeIcon.innerHTML = moonPath;
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#000000');
+    }
+  }
+
+  // Load from localStorage (default dark)
+  const savedTheme = localStorage.getItem('gastos_viagem_theme');
+  const isLight = savedTheme === 'light';
+  applyTheme(isLight);
+
+  toggleBtn.addEventListener('click', () => {
+    const willBeLight = !document.documentElement.classList.contains('theme-light');
+    applyTheme(willBeLight);
+    localStorage.setItem('gastos_viagem_theme', willBeLight ? 'light' : 'dark');
+  });
+}
+setupTheme();
 
 // Setup Accordions (Minimizáveis)
 function setupAccordions() {
