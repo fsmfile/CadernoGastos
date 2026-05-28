@@ -1,16 +1,14 @@
 // Caderno de Gastos — Service Worker
 // Estratégia:
-// - App shell (HTML, ícones, manifest, fontes): cache-first com revalidação em background
-// - Chamadas ao Apps Script: SEMPRE rede (nunca cache — dados precisam estar frescos)
-// - Outros recursos: stale-while-revalidate
+// - index.html: SEMPRE network-first (garante atualização imediata)
+// - Ícones / manifest: cache-first (raramente mudam)
+// - Google Fonts: stale-while-revalidate
+// - Supabase e CDNs externos: não interceptados
 
-const VERSION = 'v1.7.2';
+const VERSION = 'v1.8.1';
 const CACHE_NAME = `caderno-gastos-${VERSION}`;
 
-// Recursos essenciais para o app abrir offline
-const APP_SHELL = [
-  './',
-  './index.html',
+const STATIC_SHELL = [
   './manifest.webmanifest',
   './icon.svg',
   './icon-192.png',
@@ -19,63 +17,66 @@ const APP_SHELL = [
   './favicon-32.png'
 ];
 
-// Instalação: pré-cacheia o app shell
+// Instalação: pré-cacheia apenas assets estáticos (sem index.html)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
+      .then((cache) => cache.addAll(STATIC_SHELL))
       .then(() => self.skipWaiting())
   );
 });
 
-// Ativação: limpa caches antigos
+// Ativação: limpa caches antigos e assume controle imediatamente
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      )
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch: roteamento por tipo de recurso
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
-
-  // Apenas GET é cacheável
   if (request.method !== 'GET') return;
 
-  // NUNCA cachear chamadas ao Apps Script — sempre rede direto
-  if (url.hostname === 'script.google.com' || url.hostname.endsWith('.googleusercontent.com')) {
-    return; // deixa o navegador lidar normalmente
-  }
+  const url = new URL(request.url);
 
-  // Fontes do Google: stale-while-revalidate (cache rápido, atualiza em background)
+  // Fontes do Google: stale-while-revalidate
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     event.respondWith(staleWhileRevalidate(request));
     return;
   }
 
-  // Mesma origem (app shell): cache-first
-  if (url.origin === self.location.origin) {
-    event.respondWith(cacheFirst(request));
+  // Apenas mesma origem
+  if (url.origin !== self.location.origin) return;
+
+  // index.html (navegação): network-first — sempre busca versão mais recente
+  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('index.html')) {
+    event.respondWith(networkFirst(request));
     return;
   }
+
+  // Outros assets da mesma origem: cache-first
+  event.respondWith(cacheFirst(request));
 });
+
+async function networkFirst(request) {
+  try {
+    const res = await fetch(request);
+    if (res && res.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, res.clone());
+    }
+    return res;
+  } catch {
+    const cached = await caches.match(request);
+    return cached || caches.match('./index.html');
+  }
+}
 
 async function cacheFirst(request) {
   const cached = await caches.match(request);
-  if (cached) {
-    // Atualiza em background se possível
-    fetch(request).then((res) => {
-      if (res && res.ok) {
-        caches.open(CACHE_NAME).then((c) => c.put(request, res.clone()));
-      }
-    }).catch(() => {});
-    return cached;
-  }
+  if (cached) return cached;
   try {
     const res = await fetch(request);
     if (res && res.ok) {
@@ -84,11 +85,6 @@ async function cacheFirst(request) {
     }
     return res;
   } catch (err) {
-    // Fallback para o index se for navegação
-    if (request.mode === 'navigate') {
-      const fallback = await caches.match('./index.html');
-      if (fallback) return fallback;
-    }
     throw err;
   }
 }
@@ -103,7 +99,6 @@ async function staleWhileRevalidate(request) {
   return cached || networkPromise;
 }
 
-// Mensagem para forçar atualização imediata
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
