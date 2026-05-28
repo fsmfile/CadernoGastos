@@ -2196,6 +2196,68 @@
     }
     .new-carteira-form { display: flex; flex-direction: column; gap: 12px; }
 
+    /* ===== INDICADOR DE CARTEIRA (header) ===== */
+    .carteira-indicator {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 9px 14px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: 14px; margin-bottom: 16px;
+      cursor: pointer; text-align: left;
+      transition: all .15s ease;
+    }
+    .carteira-indicator:active { transform: scale(0.99); background: var(--surface-light); }
+    .carteira-indicator-info { flex: 1; min-width: 0; }
+    .carteira-indicator-nome {
+      font-size: 13px; font-weight: 500; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .carteira-indicator-meta {
+      display: flex; align-items: center; gap: 6px; margin-top: 2px;
+    }
+    .carteira-type-badge {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 2px 7px; border-radius: 6px;
+    }
+    .carteira-type-badge.viagem { background: rgba(255,159,10,0.2); color: var(--accent); }
+    .carteira-type-badge.comum  { background: rgba(100,210,255,0.15); color: #64d2ff; }
+    .carteira-role-badge { font-size: 10px; color: var(--text-muted); }
+
+    /* ===== BADGE DE TIPO NA LISTA DE CARTEIRAS ===== */
+    .carteira-item-tipo {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 2px 8px; border-radius: 6px;
+      align-self: center; flex-shrink: 0;
+    }
+    .carteira-item-tipo.viagem { background: rgba(255,159,10,0.2); color: var(--accent); }
+    .carteira-item-tipo.comum  { background: rgba(100,210,255,0.15); color: #64d2ff; }
+
+    /* ===== SELETOR DE TIPO NA CRIAÇÃO DE CARTEIRA ===== */
+    .tipo-selector { display: flex; gap: 10px; margin-bottom: 14px; }
+    .tipo-selector button {
+      flex: 1; padding: 12px 8px; border: 1.5px solid var(--line);
+      border-radius: 14px; background: transparent; color: var(--text-muted);
+      font: inherit; font-size: 13px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      transition: all .15s ease;
+    }
+    .tipo-selector button .tipo-emoji { font-size: 20px; }
+    .tipo-selector button.active { border-color: var(--accent); color: var(--text); }
+
+    /* ===== BANNER "CRIAR CARTEIRA DE VIAGEM" (carteiras comuns) ===== */
+    .viajando-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; gap: 10px;
+      background: var(--accent-soft); border: 1px solid rgba(255,159,10,0.25);
+      border-radius: 12px; margin-bottom: 16px;
+    }
+    .viajando-banner span { font-size: 13px; color: var(--text-muted); }
+    .viajando-banner button {
+      font: inherit; font-size: 12px; font-weight: 600;
+      color: var(--accent); background: none;
+      border: 1px solid var(--accent); border-radius: 8px;
+      padding: 5px 10px; cursor: pointer; white-space: nowrap;
+    }
+
     .modal {
       background: var(--bg);
       width: 100%;
@@ -2360,7 +2422,7 @@
     <header class="header">
       <div class="brand">
         <h1>Caderno<br /><em>de Gastos</em></h1>
-        <div class="sub">Diário da viagem</div>
+        <div class="sub" id="brandSub">Diário da viagem</div>
       </div>
       
       <div style="display:flex; gap:10px;">
@@ -2378,6 +2440,24 @@
       </button>
       </div>
     </header>
+
+    <!-- CARTEIRA INDICATOR -->
+    <button class="carteira-indicator" id="carteiraIndicator" style="display:none;">
+      <div class="carteira-indicator-info">
+        <div class="carteira-indicator-nome" id="carteiraIndicatorNome">—</div>
+        <div class="carteira-indicator-meta">
+          <span class="carteira-type-badge" id="carteiraIndicatorTipoBadge">—</span>
+          <span class="carteira-role-badge" id="carteiraIndicatorRoleBadge">—</span>
+        </div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+
+    <!-- BANNER VIAGEM (apenas em carteiras comuns) -->
+    <div class="viajando-banner" id="viajandoBanner" style="display:none;">
+      <span>✈️ Planejando uma viagem?</span>
+      <button id="criarCarteiraViagemBtn">Criar carteira de viagem</button>
+    </div>
 
     <!-- WALLET (saldo real da conta) -->
     <div class="wallet-card">
@@ -2399,7 +2479,8 @@
       </div>
     </div>
 
-    <!-- TRIP SELECTOR -->
+    <!-- TRIP SELECTOR (apenas em carteiras de viagem) -->
+    <div id="tripSelectorWrap">
     <button class="trip-selector" id="tripSelector">
       <div class="trip-icon">🗺️</div>
       <div class="trip-info">
@@ -2410,6 +2491,7 @@
         <polyline points="6 9 12 15 18 9"/>
       </svg>
     </button>
+    </div>
 
     <!-- BALANCE -->
     <div class="balance-card" id="balanceCard">
@@ -2767,6 +2849,14 @@
         <button class="login-btn" style="background:var(--text-muted);" id="showCreateCarteiraBtn">+ Criar nova carteira</button>
       </div>
       <div class="new-carteira-form" id="createCarteiraForm" style="display:none;">
+        <div class="tipo-selector" id="carteiraTypeSelector">
+          <button type="button" class="active" data-tipo="viagem">
+            <span class="tipo-emoji">✈️</span>De viagem
+          </button>
+          <button type="button" data-tipo="comum">
+            <span class="tipo-emoji">🏠</span>Comum
+          </button>
+        </div>
         <div class="login-field">
           <label for="carteiraNameInput">Nome da carteira</label>
           <input type="text" id="carteiraNameInput" placeholder="Ex: Família Matos" maxlength="50" />
@@ -2887,7 +2977,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.8.0';
+  const APP_VERSION = '1.9.0';
 
   const SUPABASE_URL      = 'https://bhjvbkidtnggzxbtsqdp.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_-PsK3cq1p2pXG85ExwaUng_pSyw6MCi';
@@ -2942,13 +3032,33 @@
     { id: 'outros',       emoji: '📌', nome: 'Outros' }
   ];
 
+  // Categorias para carteiras comuns (doméstico / cotidiano)
+  const CATEGORIAS_COMUM = [
+    { id: 'alimentacao',  emoji: '🍽️', nome: 'Alimentação' },
+    { id: 'moradia',      emoji: '🏠', nome: 'Moradia' },
+    { id: 'contas',       emoji: '💡', nome: 'Contas' },
+    { id: 'transporte',   emoji: '🚕', nome: 'Transporte' },
+    { id: 'mercado',      emoji: '🛒', nome: 'Mercado' },
+    { id: 'saude',        emoji: '💊', nome: 'Saúde' },
+    { id: 'educacao',     emoji: '🎓', nome: 'Educação' },
+    { id: 'vestuario',    emoji: '👕', nome: 'Vestuário' },
+    { id: 'assinaturas',  emoji: '💳', nome: 'Assinaturas' },
+    { id: 'lazer',        emoji: '🍺', nome: 'Lazer' },
+    { id: 'pet',          emoji: '🐾', nome: 'Pet' },
+    { id: 'compras',      emoji: '🛍️', nome: 'Compras' },
+    { id: 'presentes',    emoji: '🎁', nome: 'Presentes' },
+    { id: 'servicos',     emoji: '🧹', nome: 'Serviços' },
+    { id: 'outros',       emoji: '📌', nome: 'Outros' }
+  ];
+
   // Lookup global que cobre todas as categorias
   const CAT_BY_ID = Object.fromEntries(
-    [...CATEGORIAS, ...CATEGORIAS_PESSOAL].map(c => [c.id, c])
+    [...CATEGORIAS, ...CATEGORIAS_PESSOAL, ...CATEGORIAS_COMUM].map(c => [c.id, c])
   );
 
-  // Retorna a lista de categorias conforme o escopo atual do form
+  // Retorna a lista de categorias conforme o tipo de carteira e escopo
   function categoriasDoEscopo(scope) {
+    if (!isViagemCarteira()) return CATEGORIAS_COMUM;
     return scope === 'pessoal' ? CATEGORIAS_PESSOAL : CATEGORIAS;
   }
 
@@ -3030,15 +3140,29 @@
     if (!sb) return [];
     const { data: user } = await sb.auth.getUser();
     if (!user?.user) return [];
-    const { data, error } = await sb
+    const userId = user.user.id;
+
+    // Tenta com coluna tipo (requer migração); se falhar, usa query legada
+    let { data, error } = await sb
       .from('carteira_membros')
-      .select('carteira_id, nome_exibicao, carteiras(id, nome, owner_id)')
-      .eq('user_id', user.user.id);
+      .select('carteira_id, nome_exibicao, carteiras(id, nome, owner_id, tipo)')
+      .eq('user_id', userId);
+
+    if (error) {
+      // Coluna tipo ainda não existe — fallback sem ela
+      ({ data, error } = await sb
+        .from('carteira_membros')
+        .select('carteira_id, nome_exibicao, carteiras(id, nome, owner_id)')
+        .eq('user_id', userId));
+    }
+
     if (error || !data) return [];
     return data.map(m => ({
       id: m.carteiras.id,
       nome: m.carteiras.nome,
+      tipo: m.carteiras.tipo || 'viagem',
       ownerId: m.carteiras.owner_id,
+      isOwner: m.carteiras.owner_id === userId,
       nomeExibicao: m.nome_exibicao
     }));
   }
@@ -3066,12 +3190,12 @@
     return true;
   }
 
-  async function criarCarteira(nome) {
+  async function criarCarteira(nome, tipo = 'viagem') {
     if (!sb || !nome.trim()) return { ok: false, detail: 'Nome inválido' };
     const { data: user } = await sb.auth.getUser();
     if (!user?.user) return { ok: false, detail: 'Não autenticado' };
     const { data: nova, error: e1 } = await sb.from('carteiras')
-      .insert({ nome: nome.trim(), owner_id: user.user.id })
+      .insert({ nome: nome.trim(), owner_id: user.user.id, tipo })
       .select().single();
     if (e1) return { ok: false, detail: e1.message };
     const { error: e2 } = await sb.from('carteira_membros').insert({
@@ -3099,6 +3223,7 @@
     localStorage.setItem(CARTEIRA_KEY, carteira.id);
     state.entries = []; state.trips = []; state.ajustes = []; state.activeTripId = '';
     persist(); persistTrips(); persistAjustes(); persistActiveTrip();
+    updateCarteiraIndicator();
     hideCarteiraScreen();
     setupRealtime();
     setTimeout(syncAll, 400);
@@ -3139,22 +3264,36 @@
     msg.textContent  = 'Selecione uma carteira para acessar.';
     createSect.style.display = '';
     $('createCarteiraForm').style.display = 'none';
-    list.innerHTML = carteiras.map(c => `
+    list.innerHTML = carteiras.map(c => {
+      const tipo = c.tipo || 'viagem';
+      const tipoBadge = tipo === 'comum'
+        ? '<span class="carteira-item-tipo comum">🏠 Comum</span>'
+        : '<span class="carteira-item-tipo viagem">✈️ Viagem</span>';
+      const role = c.isOwner ? 'Dono' : 'Membro';
+      return `
       <div class="carteira-item" data-cid="${c.id}" data-cnome="${escapeHtml(c.nome)}">
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="carteira-item-nome">${escapeHtml(c.nome)}</div>
+          <div class="carteira-item-info">${role}</div>
         </div>
-        <span style="color:var(--muted);">→</span>
-      </div>`).join('');
+        ${tipoBadge}
+        <span style="color:var(--muted);margin-left:6px;">→</span>
+      </div>`;
+    }).join('');
   }
 
   function updateCarteiraInfoInSettings() {
-    const c = state.carteiras.find(x => x.id === state.activeCaerteiraId);
+    const c = getActiveCarteira();
     if (!c) return;
     const nomeEl = $('carteiraNomeDisplay');
     const membEl = $('carteiraMembrosDisplay');
-    if (nomeEl) nomeEl.textContent = c.nome;
-    if (membEl) {
+    if (nomeEl) {
+      const tipo = c.tipo || 'viagem';
+      const tipoBadge = tipo === 'comum' ? ' 🏠 Comum' : ' ✈️ Viagem';
+      const role = c.isOwner ? ' · Dono' : ' · Membro';
+      nomeEl.textContent = c.nome + tipoBadge + role;
+    }
+    if (membEl && sb) {
       sb.from('carteira_membros').select('nome_exibicao').eq('carteira_id', c.id)
         .then(({ data }) => {
           if (data) membEl.textContent = data.length + ' membro(s)';
@@ -3381,6 +3520,53 @@
       .sort((a, b) => b.total - a.total);
   }
 
+  // ===== CARTEIRA HELPERS =====
+  function getActiveCarteira() {
+    return state.carteiras.find(c => c.id === state.activeCaerteiraId) || null;
+  }
+  function isViagemCarteira() {
+    const c = getActiveCarteira();
+    // Sem tipo definido (legado) = viagem por padrão
+    return !c || !c.tipo || c.tipo === 'viagem';
+  }
+  function updateCarteiraIndicator() {
+    const c = getActiveCarteira();
+    const ind = $('carteiraIndicator');
+    if (!ind) return;
+    if (!c) { ind.style.display = 'none'; return; }
+    ind.style.display = '';
+
+    const { data: user } = {};  // userId resolvido abaixo via state
+    $('carteiraIndicatorNome').textContent = c.nome;
+
+    const tipoBadge = $('carteiraIndicatorTipoBadge');
+    const tipo = c.tipo || 'viagem';
+    tipoBadge.textContent = tipo === 'comum' ? '🏠 Comum' : '✈️ Viagem';
+    tipoBadge.className = `carteira-type-badge ${tipo}`;
+
+    const roleBadge = $('carteiraIndicatorRoleBadge');
+    roleBadge.textContent = c.isOwner ? 'Dono' : 'Membro';
+
+    // Ajusta textos dinâmicos conforme tipo
+    const brandSub = $('brandSub');
+    if (brandSub) brandSub.textContent = tipo === 'comum' ? 'Controle de gastos' : 'Diário da viagem';
+
+    const localInp = document.getElementById('local');
+    if (localInp) localInp.placeholder = tipo === 'comum' ? 'Local / estabelecimento' : 'Local da viagem';
+
+    // Banner de viagem
+    const banner = $('viajandoBanner');
+    if (banner) banner.style.display = tipo === 'comum' ? '' : 'none';
+
+    // Trip selector wrap
+    const tripWrap = $('tripSelectorWrap');
+    if (tripWrap) tripWrap.style.display = tipo === 'comum' ? 'none' : '';
+
+    // Scope toggle
+    const scopeEl = $('scopeToggle');
+    if (scopeEl) scopeEl.style.display = tipo === 'comum' ? 'none' : '';
+  }
+
   // ===== VIAGENS =====
   function getActiveTrip() {
     return state.trips.find(t => t.id === state.activeTripId) || null;
@@ -3448,11 +3634,18 @@
   }
 
   function renderBalance() {
-    const trip = getActiveTrip();
+    const allNonDeleted = state.entries.filter(e => !e.deleted);
+
+    // Para carteiras comuns: usa todos os lançamentos (sem filtro de viagem)
+    const entriesParaBalance = isViagemCarteira()
+      ? entriesOfActiveTrip()
+      : allNonDeleted;
+
+    const trip = isViagemCarteira() ? getActiveTrip() : null;
     const orcDebito = trip ? Number(trip.orcamentoDebito) || 0 : 0;
     const orcCredito = trip ? Number(trip.orcamentoCredito) || 0 : 0;
 
-    const entries = entriesOfActiveTrip();
+    const entries = entriesParaBalance;
     const gastoDebito = entries
       .filter(e => e.tipo === 'debito')
       .reduce((s, e) => s + Number(e.valor), 0);
@@ -3527,18 +3720,25 @@
     if (pctCred >= 100 || saldoOrcCredito < 0) barC.classList.add('danger');
     else if (pctCred >= 80) barC.classList.add('warning');
 
-    // Total gasto conforme scope selecionado
-    const allEntries = state.entries.filter(e => !e.deleted);
-    const pessoaisDebito = allEntries.filter(e => (e.scope||'viagem')==='pessoal' && e.tipo==='debito').reduce((s,e)=>s+Number(e.valor),0);
-    const pessoaisCredito = allEntries.filter(e => (e.scope||'viagem')==='pessoal' && e.tipo==='credito').reduce((s,e)=>s+Number(e.valor),0);
-    const TOTAL_LABELS = { viagem: 'Viagem', pessoal: 'Fora da viagem', tudo: 'Total geral' };
-    const totalGasto =
-      state.totalScope === 'pessoal' ? pessoaisDebito + pessoaisCredito :
-      state.totalScope === 'tudo'    ? gastoDebito + gastoCredito + pessoaisDebito + pessoaisCredito :
-                                       gastoDebito + gastoCredito;
+    // Total gasto conforme scope selecionado (ou tudo, para carteiras comuns)
+    let totalGasto, totalLabel;
+    if (!isViagemCarteira()) {
+      // Carteira comum: soma todos os lançamentos
+      totalGasto = allNonDeleted.reduce((s, e) => s + Number(e.valor), 0);
+      totalLabel = 'Total geral';
+    } else {
+      const pessoaisDebito = allNonDeleted.filter(e => (e.scope||'viagem')==='pessoal' && e.tipo==='debito').reduce((s,e)=>s+Number(e.valor),0);
+      const pessoaisCredito = allNonDeleted.filter(e => (e.scope||'viagem')==='pessoal' && e.tipo==='credito').reduce((s,e)=>s+Number(e.valor),0);
+      const TOTAL_LABELS = { viagem: 'Viagem', pessoal: 'Fora da viagem', tudo: 'Total geral' };
+      totalGasto =
+        state.totalScope === 'pessoal' ? pessoaisDebito + pessoaisCredito :
+        state.totalScope === 'tudo'    ? gastoDebito + gastoCredito + pessoaisDebito + pessoaisCredito :
+                                         gastoDebito + gastoCredito;
+      totalLabel = TOTAL_LABELS[state.totalScope] || 'Viagem';
+    }
 
     $('totalGasto').textContent = fmtMoney(totalGasto);
-    $('totalScopeLabel').textContent = TOTAL_LABELS[state.totalScope] || 'Viagem';
+    $('totalScopeLabel').textContent = totalLabel;
 
     // Alerta de inconsistência: orçamento positivo mas conta negativa
     const alertEl = $('balanceAlert');
@@ -3609,9 +3809,10 @@
   function renderCategorias() {
     const scope = state.scope || '';
     const cats = categoriasDoEscopo(scope || 'viagem');
+    const escopoSelecionado = !isViagemCarteira() || !!scope;
 
-    // Se a categoria atual não existe no novo escopo, resetar para a primeira
-    if (scope && !cats.find(c => c.id === state.categoria)) {
+    // Se a categoria atual não existe no conjunto atual, resetar para a primeira
+    if (escopoSelecionado && !cats.find(c => c.id === state.categoria)) {
       state.categoria = cats[0].id;
       localStorage.setItem(CAT_KEY, state.categoria);
     }
@@ -3622,8 +3823,8 @@
       </button>
     `).join('');
 
-    // Opacidade: oculta chips se escopo não foi selecionado ainda
-    catScroll.classList.toggle('cat-scroll-hidden', !scope);
+    // Oculta chips se escopo não foi selecionado (apenas carteiras de viagem)
+    catScroll.classList.toggle('cat-scroll-hidden', !escopoSelecionado);
   }
 
   function renderEntries() {
@@ -3631,6 +3832,7 @@
     const list = state.entries
       .filter(e => !e.deleted)
       .filter(e => {
+        if (!isViagemCarteira()) return true; // carteira comum: exibe tudo
         const scope = e.scope || 'viagem';
         // Mostra gastos da viagem ativa OU gastos pessoais (que aparecem sempre)
         if (scope === 'pessoal') return true;
@@ -3644,9 +3846,14 @@
       });
 
     if (list.length === 0) {
-      const hint = getActiveTrip()
-        ? 'Nenhum gasto ainda.<br/>Comece registrando seu primeiro.'
-        : 'Crie uma viagem para começar.';
+      let hint;
+      if (!isViagemCarteira()) {
+        hint = 'Nenhum gasto ainda.<br/>Comece registrando seu primeiro.';
+      } else {
+        hint = getActiveTrip()
+          ? 'Nenhum gasto ainda.<br/>Comece registrando seu primeiro.'
+          : 'Crie uma viagem para começar.';
+      }
       entriesEl.innerHTML = `<div class="empty">${hint}</div>`;
       return;
     }
@@ -3733,6 +3940,7 @@
   }
 
   function render() {
+    updateCarteiraIndicator();
     renderWallet();
     renderTripSelector();
     renderBalance();
@@ -4868,6 +5076,13 @@ tr:last-child td{border-bottom:none}
   const scopeToggle = $('scopeToggle');
 
   function applyScopeToggleUI() {
+    // Carteiras comuns não têm toggle de viagem/pessoal
+    if (!isViagemCarteira()) {
+      scopeToggle.style.display = 'none';
+      renderCategorias();
+      return;
+    }
+    scopeToggle.style.display = '';
     const s = state.scope;
     scopeToggle.classList.remove('none', 'pessoal');
     if (!s) {
@@ -4904,8 +5119,12 @@ tr:last-child td{border-bottom:none}
     const dataGasto = dataGastoInput.value || todayISO();
     if (!local || !item || !valor || valor <= 0) return;
 
-    // Scope obrigatório
-    if (!state.scope) {
+    // Para carteiras comuns, scope é sempre 'pessoal' (sem conceito de viagem)
+    const carteiraComum = !isViagemCarteira();
+    const scopeEfetivo = carteiraComum ? 'pessoal' : state.scope;
+
+    // Scope obrigatório (apenas carteiras de viagem)
+    if (!carteiraComum && !state.scope) {
       scopeToggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
       scopeToggle.classList.add('none');
       // pulsa o toggle pra chamar atenção
@@ -4917,7 +5136,7 @@ tr:last-child td{border-bottom:none}
 
     // Se for "da viagem", precisa de viagem ativa
     const trip = getActiveTrip();
-    const isViagem = state.scope === 'viagem';
+    const isViagem = scopeEfetivo === 'viagem';
     if (isViagem && !trip) {
       showSync('Crie uma viagem primeiro 🗺️', true);
       openTripsModal();
@@ -4927,7 +5146,7 @@ tr:last-child td{border-bottom:none}
     const entry = {
       id: makeId(),
       viagemId: isViagem ? trip.id : '',
-      scope: state.scope,
+      scope: scopeEfetivo,
       data: new Date().toISOString(),
       dataGasto,
       local, item,
@@ -5127,12 +5346,22 @@ tr:last-child td{border-bottom:none}
     $('createCarteiraSection').style.display = '';
     $('createCarteiraForm').style.display = 'none';
   });
+  // Tipo selector na criação de carteira
+  $('carteiraTypeSelector').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-tipo]');
+    if (!btn) return;
+    $('carteiraTypeSelector').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+
   $('confirmCreateCarteiraBtn').addEventListener('click', async () => {
     const nome = $('carteiraNameInput').value.trim();
     if (!nome) { alert('Digite um nome para a carteira.'); return; }
+    const tipoBtn = $('carteiraTypeSelector').querySelector('button.active');
+    const tipo = tipoBtn ? tipoBtn.dataset.tipo : 'viagem';
     $('confirmCreateCarteiraBtn').disabled = true;
     showSync('Criando carteira…', false, false);
-    const res = await criarCarteira(nome);
+    const res = await criarCarteira(nome, tipo);
     $('confirmCreateCarteiraBtn').disabled = false;
     if (!res.ok) { showSync('Erro: ' + res.detail, true); return; }
     const carteiras = await fetchCarteiras();
@@ -5146,6 +5375,28 @@ tr:last-child td{border-bottom:none}
     state.carteiras = carteiras;
     if (carteiras.length <= 1) { alert('Você só tem uma carteira.'); return; }
     showCarteiraScreen(); renderCarteiraScreen(carteiras, false);
+  });
+
+  // Indicador de carteira no header → abre configurações
+  $('carteiraIndicator').addEventListener('click', () => {
+    $('userName').value = state.userName;
+    updateCarteiraInfoInSettings();
+    renderBalanceModeRadio();
+    modalBackdrop.classList.add('show');
+  });
+
+  // Banner de viagem em carteiras comuns → cria carteira de viagem
+  $('criarCarteiraViagemBtn').addEventListener('click', () => {
+    // Abre tela de criação com tipo 'viagem' pré-selecionado
+    showCarteiraScreen();
+    $('createCarteiraSection').style.display = 'none';
+    $('createCarteiraForm').style.display = 'flex';
+    // Pré-seleciona tipo viagem
+    $('carteiraTypeSelector').querySelectorAll('button').forEach(b => {
+      b.classList.toggle('active', b.dataset.tipo === 'viagem');
+    });
+    $('carteiraNameInput').value = '';
+    $('carteiraNameInput').focus();
   });
   $('inviteBtn').addEventListener('click', async () => {
     const email = $('inviteEmail').value.trim();
@@ -6143,7 +6394,9 @@ tr:last-child td{border-bottom:none}
   $('walletAdjust').addEventListener('click', () => openAdjustModal('debito'));
 
   // Toggle "Total gasto" — cicla: viagem → fora da viagem → tudo → viagem
+  // (desabilitado em carteiras comuns, onde sempre mostra tudo)
   $('totalScopeBtn').addEventListener('click', () => {
+    if (!isViagemCarteira()) return;
     const ciclo = { viagem: 'pessoal', pessoal: 'tudo', tudo: 'viagem' };
     state.totalScope = ciclo[state.totalScope] || 'viagem';
     localStorage.setItem(TOTAL_SCOPE_KEY, state.totalScope);
