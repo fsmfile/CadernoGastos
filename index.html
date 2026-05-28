@@ -581,8 +581,8 @@
 
     /* ===== SALDO DA CONTA (carteira real) ===== */
     .wallet-card {
-      background: linear-gradient(135deg, var(--text) 0%, #2a2a55 100%);
-      color: var(--bg);
+      background: linear-gradient(135deg, var(--surface-light) 0%, #1e1e2d 100%);
+      color: var(--text);
       border-radius: 16px;
       padding: 20px 22px;
       margin-bottom: 16px;
@@ -608,12 +608,12 @@
       font-size: 10px;
       letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: rgba(245, 239, 228, 0.65);
+      color: var(--text-muted);
     }
     .wallet-adjust {
-      background: rgba(245, 239, 228, 0.12);
-      color: var(--bg);
-      border: 1px solid rgba(245, 239, 228, 0.2);
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       padding: 6px 12px;
       
@@ -623,7 +623,7 @@
       cursor: pointer;
       transition: background .15s ease;
     }
-    .wallet-adjust:active { background: rgba(245, 239, 228, 0.22); }
+    .wallet-adjust:active { background: rgba(255, 255, 255, 0.22); }
     .wallet-split {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -634,7 +634,7 @@
       font-size: 10px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: rgba(245, 239, 228, 0.55);
+      color: var(--text-muted);
       margin-bottom: 4px;
       display: flex; align-items: center; gap: 6px;
     }
@@ -959,6 +959,17 @@
     .estab-option:last-child { border-bottom: none; }
     .estab-option:active { background: var(--surface); }
     .estab-option.new-opt { color: var(--accent); font-weight: 500; }
+    .osm-divider {
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      padding: 5px 14px 4px; text-transform: uppercase; letter-spacing: 0.06em;
+      border-top: 1px solid var(--line); background: rgba(255,255,255,0.04);
+    }
+    .estab-option.osm { display: flex; align-items: flex-start; }
+    .osm-addr {
+      display: block; font-size: 11px; color: var(--text-muted);
+      margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .osm-loading { padding: 10px 16px; font-size: 12px; color: var(--text-muted); text-align: center; }
     .chip.estab {
       background: rgba(66,133,244,0.1);
       color: #2563EB;
@@ -985,6 +996,40 @@
       transition: opacity .15s;
     }
     .whatsapp-btn:active { opacity: 0.85; }
+
+    /* ===== MAPA + RESUMO COMPARTILHÁVEL ===== */
+    .share-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .share-row-btn {
+      padding: 12px 8px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--line); border-radius: 16px;
+      font-size: 12.5px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      transition: opacity .15s;
+    }
+    .share-row-btn:active { opacity: 0.7; }
+
+    .map-modal-backdrop {
+      position: fixed; inset: 0; background: #111; z-index: 300;
+      display: none; flex-direction: column;
+    }
+    .map-modal-backdrop.show { display: flex; }
+    .map-modal-header {
+      padding: calc(14px + env(safe-area-inset-top)) 18px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #333; flex-shrink: 0; background: #111;
+    }
+    .map-modal-title { font-weight: 600; font-size: 16px; color: #fff; }
+    .map-modal-close {
+      background: none; border: none; color: #8e8e93;
+      font-size: 22px; cursor: pointer; padding: 2px 8px; line-height: 1;
+    }
+    #tripMapEl { flex: 1; width: 100%; min-height: 0; }
+    .map-legend {
+      padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+      font-size: 11px; color: #8e8e93; text-align: center;
+      border-top: 1px solid #333; flex-shrink: 0; background: #111;
+    }
 
     /* ===== DASHBOARD ===== */
     .dash-btn {
@@ -2415,6 +2460,16 @@
 
   </div>
 
+  <!-- MAP MODAL -->
+  <div class="map-modal-backdrop" id="mapModalBackdrop">
+    <div class="map-modal-header">
+      <span class="map-modal-title" id="mapModalTitle">Mapa da viagem</span>
+      <button type="button" class="map-modal-close" id="mapModalClose">✕</button>
+    </div>
+    <div id="tripMapEl"></div>
+    <div class="map-legend" id="mapLegend">Toque nos marcadores para ver detalhes</div>
+  </div>
+
   <!-- SYNC INDICATOR -->
   <div class="sync-bar" id="syncBar">
     <div class="spinner"></div>
@@ -2517,6 +2572,10 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Compartilhar resumo
       </button>
+      <div class="share-row">
+        <button type="button" class="share-row-btn" id="openMapBtn">🗺️ Mapa da viagem</button>
+        <button type="button" class="share-row-btn" id="exportHtmlBtn">📤 Resumo HTML</button>
+      </div>
     </div>
   </div>
 
@@ -3629,6 +3688,7 @@
             item: data.item,
             estabelecimento: data.estabelecimento || null,
             gps: data.gps || null,
+            maps_link: data.mapsLink || null,
             valor: data.valor,
             tipo: data.tipo,
             categoria: data.categoria
@@ -3710,6 +3770,7 @@
       local: entry.local, item: entry.item,
       estabelecimento: entry.estabelecimento || '',
       gps: entry.gps || '',
+      mapsLink: entry.mapsLink || '',
       valor: entry.valor,
       tipo: entry.tipo, categoria: entry.categoria
     });
@@ -3906,6 +3967,9 @@
             dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
             local: String(r.local || ''),
             item: String(r.item || ''),
+            estabelecimento: String(r.estabelecimento || ''),
+            gps: String(r.gps || ''),
+            mapsLink: String(r.mapsLink || ''),
             valor: Number(r.valor) || 0,
             tipo: r.tipo === 'credito' ? 'credito' : 'debito',
             categoria: CAT_BY_ID[catId] ? catId : 'outros',
@@ -4054,42 +4118,113 @@
     return q ? todos.filter(s => s.toLowerCase().includes(q)) : todos;
   }
 
-  function showEstabDropdown(filtro) {
+  // Resultados OSM atuais para o dropdown
+  let osmResults = [];
+  let osmSearchTimer = null;
+
+  function buildEstabDropdownHtml(filtro, osmData) {
     const lista = getEstabsUsados(filtro);
     const q = (filtro || '').trim();
     let html = lista.map(s => `
       <div class="estab-option" data-estab-opt="${escapeHtml(s)}">
         <span>📍</span>${escapeHtml(s)}
       </div>`).join('');
+
+    if (osmData && osmData.length > 0) {
+      html += `<div class="osm-divider">Busca no mapa (OpenStreetMap)</div>`;
+      osmData.forEach(r => {
+        const name = r.name || r.display_name.split(',')[0].trim();
+        const addr = r.display_name.split(',').slice(1, 3).join(',').trim();
+        html += `<div class="estab-option osm"
+          data-osm-name="${escapeHtml(name)}"
+          data-osm-lat="${r.lat}"
+          data-osm-lng="${r.lon}"
+          data-osm-link="https://www.openstreetmap.org/${r.osm_type}/${r.osm_id}">
+          <span>🔍</span>
+          <span style="flex:1;min-width:0">
+            ${escapeHtml(name)}<span class="osm-addr">${escapeHtml(addr)}</span>
+          </span>
+        </div>`;
+      });
+    }
+
     if (q && !lista.find(s => s.toLowerCase() === q.toLowerCase())) {
       html += `<div class="estab-option new-opt" data-estab-opt="${escapeHtml(q)}">
         <span>✚</span>Usar "${escapeHtml(q)}"
       </div>`;
     }
+    return html;
+  }
+
+  function showEstabDropdown(filtro) {
+    const html = buildEstabDropdownHtml(filtro, osmResults);
     if (!html) { estabDropdown.classList.remove('show'); return; }
     estabDropdown.innerHTML = html;
     estabDropdown.classList.add('show');
   }
 
-  estabInput.addEventListener('focus', () => showEstabDropdown(estabInput.value));
-  estabInput.addEventListener('input', () => showEstabDropdown(estabInput.value));
+  async function fetchOsmResults(q, city) {
+    const query = [q, city].filter(Boolean).join(' ');
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=4&addressdetails=0&accept-language=pt-BR`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      return await res.json();
+    } catch { return []; }
+  }
+
+  function selectOsmResult(opt) {
+    const name = opt.dataset.osmName;
+    const lat = opt.dataset.osmLat;
+    const lng = opt.dataset.osmLng;
+    const link = opt.dataset.osmLink;
+    estabInput.value = name;
+    applyMapsData({ url: link, name, coords: `${lat},${lng}`, shortLink: false });
+    estabDropdown.classList.remove('show');
+  }
+
+  estabInput.addEventListener('focus', () => {
+    osmResults = [];
+    showEstabDropdown(estabInput.value);
+  });
+  estabInput.addEventListener('input', () => {
+    osmResults = [];
+    showEstabDropdown(estabInput.value);
+    const q = estabInput.value.trim();
+    if (q.length < 3) return;
+    clearTimeout(osmSearchTimer);
+    osmSearchTimer = setTimeout(async () => {
+      if (estabInput.value.trim() !== q) return;
+      if (!estabDropdown.classList.contains('show')) return;
+      const results = await fetchOsmResults(q, localInput.value.trim());
+      if (estabInput.value.trim() !== q) return;
+      osmResults = results;
+      showEstabDropdown(estabInput.value);
+    }, 600);
+  });
   estabInput.addEventListener('blur', () => setTimeout(() => estabDropdown.classList.remove('show'), 150));
 
+  function handleEstabOptClick(opt) {
+    if (opt.dataset.osmName) {
+      selectOsmResult(opt);
+    } else {
+      estabInput.value = opt.dataset.estabOpt;
+      estabDropdown.classList.remove('show');
+      valorInput.focus();
+    }
+  }
+
   estabDropdown.addEventListener('mousedown', e => {
-    const opt = e.target.closest('[data-estab-opt]');
+    const opt = e.target.closest('[data-estab-opt], [data-osm-name]');
     if (!opt) return;
     e.preventDefault();
-    estabInput.value = opt.dataset.estabOpt;
-    estabDropdown.classList.remove('show');
-    valorInput.focus();
+    handleEstabOptClick(opt);
   });
   estabDropdown.addEventListener('touchend', e => {
-    const opt = e.target.closest('[data-estab-opt]');
+    const opt = e.target.closest('[data-estab-opt], [data-osm-name]');
     if (!opt) return;
     e.preventDefault();
-    estabInput.value = opt.dataset.estabOpt;
-    estabDropdown.classList.remove('show');
-    valorInput.focus();
+    handleEstabOptClick(opt);
   });
 
   // ===== MAPS INTEGRATION =====
@@ -4220,6 +4355,336 @@
     $('mapsLinkWrap').classList.remove('show');
     $('mapsLinkInput').value = '';
   });
+
+  // ===== LEAFLET + MAPA DA VIAGEM =====
+
+  let leafletLoaded = false;
+  function loadLeaflet() {
+    return new Promise(resolve => {
+      if (leafletLoaded || window.L) { leafletLoaded = true; resolve(); return; }
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => { leafletLoaded = true; resolve(); };
+      document.head.appendChild(script);
+    });
+  }
+
+  const cityCoordCache = new Map();
+  async function geocodeCity(cityName) {
+    if (cityCoordCache.has(cityName)) return cityCoordCache.get(cityName);
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1&accept-language=pt-BR`;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data.length) return null;
+      const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      cityCoordCache.set(cityName, coords);
+      return coords;
+    } catch { return null; }
+  }
+
+  let tripMap = null;
+
+  async function openTripMap() {
+    const trip = getActiveTrip();
+    if (!trip) { showSync('Nenhuma viagem ativa', true); return; }
+
+    const entries = entriesOfActiveTrip().sort((a, b) =>
+      (a.dataGasto || a.data).localeCompare(b.dataGasto || b.data));
+
+    $('mapModalTitle').textContent = trip.nome;
+    $('mapModalBackdrop').classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    await loadLeaflet();
+
+    if (tripMap) { tripMap.remove(); tripMap = null; }
+
+    tripMap = L.map('tripMapEl', { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 18
+    }).addTo(tripMap);
+
+    const allBounds = [];
+    const routeCoords = [];
+
+    // Marcadores individuais (com GPS)
+    for (const e of entries) {
+      if (!e.gps) continue;
+      const [lat, lng] = e.gps.split(',').map(Number);
+      if (isNaN(lat) || isNaN(lng)) continue;
+      const cat = CAT_BY_ID[e.categoria] || CAT_BY_ID.outros;
+      const popup = `<b>${escapeHtml(e.estabelecimento || e.item)}</b><br>
+        📍 ${escapeHtml(e.local)}<br>
+        ${fmtMoney(e.valor)} · ${cat.emoji} ${cat.nome}<br>
+        <small>${fmtDateShort(e.dataGasto)}</small>`;
+      L.circleMarker([lat, lng], {
+        radius: 9, color: '#fff', weight: 2, fillColor: '#4285F4', fillOpacity: 0.9
+      }).addTo(tripMap).bindPopup(popup);
+      allBounds.push([lat, lng]);
+      routeCoords.push({ lat, lng, date: e.dataGasto || e.data });
+    }
+
+    // Marcadores de cidade (geocodificados) para cidades sem GPS
+    const citiesWithGps = new Set(entries.filter(e => e.gps).map(e => e.local));
+    const allCities = [...new Set(entries.map(e => e.local))];
+    for (const city of allCities) {
+      const cityEntries = entries.filter(e => e.local === city);
+      const cityTotal = cityEntries.reduce((s, e) => s + Number(e.valor), 0);
+      const hasGps = citiesWithGps.has(city);
+
+      let coords = null;
+      if (!hasGps) {
+        coords = await geocodeCity(city);
+      } else {
+        // Usa centróide dos pontos da cidade
+        const pts = cityEntries.filter(e => e.gps).map(e => e.gps.split(',').map(Number));
+        if (pts.length) {
+          coords = [pts.reduce((s, p) => s + p[0], 0) / pts.length,
+                    pts.reduce((s, p) => s + p[1], 0) / pts.length];
+        }
+      }
+      if (!coords) continue;
+
+      const popup = `<b>📍 ${escapeHtml(city)}</b><br>${fmtMoney(cityTotal)} · ${cityEntries.length} gasto${cityEntries.length !== 1 ? 's' : ''}`;
+      L.marker(coords, {
+        icon: L.divIcon({
+          html: `<div style="background:#ff9f0a;color:#000;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${escapeHtml(city)}</div>`,
+          className: '', iconAnchor: [0, 0]
+        })
+      }).addTo(tripMap).bindPopup(popup);
+
+      if (!hasGps) allBounds.push(coords);
+    }
+
+    // Rota (linha) conectando os pontos com GPS em ordem cronológica
+    const route = routeCoords.sort((a, b) => a.date.localeCompare(b.date)).map(p => [p.lat, p.lng]);
+    if (route.length > 1) {
+      L.polyline(route, { color: '#4285F4', weight: 2, opacity: 0.55, dashArray: '5,8' }).addTo(tripMap);
+    }
+
+    if (allBounds.length > 0) {
+      tripMap.fitBounds(allBounds, { padding: [30, 30] });
+    } else {
+      tripMap.setView([0, 0], 2);
+    }
+
+    const gpsCount = entries.filter(e => e.gps).length;
+    $('mapLegend').textContent = `${gpsCount} de ${entries.length} gastos com GPS · cidades baseadas em geocodificação`;
+  }
+
+  $('openMapBtn').addEventListener('click', openTripMap);
+  $('mapModalClose').addEventListener('click', () => {
+    $('mapModalBackdrop').classList.remove('show');
+    document.body.style.overflow = '';
+  });
+
+  // ===== GERADOR DE RESUMO HTML COMPARTILHÁVEL =====
+
+  async function generateShareHTML() {
+    const trip = getActiveTrip();
+    if (!trip) { showSync('Nenhuma viagem ativa', true); return; }
+    const entries = entriesOfActiveTrip().sort((a, b) =>
+      (a.dataGasto || a.data).localeCompare(b.dataGasto || b.data));
+    if (entries.length === 0) { showSync('Nenhum gasto para exportar', true); return; }
+
+    showSync('Gerando resumo…', false, false);
+
+    // Geocodifica cidades que não têm GPS
+    const citiesNeedGeo = [...new Set(entries.filter(e => !e.gps).map(e => e.local))];
+    const geocoded = {};
+    for (const city of citiesNeedGeo) {
+      const c = await geocodeCity(city);
+      if (c) geocoded[city] = c;
+    }
+
+    const total = entries.reduce((s, e) => s + Number(e.valor), 0);
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    const cities = [...new Set(entries.map(e => e.local))];
+
+    // Dados para o mapa no HTML gerado
+    const mapMarkers = [];
+    entries.forEach(e => {
+      if (!e.gps) return;
+      const [lat, lng] = e.gps.split(',').map(Number);
+      if (isNaN(lat) || isNaN(lng)) return;
+      const cat = CAT_BY_ID[e.categoria] || CAT_BY_ID.outros;
+      mapMarkers.push({ lat, lng, type: 'expense',
+        label: e.estabelecimento || e.item, local: e.local,
+        valor: e.valor, catEmoji: cat.emoji, catNome: cat.nome, data: e.dataGasto });
+    });
+    cities.forEach(city => {
+      const pts = entries.filter(e => e.local === city && e.gps)
+        .map(e => e.gps.split(',').map(Number)).filter(p => !isNaN(p[0]));
+      let coords = pts.length
+        ? [pts.reduce((s, p) => s + p[0], 0) / pts.length, pts.reduce((s, p) => s + p[1], 0) / pts.length]
+        : (geocoded[city] || null);
+      if (!coords) return;
+      const cityTotal = entries.filter(e => e.local === city).reduce((s, e) => s + Number(e.valor), 0);
+      const cityCount = entries.filter(e => e.local === city).length;
+      mapMarkers.push({ lat: coords[0], lng: coords[1], type: 'city',
+        label: city, valor: cityTotal, count: cityCount });
+    });
+
+    // Gastos por categoria para o resumo
+    const porCat = {};
+    entries.forEach(e => { const c = e.categoria || 'outros'; porCat[c] = (porCat[c] || 0) + Number(e.valor); });
+    const catRows = Object.entries(porCat).sort((a, b) => b[1] - a[1]).map(([id, val]) => {
+      const c = CAT_BY_ID[id] || CAT_BY_ID.outros;
+      const pct = total > 0 ? (val / total * 100).toFixed(1) : 0;
+      return { emoji: c.emoji, nome: c.nome, val, pct };
+    });
+
+    // Blocos por cidade com gastos
+    const cityBlocks = cities.map(city => {
+      const cityEntries = entries.filter(e => e.local === city);
+      const cityTotal = cityEntries.reduce((s, e) => s + Number(e.valor), 0);
+      const pct = total > 0 ? (cityTotal / total * 100).toFixed(1) : 0;
+      const rows = cityEntries.map(e => {
+        const cat = CAT_BY_ID[e.categoria] || CAT_BY_ID.outros;
+        return `<tr>
+          <td>${fmtDateShort(e.dataGasto)}</td>
+          <td>${escapeHtml(e.item)}${e.estabelecimento ? `<br><small>${escapeHtml(e.estabelecimento)}</small>` : ''}</td>
+          <td>${cat.emoji} ${cat.nome}</td>
+          <td class="val">${fmtMoney(e.valor)}</td>
+        </tr>`;
+      }).join('');
+      return { city, cityTotal, pct, rows };
+    });
+
+    const tripPeriod = trip.inicio
+      ? `${fmtDateShort(trip.inicio)}${trip.fim ? ' → ' + fmtDateShort(trip.fim) : ' →'}`
+      : '';
+    const diasSet = new Set(entries.map(e => e.dataGasto || e.data.slice(0, 10)));
+    const dias = diasSet.size;
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${escapeHtml(trip.nome)} — Resumo de Viagem</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#f0f0f0;line-height:1.5;font-size:15px}
+.wrap{max-width:680px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:26px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px}
+.subtitle{color:#8e8e93;font-size:14px;margin-bottom:28px}
+.section{background:#1c1c1e;border-radius:18px;padding:20px;margin-bottom:16px}
+.section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#8e8e93;margin-bottom:14px}
+#map{width:100%;height:340px;border-radius:14px;overflow:hidden;margin-bottom:16px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:#1c1c1e;border-radius:14px;padding:14px 16px}
+.stat-label{font-size:11px;color:#8e8e93;margin-bottom:2px}
+.stat-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat-val.green{color:#32d74b}.stat-val.red{color:#ff453a}.stat-val.orange{color:#ff9f0a}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;font-weight:600;color:#8e8e93;text-transform:uppercase;letter-spacing:.05em;padding:0 0 8px;border-bottom:1px solid #333}
+td{padding:8px 0;border-bottom:1px solid #222;vertical-align:top}
+td.val{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:500}
+td small{font-size:11px;color:#8e8e93}
+tr:last-child td{border-bottom:none}
+.city-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.city-name{font-size:17px;font-weight:600}
+.city-meta{font-size:13px;color:#8e8e93}
+.bar-wrap{height:4px;background:#333;border-radius:2px;overflow:hidden;margin-bottom:14px}
+.bar-fill{height:100%;background:#ff9f0a;border-radius:2px}
+.footer{text-align:center;font-size:12px;color:#555;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>${escapeHtml(trip.nome)}</h1>
+  <div class="subtitle">${tripPeriod ? tripPeriod + ' · ' : ''}${dias} dia${dias !== 1 ? 's' : ''} · Gerado em ${hoje}</div>
+
+  <div id="map"></div>
+
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-label">Total gasto</div><div class="stat-val orange">${fmtMoney(total)}</div></div>
+    <div class="stat"><div class="stat-label">Dias</div><div class="stat-val">${dias}</div></div>
+    <div class="stat"><div class="stat-label">Média/dia</div><div class="stat-val">${fmtMoney(dias > 0 ? total / dias : 0)}</div></div>
+    <div class="stat"><div class="stat-label">Gastos registrados</div><div class="stat-val">${entries.length}</div></div>
+    ${(trip.orcamentoDebito + trip.orcamentoCredito) > 0 ? `
+    <div class="stat"><div class="stat-label">Orçamento</div><div class="stat-val">${fmtMoney(Number(trip.orcamentoDebito) + Number(trip.orcamentoCredito))}</div></div>
+    <div class="stat"><div class="stat-label">Saldo</div><div class="stat-val ${(Number(trip.orcamentoDebito) + Number(trip.orcamentoCredito) - total) >= 0 ? 'green' : 'red'}">${fmtMoney(Number(trip.orcamentoDebito) + Number(trip.orcamentoCredito) - total)}</div></div>
+    ` : ''}
+  </div>
+
+  <div class="section">
+    <div class="section-title">Por categoria</div>
+    <table>
+      <thead><tr><th>Categoria</th><th>%</th><th class="val">Total</th></tr></thead>
+      <tbody>${catRows.map(r => `<tr><td>${r.emoji} ${escapeHtml(r.nome)}</td><td style="color:#8e8e93">${r.pct}%</td><td class="val">${fmtMoney(r.val)}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>
+
+  ${cityBlocks.map(b => `
+  <div class="section">
+    <div class="city-header">
+      <span class="city-name">📍 ${escapeHtml(b.city)}</span>
+      <span class="city-meta">${b.pct}% do total</span>
+    </div>
+    <div class="bar-wrap"><div class="bar-fill" style="width:${b.pct}%"></div></div>
+    <div style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:14px;color:#ff9f0a">${fmtMoney(b.cityTotal)}</div>
+    <table>
+      <thead><tr><th>Data</th><th>Item</th><th>Categoria</th><th class="val">Valor</th></tr></thead>
+      <tbody>${b.rows}</tbody>
+    </table>
+  </div>`).join('')}
+
+  <div class="footer">Gerado pelo Caderno de Gastos 📒 · cadernodegastos.app</div>
+</div>
+
+<script>
+(function(){
+  var markers = ${JSON.stringify(mapMarkers)};
+  var map = L.map('map');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap contributors', maxZoom:18
+  }).addTo(map);
+  var bounds = [];
+  var route = [];
+  markers.forEach(function(m){
+    if(m.type==='expense'){
+      var pop = '<b>'+m.label+'</b><br>📍 '+m.local+'<br>'+m.catEmoji+' '+m.catNome+'<br><b>'+m.valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</b>';
+      L.circleMarker([m.lat,m.lng],{radius:8,color:'#fff',weight:2,fillColor:'#4285F4',fillOpacity:0.9}).addTo(map).bindPopup(pop);
+      bounds.push([m.lat,m.lng]);
+      route.push([m.lat,m.lng]);
+    } else {
+      var pop2 = '<b>📍 '+m.label+'</b><br>'+m.count+' gastos<br>'+m.valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+      L.marker([m.lat,m.lng],{icon:L.divIcon({html:'<div style="background:#ff9f0a;color:#000;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3)">'+m.label+'</div>',className:'',iconAnchor:[0,0]})}).addTo(map).bindPopup(pop2);
+      bounds.push([m.lat,m.lng]);
+    }
+  });
+  if(route.length>1) L.polyline(route,{color:'#4285F4',weight:2,opacity:.55,dashArray:'5,8'}).addTo(map);
+  if(bounds.length>0) map.fitBounds(bounds,{padding:[24,24]});
+  else map.setView([0,0],2);
+})();
+<\/script>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${trip.nome.replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}-resumo.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showSync('Resumo HTML gerado ✓');
+  }
+
+  $('exportHtmlBtn').addEventListener('click', generateShareHTML);
 
   // ===== WHATSAPP SHARE =====
   $('shareWhatsApp').addEventListener('click', () => {
