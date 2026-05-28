@@ -1510,6 +1510,47 @@
     .dot.debito { background: var(--debito); }
     .dot.credito { background: var(--credito); }
 
+    
+    /* ===== ACCORDION (MINIMIZÁVEIS) ===== */
+    .section-toggle {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+      box-shadow: var(--shadow);
+    }
+    .section-toggle:active { transform: scale(0.98); background: var(--surface-light); }
+    .section-toggle .chevron {
+      color: var(--text-muted);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .section-toggle.expanded .chevron {
+      transform: rotate(180deg);
+    }
+    
+    .section-content {
+      display: none;
+      animation: fadeInSlide 0.3s ease forwards;
+    }
+    .section-content.expanded {
+      display: block;
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* ===== FORM ===== */
     .section-label {
       font-weight: 600;
@@ -2385,8 +2426,15 @@
     </button>
 
     <!-- FORM -->
-    <form id="form">
-      <div class="section-label">Novo lançamento</div>
+    
+    <button type="button" class="section-toggle" id="toggleFormBtn">
+      <span>📝 Novo lançamento</span>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="section-content" id="formContent">
+      <form id="form">
+
+      
 
       <div class="field local-wrap">
         <input type="text" id="local" placeholder="Local da viagem" autocomplete="off" required />
@@ -2447,11 +2495,19 @@
 
       <button type="submit" class="submit" id="submitBtn">Registrar</button>
     </form>
+    </div>
 
     <!-- LIST -->
     <div id="approvalBanner"></div>
-    <div class="section-label">Histórico</div>
-    <div class="entries" id="entries"></div>
+    
+    <button type="button" class="section-toggle" id="toggleHistoryBtn">
+      <span>📋 Histórico</span>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="section-content" id="historyContent">
+      <div class="entries" id="entries"></div>
+    </div>
+
 
     <!-- FOOTER -->
     <footer class="app-footer">
@@ -6347,6 +6403,33 @@ tr:last-child td{border-bottom:none}
     }
   });
 })();
+
+
+// Setup Accordions (Minimizáveis)
+function setupAccordions() {
+  const toggles = [
+    { btn: document.getElementById('toggleFormBtn'), content: document.getElementById('formContent'), id: 'accordion_form' },
+    { btn: document.getElementById('toggleHistoryBtn'), content: document.getElementById('historyContent'), id: 'accordion_history' }
+  ];
+  
+  toggles.forEach(t => {
+    if (!t.btn || !t.content) return;
+    
+    // Load state from localStorage (default is closed)
+    const savedState = localStorage.getItem(t.id);
+    if (savedState === 'true') {
+      t.btn.classList.add('expanded');
+      t.content.classList.add('expanded');
+    }
+    
+    t.btn.addEventListener('click', () => {
+      const isExpanded = t.btn.classList.toggle('expanded');
+      t.content.classList.toggle('expanded');
+      localStorage.setItem(t.id, isExpanded);
+    });
+  });
+}
+setupAccordions();
 
 // ===== SERVICE WORKER (offline + instalável) =====
 if ('serviceWorker' in navigator) {
