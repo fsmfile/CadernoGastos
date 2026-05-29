@@ -2480,25 +2480,6 @@
     }
     .save-btn:active { transform: scale(0.97); }
 
-    .diag-panel {
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 11.5px;
-      line-height: 1.5;
-      color: var(--text-muted);
-      white-space: pre-wrap;
-      word-break: break-word;
-      display: none;
-    }
-    .diag-panel.show { display: block; }
-    .diag-panel .ok { color: var(--debito); font-weight: 600; }
-    .diag-panel .err { color: var(--accent); font-weight: 600; }
-    .diag-panel .hint { color: var(--text); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-family: 'DM Sans', sans-serif; font-size: 13px; }
-
     .danger-btn {
       width: 100%;
       padding: 14px;
@@ -3417,12 +3398,8 @@
         <h3>Carteira atual</h3>
         <p id="carteiraNomeDisplay" style="font-weight:600;font-size:15px;margin:0 0 4px;"></p>
         <p id="carteiraMembrosDisplay" style="font-size:13px;color: var(--text-muted);margin:0 0 14px;"></p>
-        <label style="display:block;font-size:13px;font-weight:500;color: var(--text-muted);margin-bottom:6px;">Convidar membro por e-mail</label>
-        <div class="url-input-wrap">
-          <input type="email" id="inviteEmail" placeholder="email@exemplo.com" />
-          <button class="save-btn" id="inviteBtn">Convidar</button>
-        </div>
-        <button class="submit" id="switchCarteiraBtn" style="background:var(--text-muted);margin-top:10px;width:100%;">Gerenciar carteiras</button>
+        <button class="submit" id="gerenciarCarteiraBtn" style="background:var(--text-muted);margin-bottom:8px;width:100%;">Gerenciar membros</button>
+        <button class="submit" id="switchCarteiraBtn" style="background:var(--text-muted);width:100%;">Gerenciar carteiras</button>
       </div>
 
       <div class="modal-section">
@@ -3463,12 +3440,8 @@
 
       <div class="modal-section">
         <h3>Outras ações</h3>
-        <button class="submit" id="testConn" style="background: var(--pending); margin-bottom: 10px;">Testar conexão</button>
-        <div class="diag-panel" id="diagPanel"></div>
-        <button class="submit" id="syncNow" style="background: var(--debito); margin-top: 10px;">Sincronizar agora</button>
-        <button class="submit" id="repairData" style="background: #6b5f4f; margin-top: 10px;">🔧 Reparar dados</button>
+        <button class="submit" id="syncNow" style="background: var(--debito); margin-bottom: 10px;">Sincronizar agora</button>
         <button class="submit" id="forceRefresh" style="background: #8a4a73; margin-top: 10px;">🔄 Limpar cache do app</button>
-        <button class="submit" id="showState" style="background: #4a4a5e; margin-top: 10px;">🔍 Mostrar estado interno</button>
         <button class="danger-btn" id="clearLocal">Limpar dados locais</button>
         <button class="danger-btn" id="logoutBtn" style="margin-top:8px;">Sair da conta</button>
       </div>
@@ -3476,11 +3449,30 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="carteiraModalBackdrop">
+    <div class="modal" id="carteiraModal">
+      <div class="modal-handle"></div>
+      <h2>Gerenciar carteira</h2>
+      <div class="modal-section">
+        <p id="carteiraModalNome" style="font-weight:600;font-size:15px;margin:0 0 4px;"></p>
+        <p id="carteiraModalMembros" style="font-size:13px;color:var(--text-muted);margin:0;"></p>
+      </div>
+      <div class="modal-section">
+        <h3>Convidar membro por e-mail</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin:0 0 10px;">O convidado receberá acesso a esta carteira após aceitar o convite.</p>
+        <div class="url-input-wrap">
+          <input type="email" id="inviteEmail" placeholder="email@exemplo.com" />
+          <button class="save-btn" id="inviteBtn">Convidar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <script>
 (() => {
   'use strict';
 
-  const APP_VERSION = '2.0.0';
+  const APP_VERSION = '2.0.1';
 
   const SUPABASE_URL      = 'https://bhjvbkidtnggzxbtsqdp.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_-PsK3cq1p2pXG85ExwaUng_pSyw6MCi';
@@ -6304,6 +6296,7 @@ tr:last-child td{border-bottom:none}
   });
   $('switchCarteiraBtn').addEventListener('click', async () => {
     modalBackdrop.classList.remove('show');
+    $('carteiraModalBackdrop').classList.remove('show');
     const carteiras = await fetchCarteiras();
     state.carteiras = carteiras;
     showCarteiraScreen(); renderCarteiraScreen(carteiras, false);
@@ -6377,6 +6370,25 @@ tr:last-child td{border-bottom:none}
     if (e.target === modalBackdrop) modalBackdrop.classList.remove('show');
   });
 
+  $('gerenciarCarteiraBtn').addEventListener('click', () => {
+    const c = state.carteiras.find(x => x.id === state.activeCaerteiraId);
+    if (c) {
+      $('carteiraModalNome').textContent = c.nome;
+      $('carteiraModalMembros').textContent = '';
+      if (sb) {
+        sb.from('carteira_membros').select('nome_exibicao').eq('carteira_id', c.id)
+          .then(({ data }) => {
+            if (data) $('carteiraModalMembros').textContent = data.length + ' membro(s)';
+          });
+      }
+    }
+    modalBackdrop.classList.remove('show');
+    $('carteiraModalBackdrop').classList.add('show');
+  });
+  $('carteiraModalBackdrop').addEventListener('click', (e) => {
+    if (e.target === $('carteiraModalBackdrop')) $('carteiraModalBackdrop').classList.remove('show');
+  });
+
   $('saveName').addEventListener('click', () => {
     const name = $('userName').value.trim();
     if (!name) { alert('Coloque um nome (qualquer um, só pra identificar suas solicitações).'); return; }
@@ -6407,52 +6419,6 @@ tr:last-child td{border-bottom:none}
     setTimeout(syncAll, 200);
   });
 
-  // Teste de conexão com diagnóstico detalhado
-  $('testConn').addEventListener('click', async () => {
-    const diag = $('diagPanel');
-    diag.classList.add('show');
-    diag.innerHTML = 'Testando conexão...';
-
-    if (!sb) {
-      diag.innerHTML = '<span class="err">❌ Supabase não configurado.</span>\n\nCole a Project URL e anon key acima e salve.';
-      return;
-    }
-
-    let report = `Supabase: ${state.supabaseUrl.slice(0, 50)}...\n\n`;
-
-    // Teste 1: leitura
-    report += '→ Teste 1: leitura (SELECT)\n';
-    diag.innerHTML = report + 'Aguarde...';
-    const pull = await pullEntries();
-
-    if (pull.ok) {
-      report += `<span class="ok">✓ OK — ${pull.data.length} gasto(s), ${pull.viagens.length} viagem(ns)</span>\n\n`;
-    } else {
-      report += `<span class="err">✗ FALHOU</span>\n  Motivo: ${pull.reason}\n  Detalhe: ${(pull.detail || '').slice(0, 200)}\n\n`;
-    }
-
-    // Teste 2: ping (SELECT sem escrever)
-    report += '→ Teste 2: ping\n';
-    diag.innerHTML = report + 'Aguarde...';
-    const push = await postAction({ action: 'ping' });
-
-    if (push.ok) {
-      report += `<span class="ok">✓ OK</span>\n`;
-      report += `\n<span class="hint">Tudo funcionando! Feche essa janela e use o app normalmente.</span>`;
-    } else {
-      report += `<span class="err">✗ FALHOU</span>\n  Motivo: ${push.reason}\n  Detalhe: ${(push.detail || '').slice(0, 200)}\n`;
-      let hint = '';
-      if (push.reason === 'db' || pull.reason === 'db') {
-        hint = '🔑 Erro de banco de dados. Verifique se executou o SQL de migração e se as políticas RLS estão corretas.';
-      } else if (push.reason === 'network' || pull.reason === 'network') {
-        hint = '🌐 Falha de rede. Verifique sua conexão e se a Project URL está correta.';
-      }
-      if (hint) report += `\n<span class="hint">${hint}</span>`;
-    }
-
-    diag.innerHTML = report;
-  });
-
   $('clearLocal').addEventListener('click', () => {
     if (!confirm('Apagar todos os dados locais? A planilha não será afetada.\n\nIsso inclui gastos, viagens, ajustes de saldo e preferências.')) return;
     state.entries = [];
@@ -6466,149 +6432,6 @@ tr:last-child td{border-bottom:none}
     render();
     modalBackdrop.classList.remove('show');
     showSync('Dados locais apagados — sincronize para restaurar');
-  });
-
-  // Reparar dados: re-puxa tudo da planilha e arruma gastos sem viagem
-  $('repairData').addEventListener('click', async () => {
-    try {
-      console.log('[REPAIR] iniciando…');
-      if (!sb) { showSync('Configure o Supabase primeiro', true); return; }
-      const trip = getActiveTrip();
-      if (!trip) {
-        alert('Crie ou selecione uma viagem antes de reparar.');
-        return;
-      }
-      if (!confirm(`Reparar dados:\n\n1) Limpar dados locais e re-baixar tudo da planilha (gastos, viagens e ajustes)\n2) Mover gastos órfãos para "${trip.nome}"\n\nA planilha será atualizada. Continuar?`)) return;
-
-      showSync('Reparando…', false, false);
-
-      // 1) Limpa local — TUDO que vem da planilha
-      state.entries = [];
-      state.ajustes = [];
-      // Mantém apenas as viagens locais não sincronizadas (improvável aqui),
-      // o resto vai voltar do pull
-      const tripsPendentes = state.trips.filter(t => t.synced === false);
-      state.trips = tripsPendentes.slice();
-      persist();
-      persistAjustes();
-      persistTrips();
-      render();
-      console.log('[REPAIR] state limpo');
-
-      // 2) Re-baixa da planilha
-      console.log('[REPAIR] chamando pullEntries…');
-      const pull = await pullEntries();
-      console.log('[REPAIR] resposta pull:', pull);
-      if (!pull.ok) {
-        alert('Erro ao baixar da planilha:\n\n' + (pull.detail || pull.reason || 'falha desconhecida'));
-        showSync('Erro ao baixar: ' + (pull.detail || '').slice(0, 60), true);
-        return;
-      }
-
-      console.log('[REPAIR] recebido:', {
-        gastos: (pull.data || []).length,
-        viagens: (pull.viagens || []).length,
-        ajustes: (pull.ajustes || []).length
-      });
-
-      // Gastos
-      for (const r of pull.data) {
-        if (!r.id) continue;
-        const catId = String(r.categoria || '').toLowerCase().trim();
-        const dataReg = r.data ? new Date(r.data).toISOString() : new Date().toISOString();
-        const remoteViagemId = String(r.viagemId || '');
-        const remoteScope = String(r.scope || '').trim() || (remoteViagemId ? 'viagem' : 'pessoal');
-        state.entries.push({
-          id: String(r.id),
-          viagemId: remoteViagemId,
-          scope: remoteScope,
-          data: dataReg,
-          dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
-          local: String(r.local || ''),
-          item: String(r.item || ''),
-          valor: Number(r.valor) || 0,
-          tipo: r.tipo === 'credito' ? 'credito' : 'debito',
-          categoria: CAT_BY_ID[catId] ? catId : 'outros',
-          statusRemocao: String(r.statusRemocao || '').toLowerCase().trim(),
-          solicitadoPor: String(r.solicitadoPor || ''),
-          synced: true
-        });
-      }
-      persist();
-      console.log('[REPAIR] gastos persistidos:', state.entries.length);
-
-      // Ajustes (foi o que estava sumindo!)
-      if (Array.isArray(pull.ajustes)) {
-        for (const a of pull.ajustes) {
-          if (!a.id) continue;
-          state.ajustes.push({
-            id: String(a.id),
-            data: a.data ? new Date(a.data).toISOString() : new Date().toISOString(),
-            tipo: a.tipo === 'credito' ? 'credito' : 'debito',
-            valorAntes: Number(a.valorAntes) || 0,
-            valorDepois: Number(a.valorDepois) || 0,
-            motivo: String(a.motivo || ''),
-            por: String(a.por || ''),
-            synced: true
-          });
-        }
-        persistAjustes();
-      }
-      console.log('[REPAIR] ajustes persistidos:', state.ajustes.length);
-
-      // Viagens
-      if (Array.isArray(pull.viagens)) {
-        const existingIds = new Set(state.trips.map(t => t.id));
-        for (const v of pull.viagens) {
-          if (!v.id || existingIds.has(String(v.id))) continue;
-          state.trips.push({
-            id: String(v.id),
-            nome: String(v.nome || 'Sem nome'),
-            inicio: v.inicio ? toDateOnly(v.inicio) : '',
-            fim: v.fim ? toDateOnly(v.fim) : '',
-            orcamentoDebito: Number(v.orcamentoDebito) || 0,
-            orcamentoCredito: Number(v.orcamentoCredito) || 0,
-            arquivada: !!v.arquivada,
-            synced: true
-          });
-        }
-        persistTrips();
-      }
-      console.log('[REPAIR] viagens persistidas:', state.trips.length);
-
-      // 3) Encontra órfãos e migra
-      const orfaos = state.entries.filter(e => !e.viagemId && e.scope !== 'pessoal');
-      console.log('[REPAIR] órfãos encontrados:', orfaos.length);
-      if (orfaos.length > 0) {
-        const ids = orfaos.map(o => o.id);
-        const r = await postAction({
-          action: 'assignTrip',
-          ids: ids,
-          viagemId: trip.id,
-          scope: 'viagem'
-        });
-        if (r.ok) {
-          orfaos.forEach(o => { o.viagemId = trip.id; o.scope = 'viagem'; });
-          persist();
-          render();
-          const msg = `✓ Reparado: ${state.entries.length} gasto(s), ${orfaos.length} migrado(s), ${state.ajustes.length} ajuste(s)`;
-          alert(msg);
-          showSync(msg.slice(0, 60));
-        } else {
-          alert('Falha ao migrar: ' + (r.detail || 'erro desconhecido'));
-          showSync('Falha ao migrar', true);
-        }
-      } else {
-        render();
-        const msg = `✓ Reparado: ${state.entries.length} gasto(s), ${state.ajustes.length} ajuste(s), ${state.trips.length} viagem(ns)`;
-        alert(msg);
-        showSync(msg.slice(0, 60));
-      }
-    } catch (err) {
-      console.error('[REPAIR] erro:', err);
-      alert('Erro no reparo: ' + (err.message || String(err)));
-      showSync('Erro no reparo', true);
-    }
   });
 
   // Botão "Forçar atualização do app" — limpa service worker e cache
@@ -6632,56 +6455,6 @@ tr:last-child td{border-bottom:none}
       alert('Falha ao limpar: ' + err.message);
     }
   });
-
-  // Botão "Mostrar estado interno" — para debug entre aparelhos
-  $('showState').addEventListener('click', async () => {
-    let report = `═══ ESTADO INTERNO ═══\n`;
-    report += `Versão: ${APP_VERSION}\n`;
-    report += `Aparelho: ${navigator.userAgent.includes('iPhone') ? 'iPhone' : navigator.userAgent.includes('Android') ? 'Android' : 'Outro'}\n\n`;
-
-    report += `LOCAL STORAGE:\n`;
-    report += `• Gastos: ${state.entries.length}\n`;
-    report += `• Viagens: ${state.trips.length}\n`;
-    report += `• Ajustes: ${state.ajustes.length}\n\n`;
-
-    if (state.ajustes.length > 0) {
-      report += `AJUSTES LOCAIS:\n`;
-      state.ajustes.forEach((a, i) => {
-        const data = new Date(a.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-        report += `${i+1}. [${a.tipo}] ${fmtMoney(a.valorAntes)} → ${fmtMoney(a.valorDepois)}\n`;
-        report += `   ${data} · ${a.motivo || '(sem motivo)'} · ${a.synced ? 'sync' : '⚠ PENDENTE'}\n`;
-        report += `   id: ${a.id.slice(0, 8)}…\n`;
-      });
-      report += `\n`;
-    }
-
-    // Pega o que tem no Supabase agora
-    if (sb) {
-      report += `BUSCANDO NO SUPABASE…\n`;
-      try {
-        const pull = await pullEntries();
-        if (pull.ok) {
-          report += `\nSUPABASE AGORA:\n`;
-          report += `• Gastos: ${(pull.data || []).length}\n`;
-          report += `• Viagens: ${(pull.viagens || []).length}\n`;
-          report += `• Ajustes: ${(pull.ajustes || []).length}\n`;
-          if ((pull.ajustes || []).length > 0) {
-            report += `\nAJUSTES NA PLANILHA:\n`;
-            pull.ajustes.forEach((a, i) => {
-              report += `${i+1}. [${a.tipo}] ${fmtMoney(a.valorAntes)} → ${fmtMoney(a.valorDepois)} · ${a.motivo || '(sem motivo)'}\n`;
-            });
-          }
-        } else {
-          report += `Erro ao ler planilha: ${pull.detail || pull.reason}\n`;
-        }
-      } catch (e) {
-        report += `Erro: ${e.message}\n`;
-      }
-    }
-
-    alert(report);
-  });
-
 
   // ============ DASHBOARD ============
   const dashBackdrop = $('dashBackdrop');
