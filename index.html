@@ -2836,6 +2836,7 @@
         <button type="button" class="today-btn" id="todayBtn">Hoje</button>
       </div>
 
+      <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin:0 0 8px 2px;font-weight:500;">🏷️ Categoria</div>
       <div class="cat-scroll" id="catScroll"></div>
 
       <div class="scope-toggle" id="scopeToggle">
@@ -2844,11 +2845,13 @@
         <button type="button" data-scope="pessoal"><span class="emoji">🏠</span>Fora da viagem</button>
       </div>
 
-      <div class="toggle" id="toggle">
+      <div class="toggle" id="toggle" style="margin-bottom:8px;">
         <div class="pill"></div>
-        <button type="button" class="active" data-tipo="debito">Débito</button>
-        <button type="button" data-tipo="credito">Crédito</button>
+        <button type="button" class="active" data-tipo="debito">💵 Débito</button>
+        <button type="button" data-tipo="credito">💳 Crédito</button>
       </div>
+
+      <div id="formCtx" style="display:none;font-size:13px;color:var(--text-muted);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 14px;margin-bottom:14px;font-weight:500;"></div>
 
       <button type="submit" class="submit" id="submitBtn">Registrar</button>
     </form>
@@ -3472,7 +3475,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '2.0.1';
+  const APP_VERSION = '2.0.2';
 
   const SUPABASE_URL      = 'https://bhjvbkidtnggzxbtsqdp.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_-PsK3cq1p2pXG85ExwaUng_pSyw6MCi';
@@ -4647,8 +4650,8 @@
       </button>
     `).join('');
 
-    // Oculta chips se escopo não foi selecionado (apenas carteiras de viagem)
-    catScroll.classList.toggle('cat-scroll-hidden', !escopoSelecionado);
+    // Categorias sempre visíveis (label acima já indica a seção)
+    catScroll.classList.remove('cat-scroll-hidden');
   }
 
   function renderEntries() {
@@ -5897,6 +5900,7 @@ tr:last-child td{border-bottom:none}
       localStorage.setItem(TIPO_KEY, state.tipo);
       toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
       toggle.classList.toggle('credito', state.tipo === 'credito');
+      updateFormCtx();
     });
   });
   // Estado inicial do toggle
@@ -5905,12 +5909,26 @@ tr:last-child td{border-bottom:none}
     toggle.querySelector('[data-tipo="debito"]').classList.remove('active');
     toggle.querySelector('[data-tipo="credito"]').classList.add('active');
   }
+  function updateFormCtx() {
+    const ctx = document.getElementById('formCtx');
+    if (!ctx) return;
+    const trip = getActiveTrip();
+    const scope = state.scope;
+    const tipo = state.tipo;
+    const tipoLabel = tipo === 'credito' ? '💳 No crédito' : '💵 Em conta';
+    const scopeLabel = scope === 'pessoal' ? '🏠 Fora da viagem' : (trip ? `🗺️ ${trip.nome}` : '🗺️ Viagem');
+    ctx.textContent = `${tipoLabel} · ${scopeLabel}`;
+    ctx.style.display = 'block';
+  }
+  updateFormCtx();
 
   // Toggle pessoal/viagem (scope) — obrigatório
   const scopeToggle = $('scopeToggle');
 
   function applyScopeToggleUI() {
     // Carteiras comuns não têm toggle de viagem/pessoal
+    if (!isViagemCarteira()) return;
+    updateFormCtx();
     if (!isViagemCarteira()) {
       scopeToggle.style.display = 'none';
       renderCategorias();

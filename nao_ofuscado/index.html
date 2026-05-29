@@ -1743,8 +1743,45 @@
       background: var(--paper);
       padding: 0 4px;
     }
-    /* Cats ocultas até escolher escopo */
-    .cat-scroll-hidden { opacity: 0.35; pointer-events: none; }
+    /* Toggle-dir: Saída (esq) / Entrada (dir) */
+    .toggle-dir .pill { background: var(--accent); }
+    .toggle-dir.entrada .pill { transform: translateX(100%); background: var(--debito); }
+
+    /* Toggle-pagamento: sub-toggle menor para forma de pagamento */
+    .toggle-dir { margin-bottom: 8px; }
+    .toggle-pagamento { margin-bottom: 18px; font-size: 13px; }
+    .toggle-pagamento.hidden { display: none; }
+
+    /* Banner de contexto do formulário */
+    .form-ctx {
+      display: none;
+      font-size: 13px;
+      color: var(--ink-soft);
+      background: rgba(27,27,58,0.04);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 14px;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+    .form-ctx.show { display: block; }
+
+    /* Label pequeno acima de toggles / seções */
+    .toggle-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 8px 2px;
+      font-weight: 500;
+    }
+
+    /* Chip "entrada" (💰) no histórico */
+    .chip.entrada {
+      background: rgba(93,107,60,0.12);
+      color: var(--debito);
+      font-weight: 600;
+    }
 
     /* Chip "pessoal" no histórico */
     .chip.pessoal {
@@ -2209,25 +2246,6 @@
     }
     .save-btn:active { transform: scale(0.97); }
 
-    .diag-panel {
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: var(--paper-light);
-      border: 1px solid var(--line);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11.5px;
-      line-height: 1.5;
-      color: var(--ink-soft);
-      white-space: pre-wrap;
-      word-break: break-word;
-      display: none;
-    }
-    .diag-panel.show { display: block; }
-    .diag-panel .ok { color: var(--debito); font-weight: 600; }
-    .diag-panel .err { color: var(--accent); font-weight: 600; }
-    .diag-panel .hint { color: var(--ink); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-family: 'DM Sans', sans-serif; font-size: 13px; }
-
     .danger-btn {
       width: 100%;
       padding: 14px;
@@ -2358,6 +2376,7 @@
     <!-- FORM -->
     <form id="form">
       <div class="section-label">Novo lançamento</div>
+      <div class="form-ctx" id="formCtx"></div>
 
       <div class="field local-wrap">
         <input type="text" id="local" placeholder="Local da viagem" autocomplete="off" required />
@@ -2402,6 +2421,7 @@
         <button type="button" class="today-btn" id="todayBtn">Hoje</button>
       </div>
 
+      <div class="toggle-label">🏷️ Categoria</div>
       <div class="cat-scroll" id="catScroll"></div>
 
       <div class="scope-toggle" id="scopeToggle">
@@ -2410,10 +2430,16 @@
         <button type="button" data-scope="pessoal"><span class="emoji">🏠</span>Fora da viagem</button>
       </div>
 
-      <div class="toggle" id="toggle">
+      <div class="toggle toggle-dir" id="toggle">
         <div class="pill"></div>
-        <button type="button" class="active" data-tipo="debito">Débito</button>
-        <button type="button" data-tipo="credito">Crédito</button>
+        <button type="button" class="active" data-dir="saida">💸 Saída</button>
+        <button type="button" data-dir="entrada">💰 Entrada</button>
+      </div>
+
+      <div class="toggle toggle-pagamento" id="togglePagamento">
+        <div class="pill"></div>
+        <button type="button" class="active" data-pagto="debito">💵 Em conta</button>
+        <button type="button" data-pagto="credito">💳 No crédito</button>
       </div>
 
       <button type="submit" class="submit" id="submitBtn">Registrar</button>
@@ -2692,12 +2718,8 @@
         <h3>Carteira atual</h3>
         <p id="carteiraNomeDisplay" style="font-weight:600;font-size:15px;margin:0 0 4px;"></p>
         <p id="carteiraMembrosDisplay" style="font-size:13px;color:var(--ink-soft);margin:0 0 14px;"></p>
-        <label style="display:block;font-size:13px;font-weight:500;color:var(--ink-soft);margin-bottom:6px;">Convidar membro por e-mail</label>
-        <div class="url-input-wrap">
-          <input type="email" id="inviteEmail" placeholder="email@exemplo.com" />
-          <button class="save-btn" id="inviteBtn">Convidar</button>
-        </div>
-        <button class="submit" id="switchCarteiraBtn" style="background:var(--ink-soft);margin-top:10px;width:100%;">Trocar carteira</button>
+        <button class="submit" id="gerenciarCarteiraBtn" style="background:var(--ink-soft);margin-bottom:8px;width:100%;">Gerenciar membros</button>
+        <button class="submit" id="switchCarteiraBtn" style="background:var(--ink-soft);width:100%;">Trocar carteira</button>
       </div>
 
       <div class="modal-section">
@@ -2738,16 +2760,31 @@
 
       <div class="modal-section">
         <h3>Outras ações</h3>
-        <button class="submit" id="testConn" style="background: var(--pending); margin-bottom: 10px;">Testar conexão</button>
-        <div class="diag-panel" id="diagPanel"></div>
-        <button class="submit" id="syncNow" style="background: var(--debito); margin-top: 10px;">Sincronizar agora</button>
-        <button class="submit" id="repairData" style="background: #6b5f4f; margin-top: 10px;">🔧 Reparar dados</button>
+        <button class="submit" id="syncNow" style="background: var(--debito); margin-bottom: 10px;">Sincronizar agora</button>
         <button class="submit" id="forceRefresh" style="background: #8a4a73; margin-top: 10px;">🔄 Limpar cache do app</button>
-        <button class="submit" id="showState" style="background: #4a4a5e; margin-top: 10px;">🔍 Mostrar estado interno</button>
         <button class="danger-btn" id="clearLocal">Limpar dados locais</button>
         <button class="danger-btn" id="logoutBtn" style="margin-top:8px;">Sair da conta</button>
       </div>
 
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="carteiraModalBackdrop">
+    <div class="modal" id="carteiraModal">
+      <div class="modal-handle"></div>
+      <h2>Gerenciar carteira</h2>
+      <div class="modal-section">
+        <p id="carteiraModalNome" style="font-weight:600;font-size:15px;margin:0 0 4px;"></p>
+        <p id="carteiraModalMembros" style="font-size:13px;color:var(--ink-soft);margin:0;"></p>
+      </div>
+      <div class="modal-section">
+        <h3>Convidar membro por e-mail</h3>
+        <p style="font-size:13px;color:var(--ink-soft);margin:0 0 10px;">O convidado receberá acesso a esta carteira após aceitar o convite.</p>
+        <div class="url-input-wrap">
+          <input type="email" id="inviteEmail" placeholder="email@exemplo.com" />
+          <button class="save-btn" id="inviteBtn">Convidar</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2776,6 +2813,7 @@
   const TOTAL_SCOPE_KEY = 'gastos_viagem_total_scope_v1';
   const CAT_FILTER_KEY = 'gastos_viagem_cat_filter_v1';
   const LOCAL_FILTER_KEY = 'gastos_viagem_local_filter_v1';
+  const PAGAMENTO_KEY = 'gastos_viagem_pagamento_v1';
 
   // Categorias pré-cadastradas para viagem
   // Categorias de viagem
@@ -3040,7 +3078,8 @@
     supabaseAnonKey:   localStorage.getItem(SUPABASE_ANON_KEY_KEY) || '',
     activeCaerteiraId: localStorage.getItem(CARTEIRA_KEY) || '',
     carteiras:         [],  // carregado do Supabase após login
-    tipo: localStorage.getItem(TIPO_KEY) || 'debito',
+    tipo: localStorage.getItem(TIPO_KEY) || 'debito', // 'debito'|'credito'|'entrada'
+    pagamento: (() => { const t = localStorage.getItem(TIPO_KEY); return (t === 'credito') ? 'credito' : (localStorage.getItem(PAGAMENTO_KEY) || 'debito'); })(),
     // scope vazio = não selecionado (obrigatório escolher)
     scope: localStorage.getItem(SCOPE_KEY) || '',
     lastLocal: localStorage.getItem(LOCAL_KEY) || '',
@@ -3188,7 +3227,16 @@
       })
       .reduce((s, e) => s + Number(e.valor), 0);
 
-    const saldo = ancoraValor - gastosDepois;
+    // Entradas de dinheiro registradas depois do ajuste (somam ao saldo em conta)
+    const entradasDepois = tipo === 'debito' ? state.entries
+      .filter(e => !e.deleted && e.tipo === 'entrada')
+      .filter(e => {
+        if (!ancoraTs) return true;
+        return (e.data || '') > ancoraTs;
+      })
+      .reduce((s, e) => s + Number(e.valor), 0) : 0;
+
+    const saldo = ancoraValor + entradasDepois - gastosDepois;
     return { saldo, ancoraValor, gastoDesdeAncora: gastosDepois, temAncora: !!ultimo };
   }
 
@@ -3206,7 +3254,7 @@
     const trip = getActiveTrip();
     if (!trip) return { media: 0, dias: 0, total: 0 };
 
-    let entries = entriesOfActiveTrip();
+    let entries = entriesOfActiveTrip().filter(e => e.tipo !== 'entrada');
     if (catIds !== null) entries = entries.filter(e => catIds.has(e.categoria || 'outros'));
     if (localFiltro) entries = entries.filter(e => e.local === localFiltro);
     if (entries.length === 0) return { media: 0, dias: 0, total: 0 };
@@ -3224,6 +3272,7 @@
 
     let list = state.entries.filter(e => {
       if (e.deleted) return false;
+      if (e.tipo === 'entrada') return false; // entradas não são gastos por categoria
       const scope = e.scope || 'viagem';
       if (scope === 'pessoal') return includePessoais;
       return (e.viagemId || '') === tripId;
@@ -3327,8 +3376,11 @@
     const gastoCredito = entries
       .filter(e => e.tipo === 'credito')
       .reduce((s, e) => s + Number(e.valor), 0);
+    const totalEntradas = entries
+      .filter(e => e.tipo === 'entrada')
+      .reduce((s, e) => s + Number(e.valor), 0);
 
-    const saldoOrcDebito = orcDebito - gastoDebito;
+    const saldoOrcDebito = orcDebito + totalEntradas - gastoDebito;
     const saldoOrcCredito = orcCredito - gastoCredito;
     const saldoOrcTotal = saldoOrcDebito + saldoOrcCredito;
 
@@ -3491,7 +3543,7 @@
     `).join('');
 
     // Opacidade: oculta chips se escopo não foi selecionado ainda
-    catScroll.classList.toggle('cat-scroll-hidden', !scope);
+    // Categorias sempre visíveis — escopo ajusta quais aparecem
   }
 
   function renderEntries() {
@@ -3556,7 +3608,7 @@
             ${e.estabelecimento ? `<span class="sep">·</span><span class="chip estab" data-estab-id="${e.id}">📍 ${escapeHtml(e.estabelecimento)}</span>` : ''}
             <span class="sep">·</span>
             <span class="chip cat"><span class="emoji">${cat.emoji}</span>${cat.nome}</span>
-            <span class="chip ${e.tipo}">${e.tipo}</span>
+            ${e.tipo === 'entrada' ? '<span class="chip entrada">💰 entrada</span>' : `<span class="chip ${e.tipo}">${e.tipo === 'debito' ? 'em conta' : 'no crédito'}</span>`}
             ${isPessoal ? '<span class="chip pessoal">🏠 fora da viagem</span>' : ''}
             ${e.synced === false ? '<span class="chip pending">pendente</span>' : ''}
             <span class="sep">·</span>
@@ -3609,6 +3661,7 @@
     renderLocais();
     renderCategorias();
     renderApprovalBanner();
+    updateFormCtx();
   }
 
   // ===== SYNC =====
@@ -3923,7 +3976,7 @@
             local: String(r.local || ''),
             item: String(r.item || ''),
             valor: Number(r.valor) || 0,
-            tipo: r.tipo === 'credito' ? 'credito' : 'debito',
+            tipo: ['credito','entrada'].includes(r.tipo) ? r.tipo : 'debito',
             categoria: CAT_BY_ID[catId] ? catId : 'outros',
             statusRemocao: status,
             solicitadoPor: por,
@@ -4310,21 +4363,47 @@
   // Versão visível no footer
   $('appVersion').textContent = APP_VERSION;
 
-  // Toggle débito/crédito
-  toggle.querySelectorAll('button').forEach(btn => {
+  // Toggles de direção (Saída/Entrada) e forma de pagamento (Em conta/No crédito)
+  const togglePagamento = $('togglePagamento');
+
+  function updateToggleUI() {
+    const isEntrada = state.tipo === 'entrada';
+    // Toggle principal: Saída ativo quando !isEntrada, Entrada ativo quando isEntrada
+    toggle.querySelectorAll('[data-dir]').forEach(b => {
+      b.classList.toggle('active', b.dataset.dir === (isEntrada ? 'entrada' : 'saida'));
+    });
+    toggle.classList.toggle('entrada', isEntrada);
+    // Sub-toggle forma de pagamento: visível apenas para saída
+    if (isEntrada) {
+      togglePagamento.classList.add('hidden');
+    } else {
+      togglePagamento.classList.remove('hidden');
+      togglePagamento.querySelectorAll('[data-pagto]').forEach(b => {
+        b.classList.toggle('active', b.dataset.pagto === state.tipo);
+      });
+      togglePagamento.classList.toggle('credito', state.tipo === 'credito');
+    }
+  }
+
+  toggle.querySelectorAll('[data-dir]').forEach(btn => {
     btn.addEventListener('click', () => {
-      state.tipo = btn.dataset.tipo;
+      state.tipo = btn.dataset.dir === 'entrada' ? 'entrada' : state.pagamento;
       localStorage.setItem(TIPO_KEY, state.tipo);
-      toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
-      toggle.classList.toggle('credito', state.tipo === 'credito');
+      updateToggleUI();
     });
   });
-  // Estado inicial do toggle
-  if (state.tipo === 'credito') {
-    toggle.classList.add('credito');
-    toggle.querySelector('[data-tipo="debito"]').classList.remove('active');
-    toggle.querySelector('[data-tipo="credito"]').classList.add('active');
-  }
+
+  togglePagamento.querySelectorAll('[data-pagto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.tipo = btn.dataset.pagto;
+      state.pagamento = btn.dataset.pagto;
+      localStorage.setItem(TIPO_KEY, state.tipo);
+      localStorage.setItem(PAGAMENTO_KEY, state.pagamento);
+      updateToggleUI();
+    });
+  });
+
+  updateToggleUI();
 
   // Toggle pessoal/viagem (scope) — obrigatório
   const scopeToggle = $('scopeToggle');
@@ -4342,6 +4421,7 @@
       });
     }
     renderCategorias();
+    updateFormCtx();
   }
 
   scopeToggle.querySelectorAll('button').forEach(btn => {
@@ -4604,6 +4684,7 @@
   });
   $('switchCarteiraBtn').addEventListener('click', async () => {
     modalBackdrop.classList.remove('show');
+    $('carteiraModalBackdrop').classList.remove('show');
     const carteiras = await fetchCarteiras();
     state.carteiras = carteiras;
     if (carteiras.length <= 1) { alert('Você só tem uma carteira.'); return; }
@@ -4627,6 +4708,25 @@
   });
   modalBackdrop.addEventListener('click', (e) => {
     if (e.target === modalBackdrop) modalBackdrop.classList.remove('show');
+  });
+
+  $('gerenciarCarteiraBtn').addEventListener('click', () => {
+    const c = state.carteiras.find(x => x.id === state.activeCaerteiraId);
+    if (c) {
+      $('carteiraModalNome').textContent = c.nome;
+      $('carteiraModalMembros').textContent = '';
+      if (sb) {
+        sb.from('carteira_membros').select('nome_exibicao').eq('carteira_id', c.id)
+          .then(({ data }) => {
+            if (data) $('carteiraModalMembros').textContent = data.length + ' membro(s)';
+          });
+      }
+    }
+    modalBackdrop.classList.remove('show');
+    $('carteiraModalBackdrop').classList.add('show');
+  });
+  $('carteiraModalBackdrop').addEventListener('click', (e) => {
+    if (e.target === $('carteiraModalBackdrop')) $('carteiraModalBackdrop').classList.remove('show');
   });
 
   $('saveName').addEventListener('click', () => {
@@ -4659,52 +4759,6 @@
     setTimeout(syncAll, 200);
   });
 
-  // Teste de conexão com diagnóstico detalhado
-  $('testConn').addEventListener('click', async () => {
-    const diag = $('diagPanel');
-    diag.classList.add('show');
-    diag.innerHTML = 'Testando conexão...';
-
-    if (!sb) {
-      diag.innerHTML = '<span class="err">❌ Supabase não configurado.</span>\n\nCole a Project URL e anon key acima e salve.';
-      return;
-    }
-
-    let report = `Supabase: ${state.supabaseUrl.slice(0, 50)}...\n\n`;
-
-    // Teste 1: leitura
-    report += '→ Teste 1: leitura (SELECT)\n';
-    diag.innerHTML = report + 'Aguarde...';
-    const pull = await pullEntries();
-
-    if (pull.ok) {
-      report += `<span class="ok">✓ OK — ${pull.data.length} gasto(s), ${pull.viagens.length} viagem(ns)</span>\n\n`;
-    } else {
-      report += `<span class="err">✗ FALHOU</span>\n  Motivo: ${pull.reason}\n  Detalhe: ${(pull.detail || '').slice(0, 200)}\n\n`;
-    }
-
-    // Teste 2: ping (SELECT sem escrever)
-    report += '→ Teste 2: ping\n';
-    diag.innerHTML = report + 'Aguarde...';
-    const push = await postAction({ action: 'ping' });
-
-    if (push.ok) {
-      report += `<span class="ok">✓ OK</span>\n`;
-      report += `\n<span class="hint">Tudo funcionando! Feche essa janela e use o app normalmente.</span>`;
-    } else {
-      report += `<span class="err">✗ FALHOU</span>\n  Motivo: ${push.reason}\n  Detalhe: ${(push.detail || '').slice(0, 200)}\n`;
-      let hint = '';
-      if (push.reason === 'db' || pull.reason === 'db') {
-        hint = '🔑 Erro de banco de dados. Verifique se executou o SQL de migração e se as políticas RLS estão corretas.';
-      } else if (push.reason === 'network' || pull.reason === 'network') {
-        hint = '🌐 Falha de rede. Verifique sua conexão e se a Project URL está correta.';
-      }
-      if (hint) report += `\n<span class="hint">${hint}</span>`;
-    }
-
-    diag.innerHTML = report;
-  });
-
   $('clearLocal').addEventListener('click', () => {
     if (!confirm('Apagar todos os dados locais? A planilha não será afetada.\n\nIsso inclui gastos, viagens, ajustes de saldo e preferências.')) return;
     state.entries = [];
@@ -4718,149 +4772,6 @@
     render();
     modalBackdrop.classList.remove('show');
     showSync('Dados locais apagados — sincronize para restaurar');
-  });
-
-  // Reparar dados: re-puxa tudo da planilha e arruma gastos sem viagem
-  $('repairData').addEventListener('click', async () => {
-    try {
-      console.log('[REPAIR] iniciando…');
-      if (!sb) { showSync('Configure o Supabase primeiro', true); return; }
-      const trip = getActiveTrip();
-      if (!trip) {
-        alert('Crie ou selecione uma viagem antes de reparar.');
-        return;
-      }
-      if (!confirm(`Reparar dados:\n\n1) Limpar dados locais e re-baixar tudo da planilha (gastos, viagens e ajustes)\n2) Mover gastos órfãos para "${trip.nome}"\n\nA planilha será atualizada. Continuar?`)) return;
-
-      showSync('Reparando…', false, false);
-
-      // 1) Limpa local — TUDO que vem da planilha
-      state.entries = [];
-      state.ajustes = [];
-      // Mantém apenas as viagens locais não sincronizadas (improvável aqui),
-      // o resto vai voltar do pull
-      const tripsPendentes = state.trips.filter(t => t.synced === false);
-      state.trips = tripsPendentes.slice();
-      persist();
-      persistAjustes();
-      persistTrips();
-      render();
-      console.log('[REPAIR] state limpo');
-
-      // 2) Re-baixa da planilha
-      console.log('[REPAIR] chamando pullEntries…');
-      const pull = await pullEntries();
-      console.log('[REPAIR] resposta pull:', pull);
-      if (!pull.ok) {
-        alert('Erro ao baixar da planilha:\n\n' + (pull.detail || pull.reason || 'falha desconhecida'));
-        showSync('Erro ao baixar: ' + (pull.detail || '').slice(0, 60), true);
-        return;
-      }
-
-      console.log('[REPAIR] recebido:', {
-        gastos: (pull.data || []).length,
-        viagens: (pull.viagens || []).length,
-        ajustes: (pull.ajustes || []).length
-      });
-
-      // Gastos
-      for (const r of pull.data) {
-        if (!r.id) continue;
-        const catId = String(r.categoria || '').toLowerCase().trim();
-        const dataReg = r.data ? new Date(r.data).toISOString() : new Date().toISOString();
-        const remoteViagemId = String(r.viagemId || '');
-        const remoteScope = String(r.scope || '').trim() || (remoteViagemId ? 'viagem' : 'pessoal');
-        state.entries.push({
-          id: String(r.id),
-          viagemId: remoteViagemId,
-          scope: remoteScope,
-          data: dataReg,
-          dataGasto: toDateOnly(r.dataGasto) || toDateOnly(dataReg),
-          local: String(r.local || ''),
-          item: String(r.item || ''),
-          valor: Number(r.valor) || 0,
-          tipo: r.tipo === 'credito' ? 'credito' : 'debito',
-          categoria: CAT_BY_ID[catId] ? catId : 'outros',
-          statusRemocao: String(r.statusRemocao || '').toLowerCase().trim(),
-          solicitadoPor: String(r.solicitadoPor || ''),
-          synced: true
-        });
-      }
-      persist();
-      console.log('[REPAIR] gastos persistidos:', state.entries.length);
-
-      // Ajustes (foi o que estava sumindo!)
-      if (Array.isArray(pull.ajustes)) {
-        for (const a of pull.ajustes) {
-          if (!a.id) continue;
-          state.ajustes.push({
-            id: String(a.id),
-            data: a.data ? new Date(a.data).toISOString() : new Date().toISOString(),
-            tipo: a.tipo === 'credito' ? 'credito' : 'debito',
-            valorAntes: Number(a.valorAntes) || 0,
-            valorDepois: Number(a.valorDepois) || 0,
-            motivo: String(a.motivo || ''),
-            por: String(a.por || ''),
-            synced: true
-          });
-        }
-        persistAjustes();
-      }
-      console.log('[REPAIR] ajustes persistidos:', state.ajustes.length);
-
-      // Viagens
-      if (Array.isArray(pull.viagens)) {
-        const existingIds = new Set(state.trips.map(t => t.id));
-        for (const v of pull.viagens) {
-          if (!v.id || existingIds.has(String(v.id))) continue;
-          state.trips.push({
-            id: String(v.id),
-            nome: String(v.nome || 'Sem nome'),
-            inicio: v.inicio ? toDateOnly(v.inicio) : '',
-            fim: v.fim ? toDateOnly(v.fim) : '',
-            orcamentoDebito: Number(v.orcamentoDebito) || 0,
-            orcamentoCredito: Number(v.orcamentoCredito) || 0,
-            arquivada: !!v.arquivada,
-            synced: true
-          });
-        }
-        persistTrips();
-      }
-      console.log('[REPAIR] viagens persistidas:', state.trips.length);
-
-      // 3) Encontra órfãos e migra
-      const orfaos = state.entries.filter(e => !e.viagemId && e.scope !== 'pessoal');
-      console.log('[REPAIR] órfãos encontrados:', orfaos.length);
-      if (orfaos.length > 0) {
-        const ids = orfaos.map(o => o.id);
-        const r = await postAction({
-          action: 'assignTrip',
-          ids: ids,
-          viagemId: trip.id,
-          scope: 'viagem'
-        });
-        if (r.ok) {
-          orfaos.forEach(o => { o.viagemId = trip.id; o.scope = 'viagem'; });
-          persist();
-          render();
-          const msg = `✓ Reparado: ${state.entries.length} gasto(s), ${orfaos.length} migrado(s), ${state.ajustes.length} ajuste(s)`;
-          alert(msg);
-          showSync(msg.slice(0, 60));
-        } else {
-          alert('Falha ao migrar: ' + (r.detail || 'erro desconhecido'));
-          showSync('Falha ao migrar', true);
-        }
-      } else {
-        render();
-        const msg = `✓ Reparado: ${state.entries.length} gasto(s), ${state.ajustes.length} ajuste(s), ${state.trips.length} viagem(ns)`;
-        alert(msg);
-        showSync(msg.slice(0, 60));
-      }
-    } catch (err) {
-      console.error('[REPAIR] erro:', err);
-      alert('Erro no reparo: ' + (err.message || String(err)));
-      showSync('Erro no reparo', true);
-    }
   });
 
   // Botão "Forçar atualização do app" — limpa service worker e cache
@@ -4885,56 +4796,6 @@
     }
   });
 
-  // Botão "Mostrar estado interno" — para debug entre aparelhos
-  $('showState').addEventListener('click', async () => {
-    let report = `═══ ESTADO INTERNO ═══\n`;
-    report += `Versão: ${APP_VERSION}\n`;
-    report += `Aparelho: ${navigator.userAgent.includes('iPhone') ? 'iPhone' : navigator.userAgent.includes('Android') ? 'Android' : 'Outro'}\n\n`;
-
-    report += `LOCAL STORAGE:\n`;
-    report += `• Gastos: ${state.entries.length}\n`;
-    report += `• Viagens: ${state.trips.length}\n`;
-    report += `• Ajustes: ${state.ajustes.length}\n\n`;
-
-    if (state.ajustes.length > 0) {
-      report += `AJUSTES LOCAIS:\n`;
-      state.ajustes.forEach((a, i) => {
-        const data = new Date(a.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-        report += `${i+1}. [${a.tipo}] ${fmtMoney(a.valorAntes)} → ${fmtMoney(a.valorDepois)}\n`;
-        report += `   ${data} · ${a.motivo || '(sem motivo)'} · ${a.synced ? 'sync' : '⚠ PENDENTE'}\n`;
-        report += `   id: ${a.id.slice(0, 8)}…\n`;
-      });
-      report += `\n`;
-    }
-
-    // Pega o que tem no Supabase agora
-    if (sb) {
-      report += `BUSCANDO NO SUPABASE…\n`;
-      try {
-        const pull = await pullEntries();
-        if (pull.ok) {
-          report += `\nSUPABASE AGORA:\n`;
-          report += `• Gastos: ${(pull.data || []).length}\n`;
-          report += `• Viagens: ${(pull.viagens || []).length}\n`;
-          report += `• Ajustes: ${(pull.ajustes || []).length}\n`;
-          if ((pull.ajustes || []).length > 0) {
-            report += `\nAJUSTES NA PLANILHA:\n`;
-            pull.ajustes.forEach((a, i) => {
-              report += `${i+1}. [${a.tipo}] ${fmtMoney(a.valorAntes)} → ${fmtMoney(a.valorDepois)} · ${a.motivo || '(sem motivo)'}\n`;
-            });
-          }
-        } else {
-          report += `Erro ao ler planilha: ${pull.detail || pull.reason}\n`;
-        }
-      } catch (e) {
-        report += `Erro: ${e.message}\n`;
-      }
-    }
-
-    alert(report);
-  });
-
-
   // ============ DASHBOARD ============
   const dashBackdrop = $('dashBackdrop');
   const DASH_CAT_KEY = 'gastos_viagem_dash_cat_v1';
@@ -4956,7 +4817,7 @@
   let localChartMode = 'total'; // 'total' | 'media'
 
   function getDashEntries() {
-    let entries = entriesOfActiveTrip();
+    let entries = entriesOfActiveTrip().filter(e => e.tipo !== 'entrada'); // dashboard mostra gastos
     if (dashCatsAtivas.size < CATEGORIAS.length) {
       entries = entries.filter(e => dashCatsAtivas.has(e.categoria || 'outros'));
     }
@@ -5180,7 +5041,7 @@
               return `<div class="local-detail-item">
                 <div>
                   <div class="local-detail-name">${escapeHtml(e.item)}</div>
-                  <div class="local-detail-meta">${c.emoji} ${c.nome} · ${fmtDateShort(e.dataGasto || toDateOnly(e.data))} · ${e.tipo}</div>
+                  <div class="local-detail-meta">${c.emoji} ${c.nome} · ${fmtDateShort(e.dataGasto || toDateOnly(e.data))} · ${e.tipo === 'entrada' ? '💰 entrada' : e.tipo === 'credito' ? 'no crédito' : 'em conta'}</div>
                 </div>
                 <div class="local-detail-value">${fmtMoney(e.valor)}</div>
               </div>`;
@@ -5217,7 +5078,7 @@
             <div class="top-detail-row"><span class="top-detail-label">Local</span><span class="top-detail-value">${escapeHtml(e.local)}</span></div>
             <div class="top-detail-row"><span class="top-detail-label">Data</span><span class="top-detail-value">${dataExib}</span></div>
             <div class="top-detail-row"><span class="top-detail-label">Valor</span><span class="top-detail-value">${fmtMoney(e.valor)}</span></div>
-            <div class="top-detail-row"><span class="top-detail-label">Tipo</span><span class="top-detail-value">${e.tipo === 'debito' ? '💵 Débito' : '💳 Crédito'}</span></div>
+            <div class="top-detail-row"><span class="top-detail-label">Tipo</span><span class="top-detail-value">${e.tipo === 'entrada' ? '💰 Entrada' : e.tipo === 'credito' ? '💳 No crédito' : '💵 Em conta'}</span></div>
             <div class="top-detail-row"><span class="top-detail-label">Categoria</span><span class="top-detail-value">${c.emoji} ${c.nome}</span></div>
             <div class="top-detail-row"><span class="top-detail-label">Escopo</span><span class="top-detail-value">${scope}</span></div>
           </div>
@@ -5384,7 +5245,7 @@
               <div class="cat-detail-item">
                 <div>
                   <div class="cat-detail-name">${escapeHtml(e.item)}</div>
-                  <div class="cat-detail-meta">${escapeHtml(e.local)} · ${data} · ${e.tipo}${isPessoal ? ' · 🏠 fora da viagem' : ''}</div>
+                  <div class="cat-detail-meta">${escapeHtml(e.local)} · ${data} · ${e.tipo === 'entrada' ? '💰 entrada' : e.tipo === 'credito' ? 'no crédito' : 'em conta'}${isPessoal ? ' · 🏠 fora da viagem' : ''}</div>
                 </div>
                 <div class="cat-detail-value">${fmtMoney(e.valor)}</div>
               </div>`;
@@ -5465,10 +5326,10 @@
     const trip = getActiveTrip();
     const tripNome = trip ? trip.nome : 'Viagem';
     const hoje = new Date().toLocaleDateString('pt-BR');
-    const entries = entriesOfActiveTrip().sort((a, b) =>
+    const entries = entriesOfActiveTrip().filter(e => e.tipo !== 'entrada').sort((a, b) =>
       (a.dataGasto || a.data).localeCompare(b.dataGasto || b.data));
     const pessoais = state.entries.filter(e =>
-      !e.deleted && (e.scope || 'viagem') === 'pessoal'
+      !e.deleted && (e.scope || 'viagem') === 'pessoal' && e.tipo !== 'entrada'
     ).sort((a, b) => (a.dataGasto || a.data).localeCompare(b.dataGasto || b.data));
 
     // Calcula totais
@@ -5523,7 +5384,8 @@
         md += `| Item | Local | Valor | Tipo | Categoria |\n|---|---|---|---|---|\n`;
       }
       const cat = CAT_BY_ID[e.categoria] || CAT_BY_ID.outros;
-      md += `| ${e.item} | ${e.local} | ${fmtMoney(e.valor)} | ${e.tipo} | ${cat.emoji} ${cat.nome} |\n`;
+      const tipoLabel = e.tipo === 'credito' ? 'no crédito' : 'em conta';
+      md += `| ${e.item} | ${e.local} | ${fmtMoney(e.valor)} | ${tipoLabel} | ${cat.emoji} ${cat.nome} |\n`;
     });
 
     if (pessoais.length > 0) {
@@ -5531,7 +5393,8 @@
       md += `| Item | Local | Data | Valor | Tipo |\n|---|---|---|---|---|\n`;
       pessoais.forEach(e => {
         const dg = fmtDateShort(e.dataGasto || toDateOnly(e.data));
-        md += `| ${e.item} | ${e.local} | ${dg} | ${fmtMoney(e.valor)} | ${e.tipo} |\n`;
+        const tipoLabel = e.tipo === 'credito' ? 'no crédito' : 'em conta';
+        md += `| ${e.item} | ${e.local} | ${dg} | ${fmtMoney(e.valor)} | ${tipoLabel} |\n`;
       });
       md += `\n**Total pessoal:** ${fmtMoney(totalPessoal)}\n\n`;
     }
@@ -5874,6 +5737,26 @@
       showSync('Erro: ' + (result.detail || 'falhou').slice(0, 60), true);
     }
   });
+
+  // Mostra o contexto atual no banner do formulário
+  function updateFormCtx() {
+    const ctx = $('formCtx');
+    if (!ctx) return;
+    if (!state.scope) {
+      ctx.className = 'form-ctx';
+      ctx.textContent = '';
+      return;
+    }
+    let text = '';
+    if (state.scope === 'viagem') {
+      const trip = getActiveTrip();
+      text = trip ? `📍 Registrando em: ${trip.nome}` : '⚠️ Nenhuma viagem ativa — crie uma viagem primeiro';
+    } else {
+      text = '🏠 Registrando como: Gasto pessoal (fora da viagem)';
+    }
+    ctx.textContent = text;
+    ctx.className = 'form-ctx show';
+  }
 
   // Initial render + auth check
   render();
