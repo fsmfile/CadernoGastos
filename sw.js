@@ -5,7 +5,7 @@
 // - Google Fonts: stale-while-revalidate
 // - Supabase e CDNs externos: não interceptados
 
-const VERSION = 'v1.9.3';
+const VERSION = 'v2.0.0';
 const CACHE_NAME = `caderno-gastos-${VERSION}`;
 
 const STATIC_SHELL = [
