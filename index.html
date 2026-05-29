@@ -2650,7 +2650,7 @@
     <!-- HEADER -->
     <header class="header">
       <div class="brand">
-        <h1>Caderno<br /><em>de Gastos</em></h1>
+        <h1>Fluxy</h1>
         <div class="sub" id="brandSub">Diário da viagem</div>
       </div>
       
@@ -3063,7 +3063,7 @@
 
     <!-- FOOTER -->
     <footer class="app-footer">
-      Caderno de Gastos <span class="dot-sep">·</span> v<span id="appVersion">1.0.0</span>
+      Fluxy <span class="dot-sep">·</span> v<span id="appVersion">1.0.0</span>
     </footer>
 
   </div>
@@ -3358,7 +3358,7 @@
   <div class="login-screen" id="loginScreen">
     <div class="login-box">
       <div>
-        <h1>Caderno<br>de Gastos</h1>
+        <h1>Fluxy</h1>
         <p>Faça login para sincronizar com o Supabase.</p>
       </div>
       <div class="login-field">
@@ -3475,7 +3475,8 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '2.0.2';
+  const APP_VERSION = '2.0.3';
+  const APP_NAME = 'Fluxy';
 
   const SUPABASE_URL      = 'https://bhjvbkidtnggzxbtsqdp.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_-PsK3cq1p2pXG85ExwaUng_pSyw6MCi';
@@ -5774,7 +5775,7 @@ tr:last-child td{border-bottom:none}
     </table>
   </div>`).join('')}
 
-  <div class="footer">Gerado pelo Caderno de Gastos 📒 · cadernodegastos.app</div>
+  <div class="footer">Gerado pelo Fluxy 💰 · fluxy.app</div>
 </div>
 
 <script>
@@ -5872,7 +5873,7 @@ tr:last-child td{border-bottom:none}
       });
     }
 
-    txt += `\n_Gerado pelo Caderno de Gastos_ 📒`;
+    txt += `\n_Gerado pelo ${APP_NAME}_ 💰`;
 
     const url = 'https://wa.me/?text=' + encodeURIComponent(txt);
     window.open(url, '_blank');
@@ -7019,7 +7020,7 @@ tr:last-child td{border-bottom:none}
     const locais = getLocaisDaViagem();
 
     let md = `# ${tripNome}\n`;
-    md += `> Relatório gerado em ${hoje} pelo Caderno de Gastos v${APP_VERSION}\n\n`;
+    md += `> Relatório gerado em ${hoje} pelo ${APP_NAME} v${APP_VERSION}\n\n`;
 
     if (trip) {
       md += `## Resumo da viagem\n\n`;
@@ -7075,7 +7076,7 @@ tr:last-child td{border-bottom:none}
       md += `\n**Total pessoal:** ${fmtMoney(totalPessoal)}\n\n`;
     }
 
-    md += `---\n*Exportado pelo Caderno de Gastos — https://fsmfile.github.io/CadernoGastos*\n`;
+    md += `---\n*Exportado pelo ${APP_NAME}*\n`;
 
     // Download
     const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });

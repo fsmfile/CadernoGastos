@@ -1,4 +1,4 @@
-// Caderno de Gastos — Service Worker
+// Fluxy — Service Worker
 // Estratégia:
 // - index.html: SEMPRE network-first (garante atualização imediata)
 // - Ícones / manifest: cache-first (raramente mudam)
@@ -6,7 +6,7 @@
 // - Supabase e CDNs externos: não interceptados
 
 const VERSION = 'v2.0.0';
-const CACHE_NAME = `caderno-gastos-${VERSION}`;
+const CACHE_NAME = `fluxy-${VERSION}`;
 
 const STATIC_SHELL = [
   './manifest.webmanifest',

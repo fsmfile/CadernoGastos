@@ -1,7 +1,7 @@
 {
-  "name": "Caderno de Gastos",
-  "short_name": "Gastos",
-  "description": "Diário compartilhado de gastos de viagem",
+  "name": "Fluxy",
+  "short_name": "Fluxy",
+  "description": "Registro compartilhado de gastos de viagem",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

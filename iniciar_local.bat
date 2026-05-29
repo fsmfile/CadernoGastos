@@ -1,8 +1,8 @@
 @echo off
-title Caderno de Gastos - Servidor Local
+title Fluxy - Servidor Local
 
 echo ===================================================================
-echo             CADERNO DE GASTOS - INICIALIZADOR LOCAL
+echo                   FLUXY - INICIALIZADOR LOCAL
 echo ===================================================================
 echo.
 echo [*] Detectando ferramentas no ambiente para rodar o PWA...

@@ -1,8 +1,8 @@
-# Caderno de Gastos
+# Fluxy
 
 PWA leve para registro compartilhado de gastos de viagem, com sincronização via Google Sheets.
 
-**Versão atual:** 2.0.2
+**Versão atual:** 2.0.3
 
 ## Funcionalidades
 
@@ -29,7 +29,7 @@ A forma mais simples é usar **GitHub Pages**:
 1. Em `Settings → Pages` deste repositório
 2. Em "Source", escolha **Deploy from a branch**
 3. Branch: `main` / pasta `/ (root)`
-4. Salve. Em ~1 minuto seu app estará em `https://fsmfile.github.io/CadernoGastos/`
+4. Salve. Em ~1 minuto seu app estará em `https://fsmfile.github.io/Fluxy/`
 
 ### 2. Criar a planilha do Google
 
@@ -73,8 +73,8 @@ Tudo client-side: HTML + CSS + Vanilla JS. Sem build, sem dependências, sem fra
 
 ## Histórico de versões
 
+- **2.0.3** — Renomeação do app para Fluxy; constante `APP_NAME` centralizada no JS
 - **2.0.2** — Label "🏷️ Categoria" sempre visível no formulário, banner de contexto mostrando onde o lançamento será registrado (ex: "💵 Em conta · 🗺️ Bahia"), categorias sempre exibidas independente do escopo selecionado
-
 - **1.5.4** — "Reparar dados" agora também recarrega ajustes de saldo e viagens da planilha (corrige saldo divergente entre aparelhos)
 - **1.5.3** — Função `repararPlanilha()` (remove colunas duplicadas, atribui órfãos, limpa testes) + teste de conexão sem deixar lixo (action `ping`)
 - **1.5.2** — Saldo da conta usa dataGasto (consistência entre aparelhos)
