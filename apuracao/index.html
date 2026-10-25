@@ -441,15 +441,20 @@ async function getJ(u){let r;try{r=await fetch(u+(u.includes("?")?"&":"?")+"t="+
 async function descobrir(){
   if(ELE)return ELE;
   const c=await getJ(`${TSE}/comum/config/ele-c.json`);
-  diag("config.c",c.c);
-  diag("eleições na config",(c.pl||[]).flatMap(p=>(p.e||[]).map(e=>`${e.cd} t${e.t} ${e.dt||""} ${e.nm||""}`)).join(" | ").slice(0,600));
+  const all=[];for(const pl of c.pl||[])for(const e of pl.e||[])all.push(e);
+  const nm=e=>String(e.nm||"");
   const cands=[];
-  for(const pl of c.pl||[])for(const e of pl.e||[])cands.push(e);
-  const doAno=cands.filter(e=>String(e.dt||"").includes(ANO)||String(c.c||"").includes(ANO));
-  const t2=doAno.filter(e=>String(e.t)==="2");
-  const pick=(t2.find(e=>/federal|geral|presid/i.test(e.nm||""))||t2[0]);
-  if(!pick)throw new Error("eleição do 2º turno não encontrada na configuração do TSE");
-  return pick.cd;
+  const t2=all.find(e=>nm(e).includes(ANO)&&/federal/i.test(nm(e))&&(String(e.t)==="2"||/2º/.test(nm(e))));
+  if(t2)cands.push(String(t2.cd));
+  const t1=all.find(e=>nm(e).includes(ANO)&&/federal/i.test(nm(e))&&(String(e.t)==="1"||/1º/.test(nm(e))));
+  if(t1)cands.push(String(+t1.cd+1));
+  diag("códigos a testar",cands.join(", ")||"nenhum");
+  for(const cd of cands){
+    ELE=cd;
+    try{const j=await getJ(url("br"));if(j&&j.cand)return cd}catch(err){}
+  }
+  ELE=null;
+  throw new Error("o TSE ainda não publicou os dados do 2º turno (testei "+(cands.join(", ")||"nenhum código")+")");
 }
 function conv(j){
   const c=j.cand||[];
@@ -479,8 +484,11 @@ async function puxaUF(){ // um estado a cada 1,5 s: ciclo completo ~40 s
 }
 (async()=>{
   msg("Conectando ao TSE…");
-  diag("versão","2");
-  try{ELE=await descobrir();diag("eleição escolhida",ELE)}catch(err){msg(err instanceof TypeError?"O navegador bloqueou a leitura do TSE (CORS). Os dados ao vivo não podem ser lidos deste site.":"Não achei a eleição na configuração do TSE: "+err.message);return}
+  diag("versão","3");
+  while(true){
+    try{ELE=await descobrir();diag("eleição escolhida",ELE);break}
+    catch(err){msg(err instanceof TypeError?"O navegador bloqueou a leitura do TSE (CORS).":"Aguardando o TSE: "+err.message+". Tento de novo em 30 s.");await new Promise(r=>setTimeout(r,30000))}
+  }
   await puxaBR();
   setInterval(puxaBR,15000);
   setInterval(puxaUF,1500);
