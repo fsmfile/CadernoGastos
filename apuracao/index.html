@@ -448,7 +448,10 @@ async function descobrir(){
   if(t2)cands.push(String(t2.cd));
   const t1=all.find(e=>nm(e).includes(ANO)&&/federal/i.test(nm(e))&&(String(e.t)==="1"||/1º/.test(nm(e))));
   if(t1)cands.push(String(+t1.cd+1));
+  const uniq=[...new Set(cands)];cands.length=0;cands.push(...uniq);
   diag("códigos a testar",cands.join(", ")||"nenhum");
+  diag("2026 na config",JSON.stringify(all.filter(e=>nm(e).includes(ANO))).slice(0,1500));
+  if(t1){try{const j=await getJ(`${TSE}/ele${ANO}/${t1.cd}/dados-simplificados/br/br-c0001-e${String(t1.cd).padStart(6,"0")}-r.json`);diag("teste 1º turno ("+t1.cd+")","OK, pst "+j.pst+", cand "+(j.cand||[]).length)}catch(e){diag("teste 1º turno ("+t1.cd+")","falhou")}}
   for(const cd of cands){
     ELE=cd;
     try{const j=await getJ(url("br"));if(j&&j.cand)return cd}catch(err){}
@@ -484,7 +487,7 @@ async function puxaUF(){ // um estado a cada 1,5 s: ciclo completo ~40 s
 }
 (async()=>{
   msg("Conectando ao TSE…");
-  diag("versão","3");
+  diag("versão","4");
   while(true){
     try{ELE=await descobrir();diag("eleição escolhida",ELE);break}
     catch(err){msg(err instanceof TypeError?"O navegador bloqueou a leitura do TSE (CORS).":"Aguardando o TSE: "+err.message+". Tento de novo em 30 s.");await new Promise(r=>setTimeout(r,30000))}
