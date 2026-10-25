@@ -356,7 +356,7 @@ function fillSheet(uf){
   }
   const rows=[["Seções apuradas",pf(n.ap)]];
   if(n.eleitores!=null)rows.push(["Eleitorado",nf.format(n.eleitores)]);
-  if(n.abst!=null)rows.push(["Abstenção",pf(n.abst)]);
+  if(n.abst!=null&&n.ap>=99)rows.push(["Abstenção",pf(n.abst)]);
   if(n.brancos!=null)rows.push(["Brancos",pf(n.brancos)]);
   if(n.nulos!=null)rows.push(["Nulos",pf(n.nulos)]);
   if(n.upd)rows.push(["Atualizado",new Date(n.upd).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})]);
