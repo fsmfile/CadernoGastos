@@ -65,6 +65,7 @@ h2{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.08e
 .zoom button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .map .lb{font-size:calc(30px / var(--k,1))}
 .map .lb .p{font-size:calc(21px / var(--k,1))}
+.map .p.pl{fill:var(--lula)}.map .p.pf{fill:var(--flavio)}
 .map .ol{stroke-width:calc(2.2px / var(--k,1))}
 .map .ol.sel{stroke-width:calc(5px / var(--k,1))}
 .map.zoomed .chips{display:none}
@@ -171,7 +172,7 @@ footer{font-size:12px;color:var(--muted);text-align:center}
       <button data-r="BR" aria-pressed="true">Brasil</button><button data-r="Sudeste" aria-pressed="false">Sudeste</button><button data-r="Nordeste" aria-pressed="false">Nordeste</button><button data-r="Sul" aria-pressed="false">Sul</button><button data-r="Centro-Oeste" aria-pressed="false">Centro-Oeste</button><button data-r="Norte" aria-pressed="false">Norte</button>
     </div>
     <div class="mapbox"><svg class="map" id="map" viewBox="10 0 1150 1000" role="group" aria-label="Mapa do Brasil por estado"></svg></div>
-    <div class="hint">Toque num estado para ver o detalhe. Cor mais forte = vantagem maior. Cada estado vai se enchendo de baixo pra cima conforme as urnas são apuradas, na cor de quem está na frente. Cor sólida com ✓ = apuração concluída. Use os botões de região pra aproximar. Na visão do Brasil, os estados pequenos ficam nas etiquetas à direita.</div>
+    <div class="hint">O preenchimento mostra quanto do estado já foi apurado: ele enche de baixo pra cima, na cor de quem está na frente. O número é o % de votos válidos de quem lidera ali, na cor dele. Toque num estado para ver o detalhe. Cor sólida com ✓ = apuração concluída. Use os botões de região pra aproximar. Na visão do Brasil, os estados pequenos ficam nas etiquetas à direita.</div>
   </section>
 
   <section class="sec">
@@ -313,12 +314,13 @@ function renderGrid(){
     if(current===uf)o.ol.parentNode.appendChild(o.ol);
     o.path.setAttribute("aria-label",o.nome+(n.has?`: Lula ${pf(n.l)}, Flávio ${pf(n.f)}, ${pf(n.ap)} apurado`:": sem dados ainda"));
     const pct=n.has?(done(n)?"✓ ":"")+Math.round(Math.max(n.l,n.f))+"%":"";
+    const pc="p"+(leadOf(n)==="l"?" pl":leadOf(n)==="f"?" pf":"");
     o.lb.classList.toggle("has",n.has);
-    o.lb.innerHTML=n.has?`<tspan x="${GEO.ufs[uf].c[0]}">${uf}</tspan><tspan class="p" x="${GEO.ufs[uf].c[0]}" dy="1.05em">${pct}</tspan>`:uf;
+    o.lb.innerHTML=n.has?`<tspan x="${GEO.ufs[uf].c[0]}">${uf}</tspan><tspan class="${pc}" x="${GEO.ufs[uf].c[0]}" dy="1.05em">${pct}</tspan>`:uf;
     if(o.chip){
       if(col)o.rect.style.fill=col; o.rect.style.transform=`scaleX(${k})`; o.chip.classList.toggle("has",n.has); o.chip.classList.toggle("sel",current===uf);
       o.chip.setAttribute("aria-label",o.path.getAttribute("aria-label"));
-      o.ct.innerHTML=n.has?`${uf} <tspan class="p">${pct}</tspan>`:uf;
+      o.ct.innerHTML=n.has?`${uf} <tspan class="${pc}">${pct}</tspan>`:uf;
     }
   }
 }
