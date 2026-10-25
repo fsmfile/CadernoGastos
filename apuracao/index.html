@@ -447,19 +447,19 @@ async function descobrir(){
   const t2=all.find(e=>nm(e).includes(ANO)&&/federal/i.test(nm(e))&&(String(e.t)==="2"||/2º/.test(nm(e))));
   if(t2)cands.push(String(t2.cd));
   const t1=all.find(e=>nm(e).includes(ANO)&&/federal/i.test(nm(e))&&(String(e.t)==="1"||/1º/.test(nm(e))));
-  if(t1)cands.push(String(+t1.cd+1));
+  if(t1)cands.push(String(t1.cdt2||(+t1.cd+1)));
   const uniq=[...new Set(cands)];cands.length=0;cands.push(...uniq);
   diag("códigos a testar",cands.join(", ")||"nenhum");
-  diag("2026 na config",JSON.stringify(all.filter(e=>nm(e).includes(ANO))).slice(0,1500));
-  if(t1){try{const j=await getJ(`${TSE}/ele${ANO}/${t1.cd}/dados-simplificados/br/br-c0001-e${String(t1.cd).padStart(6,"0")}-r.json`);diag("teste 1º turno ("+t1.cd+")","OK, pst "+j.pst+", cand "+(j.cand||[]).length)}catch(e){diag("teste 1º turno ("+t1.cd+")","falhou")}}
-  for(const cd of cands){
-    ELE=cd;
-    try{const j=await getJ(url("br"));if(j&&j.cand)return cd}catch(err){}
+    if(t1){try{const j=await getJ(urlF("br",0,t1.cd));diag("teste 1º turno ("+t1.cd+")","OK, pst "+(j.s&&j.s.pst))}catch(e){diag("teste 1º turno ("+t1.cd+")","falhou")}}
+  for(const cd of cands)for(const f of [0,1]){
+    ELE=cd;FMT=f;
+    try{const j=await getJ(url("br"));if(j&&(j.cand||j.carg)){diag("formato",f===0?"novo (dados/-u.json)":"antigo (-r.json)");return cd}}catch(err){}
   }
   ELE=null;
   throw new Error("o TSE ainda não publicou os dados do 2º turno (testei "+(cands.join(", ")||"nenhum código")+")");
 }
 function conv(j){
+  if(j.s&&j.carg)return convU(j);
   const c=j.cand||[];
   const L=c.find(x=>String(x.n)==="13"), F=c.find(x=>String(x.n)==="22");
   const pst=num(j.pst);
@@ -474,10 +474,26 @@ function conv(j){
   if(!(o.lula>0||o.flavio>0)&&o.apurado===0){delete o.lula;delete o.flavio}
   return o;
 }
-const url=(ab)=>`${TSE}/ele${ANO}/${ELE}/dados-simplificados/${ab}/${ab}-c0001-e${String(ELE).padStart(6,"0")}-r.json`;
+let FMT=0; // 0 = novo (dados/-u), 1 = antigo (dados-simplificados/-r)
+const urlF=(ab,f,cd=ELE)=>{const e=String(cd).padStart(6,"0");return f===0?`${TSE}/ele${ANO}/${cd}/dados/${ab}/${ab}-c0001-e${e}-u.json`:`${TSE}/ele${ANO}/${cd}/dados-simplificados/${ab}/${ab}-c0001-e${e}-r.json`};
+const url=(ab)=>urlF(ab,FMT);
+function convU(j){
+  const c=[];for(const cg of j.carg||[])for(const a of cg.agr||[])for(const p of a.par||[])for(const x of p.cand||[])c.push(x);
+  const L=c.find(x=>String(x.n)==="13"), F=c.find(x=>String(x.n)==="22");
+  const pst=num(j.s&&j.s.pst)||0, v=j.v||{};
+  const o={apurado:pst,final:pst>=100||c.some(x=>/^eleito/i.test(String(x.st||x.dvt||"")))};
+  if(L){o.lula=num(L.pvap);o.lulaVotos=num(L.vap)}
+  if(F){o.flavio=num(F.pvap);o.flavioVotos=num(F.vap)}
+  const vv=num(v.vv),vb=num(v.vb),tvn=num(v.tvn),tot=(vv||0)+(vb||0)+(tvn||0);
+  if(tot>0){if(vb!=null)o.brancos=vb/tot*100;if(tvn!=null)o.nulos=tvn/tot*100}
+  if(j.e){if(j.e.te!=null)o.eleitores=num(j.e.te);if(j.e.pa!=null)o.abstencao=num(j.e.pa)}
+  if(j.dg&&j.hg){const [d,m,y]=j.dg.split("/");o.atualizadoEm=`${y}-${m}-${d}T${j.hg}-03:00`}
+  if(!(o.lula>0||o.flavio>0)&&pst===0){delete o.lula;delete o.flavio}
+  return o;
+}
 let falhas=0;
 async function puxaBR(){
-  try{const j=await getJ(url("br"));diag("br url",url("br"));diag("br campos",Object.keys(j).join(","));diag("br pst",j.pst+" · gerado "+(j.dg||"")+" "+(j.hg||""));diag("br cand",(j.cand||[]).map(x=>x.n+":"+x.pvap+"%").join(" "));diag("última leitura",new Date().toLocaleTimeString("pt-BR"));real.br=conv(j);falhas=0;msg("");if(!demoT){data=real;renderAll()}}
+  try{const j=await getJ(url("br"));diag("br url",url("br"));diag("br campos",Object.keys(j).join(","));diag("br pst",j.pst+" · gerado "+(j.dg||"")+" "+(j.hg||""));diag("br pst",(j.pst||(j.s&&j.s.pst))+" · gerado "+(j.dg||"")+" "+(j.hg||""));diag("br cand",JSON.stringify(conv(j)).slice(0,300));diag("última leitura",new Date().toLocaleTimeString("pt-BR"));real.br=conv(j);falhas=0;msg("");if(!demoT){data=real;renderAll()}}
   catch(err){falhas++;if(falhas>=2)msg(err instanceof TypeError?"O navegador bloqueou a leitura do TSE (CORS). Os dados ao vivo não podem ser lidos deste site.":"Não consegui ler o TSE agora ("+err.message+"). Tentando de novo…")}
 }
 let ufi=0;
@@ -487,7 +503,7 @@ async function puxaUF(){ // um estado a cada 1,5 s: ciclo completo ~40 s
 }
 (async()=>{
   msg("Conectando ao TSE…");
-  diag("versão","4");
+  diag("versão","5");
   while(true){
     try{ELE=await descobrir();diag("eleição escolhida",ELE);break}
     catch(err){msg(err instanceof TypeError?"O navegador bloqueou a leitura do TSE (CORS).":"Aguardando o TSE: "+err.message+". Tento de novo em 30 s.");await new Promise(r=>setTimeout(r,30000))}
