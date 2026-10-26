@@ -6,16 +6,16 @@
 :root{
   --bg:#f3f4f6; --surface:#ffffff; --surface-2:#e7e9ee; --line:#d5d9e1;
   --fg:#14171d; --muted:#5d6574;
-  --lula:#d62839; --flavio:#2f5bd8; --live:#11a35a;
+  --lula:#d62839; --flavio:#2f5bd8; --live:#11a35a; --win:#b8650a; --bar:#b7bdc8;
   --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1115; --surface:#181b21; --surface-2:#22262e; --line:#2e333d;
-  --fg:#eef0f4; --muted:#9aa2b1; --lula:#ef4655; --flavio:#5b82f5; --live:#2fd07c; color-scheme:dark}}
+  --fg:#eef0f4; --muted:#9aa2b1; --lula:#ef4655; --flavio:#5b82f5; --live:#2fd07c; --win:#f2a93b; --bar:#4a505c; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1115; --surface:#181b21; --surface-2:#22262e; --line:#2e333d;
-  --fg:#eef0f4; --muted:#9aa2b1; --lula:#ef4655; --flavio:#5b82f5; --live:#2fd07c; color-scheme:dark}
+  --fg:#eef0f4; --muted:#9aa2b1; --lula:#ef4655; --flavio:#5b82f5; --live:#2fd07c; --win:#f2a93b; --bar:#4a505c; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
 body{color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.4;
@@ -149,8 +149,62 @@ a.ext{color:var(--fg);font-weight:600;font-size:14px}
 footer{font-size:12px;color:var(--muted);text-align:center}
 </style>
 
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style></head><body><div class="wrap">
-  <header class="summary" id="summary">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}.tabs{display:flex;gap:4px;background:var(--surface-2);border-radius:10px;padding:3px;margin-top:12px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;font-size:14px;padding:8px;border-radius:8px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg)}
+body[data-view="logs"] .apur{display:none!important}
+.logs{display:flex;flex-direction:column;gap:14px}
+.lg-intro h2{margin-bottom:4px}
+.lg-intro p{margin:0;color:var(--muted);font-size:14px;max-width:62ch}
+.lg-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--surface);border-radius:14px;padding:12px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld span,.lab{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.fld select,.win input{font:inherit;font-size:15px;color:var(--fg);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0;width:100%}
+.fld:nth-child(2){grid-column:span 1}
+.lg-go{grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lg-go button{border:0;background:var(--fg);color:var(--bg);font:inherit;font-weight:600;font-size:15px;padding:10px 18px;border-radius:10px;cursor:pointer}
+.lg-go button:disabled{opacity:.4;cursor:default}
+.lg-est{font-size:13px;color:var(--muted)}
+.lg-prog{display:flex;flex-direction:column;gap:6px}
+.lg-prog .prog{height:6px}
+.lg-prog-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+.lg-link{border:0;background:none;color:var(--fg);font:inherit;font-size:13px;font-weight:600;text-decoration:underline;cursor:pointer;padding:4px}
+#lgRes{display:flex;flex-direction:column;gap:14px}
+#lgRes[hidden]{display:none}
+.lg-where{font-family:var(--display);font-size:24px;font-weight:700;line-height:1.1}
+.lg-where small{display:block;font-family:var(--body);font-size:13px;font-weight:400;color:var(--muted);margin-top:2px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile2{background:var(--surface);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile2 b{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.1}
+.tile2 small{font-size:12px;color:var(--muted)}
+.card{background:var(--surface);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.win{display:flex;flex-direction:column;gap:8px}
+.win-row{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+.win-row input{flex:1}
+.win-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.win-chips::-webkit-scrollbar{display:none}
+.win-chips button{flex:none;border:1px solid var(--line);background:transparent;color:var(--fg);font:inherit;font-size:13px;font-weight:600;padding:6px 11px;border-radius:999px;cursor:pointer}
+.win-out{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.win-out b{font-family:var(--display);font-size:40px;font-weight:700;line-height:1;color:var(--win)}
+.win-out span{font-size:14px;color:var(--muted)}
+.hist-wrap{position:relative}
+.hist{display:block;width:100%;height:auto;max-width:100%}
+.hist .bar0{fill:var(--bar)}
+.hist .bar1{fill:var(--win)}
+.hist .grid{stroke:var(--line);stroke-width:1}
+.hist .ax{fill:var(--muted);font-size:13px;font-family:var(--body)}
+.hist .hit{fill:transparent;cursor:pointer}
+.tip{position:absolute;top:0;transform:translateX(-50%);background:var(--fg);color:var(--bg);font-size:12px;font-weight:600;padding:5px 8px;border-radius:8px;pointer-events:none;white-space:nowrap}
+.tbl{overflow-x:auto;max-width:100%}
+.tbl table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tbl th{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:7px 8px;border-bottom:1px solid var(--line)}
+.tbl .r{text-align:right}
+.tbl td.w{color:var(--win);font-weight:600}
+@media (max-width:420px){.tile2 b{font-size:22px}.lg-form{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+  <nav class="tabs" role="tablist" aria-label="Telas"><button id="tabA" role="tab" aria-selected="true">Apuração</button><button id="tabL" role="tab" aria-selected="false">Logs das urnas</button></nav>
+  <header class="summary apur" id="summary">
     <div class="summary-in">
       <div class="status"><span id="st"><span class="dot" id="dot"></span><span id="stTxt">Carregando…</span></span><span id="upd" class="num"></span></div>
       <div class="cands">
@@ -163,7 +217,7 @@ footer{font-size:12px;color:var(--muted);text-align:center}
     </div>
   </header>
 
-  <section class="sec">
+  <section class="sec apur">
     <div class="sec-head">
       <h2>Mapa por estado</h2>
       <div class="legend"><span><em style="background:var(--lula)"></em>Lula</span><span><em style="background:var(--flavio)"></em>Flávio</span><span>✓ concluído</span></div>
@@ -175,7 +229,7 @@ footer{font-size:12px;color:var(--muted);text-align:center}
     <div class="hint">O preenchimento mostra quanto do estado já foi apurado: ele enche de baixo pra cima, na cor de quem está na frente. O número é o % de votos válidos de quem lidera ali, na cor dele. Toque num estado para ver o detalhe. Cor sólida com ✓ = apuração concluída. Use os botões de região pra aproximar. Na visão do Brasil, os estados pequenos ficam nas etiquetas à direita.</div>
   </section>
 
-  <section class="sec">
+  <section class="sec apur">
     <div class="sec-head">
       <h2>Todos os estados</h2>
       <div class="seg" role="group" aria-label="Ordenar">
@@ -187,10 +241,64 @@ footer{font-size:12px;color:var(--muted);text-align:center}
     <div class="list" id="list"></div>
   </section>
 
-  <div class="empty" id="note" hidden></div>
-  <div class="demo"><button id="demo">Ver simulação</button><span id="demoTxt">Prévia com números fictícios, só pra ver o mapa se enchendo.</span></div>
-  <details class="diag" id="diag"><summary>Diagnóstico da conexão com o TSE</summary><pre id="diagTxt">iniciando…</pre></details>
-  <footer>Percentuais sobre votos válidos. Dados lidos direto da API pública do TSE a cada 15 s (nacional) e ~40 s (estados). Fonte: <a class="ext" href="https://resultados.tse.jus.br/oficial/app/index.html" target="_blank" rel="noopener">resultados.tse.jus.br</a></footer>
+  <div class="empty apur" id="note" hidden></div>
+  <div class="demo apur"><button id="demo">Ver simulação</button><span id="demoTxt">Prévia com números fictícios, só pra ver o mapa se enchendo.</span></div>
+  <details class="diag apur" id="diag"><summary>Diagnóstico da conexão com o TSE</summary><pre id="diagTxt">iniciando…</pre></details>
+  <section class="logs" id="vLogs" hidden>
+    <div class="lg-intro">
+      <h2>Logs das urnas · 2º turno</h2>
+      <p>Cada urna registra o horário de cada voto. Escolha um lugar e o app baixa os logs do TSE e conta os votos por horário. Tudo em horário de Brasília.</p>
+    </div>
+    <div class="lg-form">
+      <label class="fld"><span>Estado</span><select id="lgUf"><option value="">Escolha…</option></select></label>
+      <label class="fld"><span>Cidade</span><select id="lgMun" disabled><option value="">—</option></select></label>
+      <label class="fld"><span>Zona eleitoral</span><select id="lgZon" disabled><option value="">—</option></select></label>
+      <div class="lg-go"><button id="lgRun" disabled>Analisar</button><span id="lgEst" class="lg-est"></span></div>
+    </div>
+    <div class="lg-prog" id="lgProg" hidden>
+      <div class="prog"><i id="lgBar" style="width:0"></i></div>
+      <div class="lg-prog-row"><span id="lgProgTxt" class="num"></span><button id="lgStop" class="lg-link">Cancelar</button></div>
+    </div>
+    <div class="empty" id="lgMsg" hidden></div>
+
+    <div id="lgRes" hidden>
+      <div class="lg-where" id="lgWhere"></div>
+      <div class="tiles">
+        <div class="tile2"><span class="lab">Votos lidos</span><b class="num" id="tVotos">–</b><small id="tUrnas"></small></div>
+        <div class="tile2"><span class="lab">Votos após 17h</span><b class="num" id="tPos">–</b><small id="tPosU"></small></div>
+        <div class="tile2"><span class="lab">Último voto</span><b class="num" id="tUlt">–</b><small id="tUltS"></small></div>
+      </div>
+
+      <div class="card">
+        <div class="win">
+          <span class="lab">Janela de horário</span>
+          <div class="win-row">
+            <input type="time" id="wIni" value="17:00" step="60" aria-label="Início da janela">
+            <span>até</span>
+            <input type="time" id="wFim" value="19:00" step="60" aria-label="Fim da janela">
+          </div>
+          <div class="win-chips">
+            <button data-w="08:00-12:00">Manhã</button><button data-w="12:00-17:00">Tarde</button><button data-w="17:00-19:00">17h–19h</button><button data-w="17:00-23:59">Após 17h</button><button data-w="19:00-23:59">Após 19h</button>
+          </div>
+          <div class="win-out"><b class="num" id="wN">–</b><span id="wTxt"></span></div>
+        </div>
+        <div class="hist-wrap">
+          <svg id="hist" class="hist" viewBox="0 0 640 230" role="img" aria-label="Votos por faixa de 15 minutos"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+        <div class="hint">Votos a cada 15 minutos. Em destaque, a janela escolhida. Toque numa barra para ver o número.</div>
+      </div>
+
+      <div class="card">
+        <h2>Seções com votos na janela</h2>
+        <div class="tbl"><table><thead><tr><th>Zona</th><th>Seção</th><th class="r">Na janela</th><th class="r">Total</th><th class="r">Último voto</th></tr></thead><tbody id="tb"></tbody></table></div>
+        <div class="hint" id="tbHint"></div>
+      </div>
+      <details class="diag"><summary>Detalhes técnicos</summary><pre id="lgDiag"></pre></details>
+    </div>
+    <p class="hint">Fonte: arquivos de urna publicados pelo TSE em resultados.tse.jus.br. Seções que votaram em cédula de papel não têm log. O horário de cada cidade é ajustado para Brasília pela hora do primeiro voto das urnas (a votação abre às 8h de Brasília).</p>
+  </section>
+  <footer class="apur">Percentuais sobre votos válidos. Dados lidos direto da API pública do TSE a cada 15 s (nacional) e ~40 s (estados). Fonte: <a class="ext" href="https://resultados.tse.jus.br/oficial/app/index.html" target="_blank" rel="noopener">resultados.tse.jus.br</a></footer>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -514,5 +622,284 @@ async function puxaUF(){ // um estado a cada 1,5 s: ciclo completo ~40 s
   setInterval(puxaBR,15000);
   setInterval(puxaUF,1500);
 })();
+
+// ===== Leitura de logs de urna (.jez = ZIP com logd.dat) =====
+const LOGX={
+  lzmaP:null,
+  loadLZMA(){
+    if(window.LZMA)return Promise.resolve(window.LZMA);
+    if(!this.lzmaP)this.lzmaP=new Promise((ok,ko)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/lzma@2.3.2/src/lzma-d-min.js";s.onload=()=>ok(window.LZMA);s.onerror=()=>ko(new Error("não carregou o descompactador LZMA"));document.head.appendChild(s)});
+    return this.lzmaP;
+  },
+  async inflateRaw(u8){
+    const ds=new DecompressionStream("deflate-raw");
+    const out=new Response(new Blob([u8]).stream().pipeThrough(ds));
+    return new Uint8Array(await out.arrayBuffer());
+  },
+  async unlzma(u8,size){
+    const L=await this.loadLZMA();
+    const psz=u8[2]|(u8[3]<<8), props=u8.subarray(4,4+psz), data=u8.subarray(4+psz);
+    const hdr=new Uint8Array(13+data.length);
+    hdr.set(props,0);
+    let s=size;for(let i=0;i<8;i++){hdr[5+i]=i<6?(s%256):0;s=Math.floor(s/256)}
+    hdr.set(data,13);
+    return new Promise((ok,ko)=>L.decompress(hdr,(r,err)=>{
+      if(err)return ko(err);
+      if(typeof r==="string"){const b=new Uint8Array(r.length);for(let i=0;i<r.length;i++)b[i]=r.charCodeAt(i)&255;return ok(b)}
+      ok(Uint8Array.from(r,x=>x&255));
+    }));
+  },
+  // lista as entradas pelo diretório central
+  entries(u8){
+    const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);
+    let e=u8.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;
+    if(e<0)throw new Error("arquivo não é ZIP");
+    const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const out=[];
+    for(let i=0;i<n;i++){
+      const method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true),usize=dv.getUint32(p+24,true);
+      const nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+      const name=new TextDecoder("latin1").decode(u8.subarray(p+46,p+46+nl));
+      const lnl=dv.getUint16(off+26,true),lxl=dv.getUint16(off+28,true);
+      const start=off+30+lnl+lxl;
+      out.push({name,method,usize,data:u8.subarray(start,start+csize)});
+      p+=46+nl+xl+cl;
+    }
+    return out;
+  },
+  async read(ent){
+    if(ent.method===0)return ent.data;
+    if(ent.method===8)return this.inflateRaw(ent.data);
+    if(ent.method===14)return this.unlzma(ent.data,ent.usize);
+    throw new Error("compressão "+ent.method+" não suportada");
+  },
+  async logs(u8,depth=0,acc=[],meth=new Set()){
+    for(const ent of this.entries(u8)){
+      if(/\.dat$/i.test(ent.name)){meth.add(ent.method);acc.push(await this.read(ent))}
+      else if(/\.jez$/i.test(ent.name)&&depth<2){meth.add(ent.method);await this.logs(await this.read(ent),depth+1,acc,meth)}
+    }
+    return {acc,meth};
+  },
+  // extrai os votos do dia (segundos do horário local) e a hora de abertura
+  async parse(u8,dataStr){
+    const {acc,meth}=await this.logs(u8);
+    const seen=new Set();let abertura=null;const dec=new TextDecoder("latin1");
+    for(const b of acc){
+      const t=dec.decode(b);let i=0;
+      while(i<t.length){
+        let j=t.indexOf("\n",i);if(j<0)j=t.length;
+        if(t.startsWith(dataStr,i)){
+          const line=t.slice(i,j).replace(/\r$/,"");
+          if(line.includes("O voto do eleitor foi computado"))seen.add(line);
+          else if(line.includes("Urna pronta para receber votos")){const s=this.sec(line);if(abertura==null||s<abertura)abertura=s}
+        }
+        i=j+1;
+      }
+    }
+    const votos=[...seen].map(l=>this.sec(l)).sort((a,b)=>a-b);
+    return {votos,abertura,metodos:[...meth]};
+  },
+  sec(l){return (+l.slice(11,13))*3600+(+l.slice(14,16))*60+(+l.slice(17,19))}
+};
+
+// ===== Tela: logs das urnas =====
+(()=>{
+const TSEo="https://resultados.tse.jus.br/oficial";
+const ANOl=new URLSearchParams(location.search).get("ano")||"2026";
+const DIA=new URLSearchParams(location.search).get("dia")||"25/10/2026";
+const NOMES={AC:"Acre",AL:"Alagoas",AM:"Amazonas",AP:"Amapá",BA:"Bahia",CE:"Ceará",DF:"Distrito Federal",ES:"Espírito Santo",GO:"Goiás",MA:"Maranhão",MG:"Minas Gerais",MS:"Mato Grosso do Sul",MT:"Mato Grosso",PA:"Pará",PB:"Paraíba",PE:"Pernambuco",PI:"Piauí",PR:"Paraná",RJ:"Rio de Janeiro",RN:"Rio Grande do Norte",RO:"Rondônia",RR:"Roraima",RS:"Rio Grande do Sul",SC:"Santa Catarina",SE:"Sergipe",SP:"São Paulo",TO:"Tocantins"};
+const FUSO_UF={AC:2,AM:1,RR:1,RO:1,MT:1,MS:1};
+const MB_SECAO=0.2, LIMITE=1500;
+const $l=id=>document.getElementById(id);
+const nfl=new Intl.NumberFormat("pt-BR");
+const hh=s=>s==null?"–":`${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor(s%3600/60)).padStart(2,"0")}`;
+const pad6=n=>String(n).padStart(6,"0");
+const LD={};function ldiag(k,v){LD[k]=v;$l("lgDiag").textContent=Object.entries(LD).map(([a,b])=>a+": "+b).join("\n")}
+async function gj(u,sig){const r=await fetch(u,{cache:"no-store",signal:sig});if(r.status===404)return null;if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
+async function gb(u,sig){const r=await fetch(u,{cache:"no-store",signal:sig});if(!r.ok)throw new Error("HTTP "+r.status);return new Uint8Array(await r.arrayBuffer())}
+
+// --- abas ---
+function setView(v){
+  document.body.dataset.view=v;
+  $l("tabA").setAttribute("aria-selected",String(v!=="logs"));$l("tabL").setAttribute("aria-selected",String(v==="logs"));
+  $l("vLogs").hidden=v!=="logs";
+  try{history.replaceState(null,"",v==="logs"?"#logs":location.pathname+location.search)}catch(e){}
+  if(v==="logs")initLogs();
+}
+$l("tabA").onclick=()=>setView("apur");$l("tabL").onclick=()=>setView("logs");
+
+// --- estado ---
+let PLEITO=null, CS=null, ctrl=null, inited=false;
+const cache=new Map(); // chave seção -> {votos,abertura}
+let cur=null; // {uf,mun,munNome,zona,secoes:[{z,s,votos(brasilia),ult}],fuso}
+
+async function descobrePleito(){
+  const p=new URLSearchParams(location.search).get("pleito");if(p)return p;
+  try{
+    const c=await gj(`${TSEo}/comum/config/ele-c.json`);
+    for(const pl of c.pl||[])for(const e of pl.e||[])if(String(e.cd)===((typeof ELE!=="undefined"&&ELE)||"6258")||/Federal - \d{4} 2º Turno/.test(e.nm||""))if(String(e.nm||"").includes(ANOl))return String(pl.cd);
+  }catch(e){}
+  return "3221";
+}
+async function initLogs(){
+  if(inited)return;inited=true;
+  const s=$l("lgUf");for(const uf of Object.keys(NOMES).sort((a,b)=>NOMES[a].localeCompare(NOMES[b],"pt-BR")))s.add(new Option(NOMES[uf],uf));
+  PLEITO=await descobrePleito();ldiag("pleito",PLEITO);
+}
+function msg(t){$l("lgMsg").hidden=!t;$l("lgMsg").textContent=t||""}
+$l("lgUf").onchange=async()=>{
+  const uf=$l("lgUf").value;const m=$l("lgMun"),z=$l("lgZon");
+  m.innerHTML="";z.innerHTML='<option value="">—</option>';z.disabled=true;$l("lgRun").disabled=true;$l("lgEst").textContent="";
+  if(!uf){m.add(new Option("—",""));m.disabled=true;return}
+  m.add(new Option("Carregando…",""));m.disabled=true;msg("");
+  try{
+    if(!PLEITO)PLEITO=await descobrePleito();
+    const u=`${TSEo}/ele${ANOl}/arquivo-urna/${PLEITO}/config/${uf.toLowerCase()}/${uf.toLowerCase()}-p${pad6(PLEITO)}-cs.json`;
+    ldiag("lista de seções",u);
+    CS=await gj(u);
+    if(!CS)throw new Error("o TSE ainda não publicou a lista de seções deste estado");
+    const mus=[];for(const a of CS.abr||[])for(const mu of a.mu||[])mus.push(mu);
+    ldiag("campos município",Object.keys(mus[0]||{}).join(","));
+    mus.sort((a,b)=>String(a.nm||a.cd).localeCompare(String(b.nm||b.cd),"pt-BR"));
+    m.innerHTML="";m.add(new Option("Escolha…",""));
+    for(const mu of mus){const n=(mu.zon||[]).reduce((t,z)=>t+(z.sec||[]).length,0);const o=new Option(`${mu.nm||mu.cd} (${nfl.format(n)} seções)`,mu.cd);m.add(o)}
+    m.disabled=false;
+  }catch(e){m.innerHTML="";m.add(new Option("—",""));msg("Não consegui carregar as cidades: "+e.message)}
+};
+function munObj(){for(const a of CS.abr||[])for(const mu of a.mu||[])if(String(mu.cd)===$l("lgMun").value)return mu;return null}
+$l("lgMun").onchange=()=>{
+  const mu=munObj(),z=$l("lgZon");z.innerHTML="";
+  if(!mu){z.add(new Option("—",""));z.disabled=true;$l("lgRun").disabled=true;return}
+  const tot=(mu.zon||[]).reduce((t,zz)=>t+(zz.sec||[]).length,0);
+  z.add(new Option(`Todas as zonas (${nfl.format(tot)} seções)`,"*"));
+  for(const zz of mu.zon||[])z.add(new Option(`Zona ${+zz.cd} (${nfl.format((zz.sec||[]).length)} seções)`,zz.cd));
+  z.disabled=false;estima();
+};
+$l("lgZon").onchange=estima;
+function alvo(){
+  const mu=munObj();if(!mu)return [];const zv=$l("lgZon").value;const out=[];
+  for(const zz of mu.zon||[])if(zv==="*"||zv===String(zz.cd))for(const s of zz.sec||[])out.push({z:zz.cd,s:s.ns});
+  return out;
+}
+function estima(){
+  const n=alvo().length,mb=Math.round(n*MB_SECAO);
+  const b=$l("lgRun");b.disabled=!n||n>LIMITE;
+  $l("lgEst").textContent=!n?"":n>LIMITE?`${nfl.format(n)} seções é demais pro celular. Escolha uma zona.`:`${nfl.format(n)} seções · cerca de ${nfl.format(Math.max(1,mb))} MB de download`;
+}
+
+// --- análise ---
+$l("lgStop").onclick=()=>ctrl&&ctrl.abort();
+$l("lgRun").onclick=async()=>{
+  const uf=$l("lgUf").value.toLowerCase(),mu=munObj(),lista=alvo();if(!mu||!lista.length)return;
+  ctrl=new AbortController();const sig=ctrl.signal;
+  $l("lgRun").disabled=true;$l("lgProg").hidden=false;msg("");
+  const res=[];let feitos=0,bytes=0,semLog=0,erros=0;const metodos=new Set();
+  const base=`${TSEo}/ele${ANOl}/arquivo-urna/${PLEITO}/dados/${uf}/${mu.cd}`;
+  const prog=()=>{$l("lgBar").style.width=(feitos/lista.length*100)+"%";$l("lgProgTxt").textContent=`${nfl.format(feitos)} de ${nfl.format(lista.length)} seções · ${(bytes/1048576).toLocaleString("pt-BR",{maximumFractionDigits:1})} MB`};
+  prog();
+  let idx=0;
+  async function worker(){
+    while(idx<lista.length&&!sig.aborted){
+      const it=lista[idx++];const key=`${uf}/${mu.cd}/${it.z}/${it.s}`;
+      try{
+        let r=cache.get(key);
+        if(!r){
+          const pasta=`${base}/${it.z}/${it.s}`;
+          const aux=await gj(`${pasta}/p${pad6(PLEITO)}-${uf}-m${mu.cd}-z${it.z}-s${it.s}-aux.json`,sig);
+          const hs=(aux&&aux.hashes)||[];
+          const h=hs.find(x=>x.st==="Totalizado")||hs[hs.length-1];
+          const arq=h&&(h.arq||[]).find(a=>a.tp==="log"||/-log\.jez$/i.test(a.nm||""));
+          if(!arq){semLog++;r={votos:[],abertura:null,semLog:true}}
+          else{
+            const u8=await gb(`${pasta}/${h.hash}/${arq.nm}`,sig);bytes+=u8.length;
+            r=await LOGX.parse(u8,DIA);r.metodos.forEach(m=>metodos.add(m));
+          }
+          cache.set(key,r);
+        }
+        res.push({z:it.z,s:it.s,...r});
+      }catch(e){if(sig.aborted)break;erros++;ldiag("último erro",`${it.z}/${it.s}: ${e.message||e}`)}
+      feitos++;prog();
+    }
+  }
+  await Promise.all(Array.from({length:6},worker));
+  $l("lgProg").hidden=true;$l("lgRun").disabled=false;estima();
+  ldiag("compressão",[...metodos].join(",")||"–");ldiag("seções sem log",semLog);ldiag("erros",erros);
+  if(sig.aborted&&!res.length){msg("Análise cancelada.");return}
+  // fuso da cidade pela hora de abertura mais comum
+  // (a votação abre às 8h de Brasília: a hora do 1º voto de cada urna revela o fuso local)
+  const cnt={};for(const r of res){const s=r.votos.length?r.votos[0]:(r.abertura!=null?r.abertura+1800:null);if(s!=null){const h=Math.floor(s/3600);cnt[h]=(cnt[h]||0)+1}}
+  const moda=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+  const fuso=moda?Math.max(-1,Math.min(3,8-(+moda[0]))):(FUSO_UF[uf.toUpperCase()]||0);
+  ldiag("ajuste de fuso (h)",fuso+(moda?" (1º voto mais comum às "+moda[0]+"h locais)":" (padrão do estado)"));
+  const secoes=res.map(r=>{const v=r.votos.map(x=>x+fuso*3600);return {z:r.z,s:r.s,votos:v,ult:v.length?v[v.length-1]:null,semLog:r.semLog}});
+  const zv=$l("lgZon").value;
+  cur={uf:uf.toUpperCase(),munNome:mu.nm||mu.cd,zona:zv,secoes,parcial:sig.aborted,erros,semLog,total:lista.length};
+  if(!secoes.some(s=>s.votos.length)){msg(semLog===res.length?"O TSE ainda não publicou os logs dessas seções.":"Nenhum voto do dia "+DIA+" encontrado nesses logs.")}
+  renderRes();
+};
+
+// --- resultado ---
+const parseT=v=>{const [h,m]=(v||"0:0").split(":").map(Number);return h*3600+m*60};
+function win(){let a=parseT($l("wIni").value),b=parseT($l("wFim").value)+59;if(b<a)[a,b]=[b,a];return [a,b]}
+function renderRes(){
+  if(!cur)return;$l("lgRes").hidden=false;
+  const S=cur.secoes,all=[];for(const s of S)for(const v of s.votos)all.push(v);
+  const comLog=S.filter(s=>!s.semLog).length;
+  $l("lgWhere").innerHTML="";
+  $l("lgWhere").append(document.createTextNode(`${cur.munNome} · ${cur.uf}`));
+  const sm=document.createElement("small");
+  sm.textContent=`${cur.zona==="*"?"Todas as zonas":"Zona "+(+cur.zona)} · ${nfl.format(comLog)} seções com log`+(cur.parcial?` · análise interrompida em ${nfl.format(S.length)} de ${nfl.format(cur.total)}`:"")+(cur.erros?` · ${cur.erros} com erro`:"");
+  $l("lgWhere").append(sm);
+  const C=17*3600,pos=all.filter(v=>v>=C).length,posU=S.filter(s=>s.ult!=null&&s.ult>=C).length;
+  const ult=S.reduce((m,s)=>s.ult!=null&&(!m||s.ult>m.ult)?s:m,null);
+  $l("tVotos").textContent=nfl.format(all.length);$l("tUrnas").textContent=`em ${nfl.format(comLog)} urnas`;
+  $l("tPos").textContent=nfl.format(pos);$l("tPosU").textContent=`em ${nfl.format(posU)} urnas`;
+  $l("tUlt").textContent=ult?hh(ult.ult):"–";$l("tUltS").textContent=ult?`Zona ${+ult.z} · Seção ${+ult.s}`:"";
+  renderWin();
+}
+function renderWin(){
+  if(!cur)return;const [a,b]=win(),S=cur.secoes;
+  const rows=[];let n=0;
+  for(const s of S){let k=0;for(const v of s.votos)if(v>=a&&v<=b)k++;n+=k;if(k)rows.push({...s,k})}
+  $l("wN").textContent=nfl.format(n);
+  $l("wTxt").textContent=`votos entre ${hh(a)} e ${hh(b)} em ${nfl.format(rows.length)} ${rows.length===1?"urna":"urnas"}`;
+  rows.sort((x,y)=>y.k-x.k||(y.ult||0)-(x.ult||0));
+  const tb=$l("tb");tb.innerHTML="";
+  for(const r of rows.slice(0,50)){
+    const tr=document.createElement("tr");
+    for(const [t,c] of [[+r.z,""],[+r.s,""],[nfl.format(r.k),"r w"],[nfl.format(r.votos.length),"r"],[hh(r.ult),"r"]]){const td=document.createElement("td");td.textContent=t;if(c)td.className=c;tr.append(td)}
+    tb.append(tr);
+  }
+  $l("tbHint").textContent=!rows.length?"Nenhuma seção com votos nessa janela.":rows.length>50?`Mostrando as 50 com mais votos, de ${nfl.format(rows.length)}.`:"";
+  renderHist(a,b);
+}
+const NS2="http://www.w3.org/2000/svg";
+function mk(t,at,p){const e=document.createElementNS(NS2,t);for(const k in at)e.setAttribute(k,at[k]);p&&p.appendChild(e);return e}
+function renderHist(a,b){
+  const svg=$l("hist");svg.innerHTML="";const tip=$l("tip");tip.hidden=true;
+  const H0=7,H1=21,BIN=900,nb=(H1-H0)*3600/BIN;const bins=new Array(nb).fill(0);
+  for(const s of cur.secoes)for(const v of s.votos){const i=Math.floor((v-H0*3600)/BIN);if(i>=0&&i<nb)bins[i]++}
+  const W=640,Hh=230,L=44,R=8,T=26,B=26,pw=W-L-R,ph=Hh-T-B;
+  const max=Math.max(1,...bins);
+  const step=[1,2,5,10,20,25,50,100,200,250,500,1000,2000,2500,5000,10000,20000,50000,100000].find(x=>max/x<=4)||Math.ceil(max/4);
+  const top=Math.ceil(max/step)*step;
+  for(let y=0;y<=top;y+=step){const yy=T+ph-(y/top)*ph;mk("line",{x1:L,x2:W-R,y1:yy,y2:yy,class:"grid"},svg);const t=mk("text",{x:L-6,y:yy+4,class:"ax","text-anchor":"end"},svg);t.textContent=y>=1000?(y/1000).toLocaleString("pt-BR")+" mil":y}
+  const bw=pw/nb;
+  for(let h=H0;h<=H1;h+=2){const x=L+(h-H0)*3600/BIN*bw;const t=mk("text",{x,y:Hh-6,class:"ax","text-anchor":h===H0?"start":h===H1?"end":"middle"},svg);t.textContent=h+"h"}
+  bins.forEach((c,i)=>{
+    const s0=H0*3600+i*BIN,inW=s0+BIN-1>=a&&s0<=b;
+    const h=c/top*ph,x=L+i*bw+1,w=Math.max(1,bw-2);
+    if(c>0){const r=Math.min(3,w/2,h);mk("path",{class:inW?"bar1":"bar0",d:`M${x},${T+ph}V${T+ph-h+r}Q${x},${T+ph-h} ${x+r},${T+ph-h}H${x+w-r}Q${x+w},${T+ph-h} ${x+w},${T+ph-h+r}V${T+ph}Z`},svg)}
+    const hit=mk("rect",{x:L+i*bw,y:T,width:bw,height:ph,class:"hit"},svg);
+    const show=()=>{tip.hidden=false;tip.textContent=`${hh(s0)}–${hh(s0+BIN)} · ${nfl.format(c)} votos`;const bb=svg.getBoundingClientRect();tip.style.left=Math.min(bb.width-60,Math.max(60,(L+i*bw+bw/2)/W*bb.width))+"px"};
+    hit.addEventListener("pointerenter",show);hit.addEventListener("click",show);
+  });
+  svg.onpointerleave=()=>{tip.hidden=true};
+}
+$l("wIni").onchange=renderWin;$l("wFim").onchange=renderWin;
+document.querySelectorAll(".win-chips button").forEach(b=>b.onclick=()=>{const [x,y]=b.dataset.w.split("-");$l("wIni").value=x;$l("wFim").value=y;renderWin()});
+
+if(location.hash==="#logs")setView("logs");else document.body.dataset.view="apur";
+})();
+
 </script>
 </body></html>
