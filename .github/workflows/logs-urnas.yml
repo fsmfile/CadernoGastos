@@ -1,0 +1,67 @@
+name: Logs das urnas (Brasil)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/logs-urnas.yml
+      - apuracao/tools/logs_urnas.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: logs-urnas
+  cancel-in-progress: true
+
+jobs:
+  uf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        uf: [sp, mg, rj, ba, rs, pr, pe, ce, pa, sc, go, ma, am, pb, es, mt, rn, pi, al, df, ms, se, ro, to, ac, ap, rr]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apuracao/tools
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 apuracao/tools/logs_urnas.py uf ${{ matrix.uf }} saida
+      - uses: actions/upload-artifact@v4
+        with:
+          name: uf-${{ matrix.uf }}
+          path: saida/*.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  juntar:
+    needs: uf
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          path: art
+          pattern: uf-*
+          merge-multiple: true
+      - name: Juntar e publicar
+        run: |
+          mkdir -p apuracao/dados/logs
+          cp art/*.json apuracao/dados/logs/ 2>/dev/null || true
+          python3 apuracao/tools/logs_urnas.py juntar apuracao/dados/logs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apuracao/dados/logs
+          git diff --cached --quiet && exit 0
+          git commit -m "Apuração: resumo nacional dos logs das urnas"
+          git pull --rebase origin main
+          git push origin HEAD:main

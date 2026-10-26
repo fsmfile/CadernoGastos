@@ -155,6 +155,10 @@ footer{font-size:12px;color:var(--muted);text-align:center}
 body[data-view="logs"] .apur{display:none!important}
 .logs{display:flex;flex-direction:column;gap:14px}
 .lg-intro h2{margin-bottom:4px}
+.lg-scope{align-self:flex-start}
+.tbl tr.click{cursor:pointer}
+.tbl tr.click:hover td{background:var(--surface-2)}
+.lg-back{align-self:flex-start}
 .lg-intro p{margin:0;color:var(--muted);font-size:14px;max-width:62ch}
 .lg-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--surface);border-radius:14px;padding:12px}
 .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
@@ -247,9 +251,10 @@ body[data-view="logs"] .apur{display:none!important}
   <section class="logs" id="vLogs" hidden>
     <div class="lg-intro">
       <h2>Logs das urnas · 2º turno</h2>
-      <p>Cada urna registra o horário de cada voto. Escolha um lugar e o app baixa os logs do TSE e conta os votos por horário. Tudo em horário de Brasília.</p>
+      <p>Cada urna registra o horário de cada voto. "Brasil inteiro" mostra o resumo de todas as urnas, processado por um robô. "Por cidade" baixa os logs do TSE na hora e mostra seção por seção. Tudo em horário de Brasília.</p>
     </div>
-    <div class="lg-form">
+    <div class="seg lg-scope" role="group" aria-label="Abrangência"><button id="scBr" aria-pressed="true">Brasil inteiro</button><button id="scLoc" aria-pressed="false">Por cidade</button></div>
+    <div class="lg-form" id="lgForm" hidden>
       <label class="fld"><span>Estado</span><select id="lgUf"><option value="">Escolha…</option></select></label>
       <label class="fld"><span>Cidade</span><select id="lgMun" disabled><option value="">—</option></select></label>
       <label class="fld"><span>Zona eleitoral</span><select id="lgZon" disabled><option value="">—</option></select></label>
@@ -262,6 +267,7 @@ body[data-view="logs"] .apur{display:none!important}
     <div class="empty" id="lgMsg" hidden></div>
 
     <div id="lgRes" hidden>
+      <button class="lg-link lg-back" id="lgBack" hidden>‹ Voltar ao Brasil</button>
       <div class="lg-where" id="lgWhere"></div>
       <div class="tiles">
         <div class="tile2"><span class="lab">Votos lidos</span><b class="num" id="tVotos">–</b><small id="tUrnas"></small></div>
@@ -290,8 +296,8 @@ body[data-view="logs"] .apur{display:none!important}
       </div>
 
       <div class="card">
-        <h2>Seções com votos na janela</h2>
-        <div class="tbl"><table><thead><tr><th>Zona</th><th>Seção</th><th class="r">Na janela</th><th class="r">Total</th><th class="r">Último voto</th></tr></thead><tbody id="tb"></tbody></table></div>
+        <h2 id="tbTit">Seções com votos na janela</h2>
+        <div class="tbl"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
         <div class="hint" id="tbHint"></div>
       </div>
       <details class="diag"><summary>Detalhes técnicos</summary><pre id="lgDiag"></pre></details>
@@ -723,7 +729,7 @@ function setView(v){
   $l("tabA").setAttribute("aria-selected",String(v!=="logs"));$l("tabL").setAttribute("aria-selected",String(v==="logs"));
   $l("vLogs").hidden=v!=="logs";
   try{history.replaceState(null,"",v==="logs"?"#logs":location.pathname+location.search)}catch(e){}
-  if(v==="logs")initLogs();
+  if(v==="logs"){initLogs();if(scope==="br"&&!cur)loadBR()}
 }
 $l("tabA").onclick=()=>setView("apur");$l("tabL").onclick=()=>setView("logs");
 
@@ -746,6 +752,23 @@ async function initLogs(){
   PLEITO=await descobrePleito();ldiag("pleito",PLEITO);
 }
 function msg(t){$l("lgMsg").hidden=!t;$l("lgMsg").textContent=t||""}
+let scope="br",BR=null,BRUF=null;
+function setScope(s){scope=s;$l("scBr").setAttribute("aria-pressed",String(s==="br"));$l("scLoc").setAttribute("aria-pressed",String(s!=="br"));$l("lgForm").hidden=s==="br";msg("");$l("lgRes").hidden=true;
+  if(s==="br")loadBR();else if(cur&&cur.kind==="loc")renderRes()}
+$l("scBr").onclick=()=>setScope("br");$l("scLoc").onclick=()=>setScope("loc");
+async function loadBR(){
+  try{
+    if(!BR){msg("Carregando o resumo nacional…");const r=await fetch("dados/logs/brasil.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;BR=await r.json()}
+    msg("");cur={kind:"br"};BRUF=null;renderRes();
+  }catch(e){msg("O resumo do Brasil inteiro ainda está sendo gerado: um robô baixa e processa os logs de todas as urnas, o que leva algumas horas. Enquanto isso, use \"Por cidade\".")}
+}
+async function openUF(uf){
+  try{msg("Carregando "+NOMES[uf]+"…");const r=await fetch("dados/logs/"+uf.toLowerCase()+".json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;BRUF=await r.json();msg("");renderRes();window.scrollTo({top:$l("lgRes").offsetTop-10,behavior:"smooth"})}
+  catch(e){msg("Não achei o resumo de "+NOMES[uf]+".")}
+}
+$l("lgBack").onclick=()=>{BRUF=null;renderRes()};
+const winBins=(bins,a,b)=>{let n=0;for(let i=0;i<bins.length;i++){const s=i*300;if(s>=a-299&&s<=b)n+=bins[i]}return n};
+const pos17b=bins=>winBins(bins,17*3600,86399);
 $l("lgUf").onchange=async()=>{
   const uf=$l("lgUf").value;const m=$l("lgMun"),z=$l("lgZon");
   m.innerHTML="";z.innerHTML='<option value="">—</option>';z.disabled=true;$l("lgRun").disabled=true;$l("lgEst").textContent="";
@@ -832,7 +855,7 @@ $l("lgRun").onclick=async()=>{
   ldiag("ajuste de fuso (h)",fuso+(moda?" (1º voto mais comum às "+moda[0]+"h locais)":" (padrão do estado)"));
   const secoes=res.map(r=>{const v=r.votos.map(x=>x+fuso*3600);return {z:r.z,s:r.s,votos:v,ult:v.length?v[v.length-1]:null,semLog:r.semLog}});
   const zv=$l("lgZon").value;
-  cur={uf:uf.toUpperCase(),munNome:mu.nm||mu.cd,zona:zv,secoes,parcial:sig.aborted,erros,semLog,total:lista.length};
+  cur={kind:"loc",uf:uf.toUpperCase(),munNome:mu.nm||mu.cd,zona:zv,secoes,parcial:sig.aborted,erros,semLog,total:lista.length};
   if(!secoes.some(s=>s.votos.length)){msg(semLog===res.length?"O TSE ainda não publicou os logs dessas seções.":"Nenhum voto do dia "+DIA+" encontrado nesses logs.")}
   renderRes();
 };
@@ -841,7 +864,8 @@ $l("lgRun").onclick=async()=>{
 const parseT=v=>{const [h,m]=(v||"0:0").split(":").map(Number);return h*3600+m*60};
 function win(){let a=parseT($l("wIni").value),b=parseT($l("wFim").value)+59;if(b<a)[a,b]=[b,a];return [a,b]}
 function renderRes(){
-  if(!cur)return;$l("lgRes").hidden=false;
+  if(!cur)return;$l("lgRes").hidden=false;$l("lgBack").hidden=!(cur.kind==="br"&&BRUF);
+  if(cur.kind==="br")return renderBR();
   const S=cur.secoes,all=[];for(const s of S)for(const v of s.votos)all.push(v);
   const comLog=S.filter(s=>!s.semLog).length;
   $l("lgWhere").innerHTML="";
@@ -856,8 +880,37 @@ function renderRes(){
   $l("tUlt").textContent=ult?hh(ult.ult):"–";$l("tUltS").textContent=ult?`Zona ${+ult.z} · Seção ${+ult.s}`:"";
   renderWin();
 }
+function renderBR(){
+  const D=BRUF?{nome:NOMES[BRUF.uf]||BRUF.uf,itens:BRUF.municipios,sub:`${nfl.format(BRUF.municipios.reduce((t,m)=>t+m.urnas,0))} urnas com log · processado em ${BRUF.gerado}`}:{nome:"Brasil",itens:BR.ufs,sub:`${nfl.format(BR.total.urnas)} urnas com log em ${BR.ufs.length} estados · processado em ${BR.gerado}`+(BR.total.erros?` · ${nfl.format(BR.total.erros)} com erro`:"")};
+  const all=new Array(288).fill(0);for(const it of D.itens)it.bins.forEach((q,i)=>all[i]+=q);
+  cur.bins=all;cur.itens=D.itens;
+  $l("lgWhere").innerHTML="";$l("lgWhere").append(document.createTextNode(D.nome));const sm=document.createElement("small");sm.textContent=D.sub;$l("lgWhere").append(sm);
+  const votos=D.itens.reduce((t,x)=>t+x.votos,0),urnas=D.itens.reduce((t,x)=>t+x.urnas,0),pu=D.itens.reduce((t,x)=>t+x.urnasPos17,0);
+  const ult=D.itens.reduce((m,x)=>x.ult!=null&&(!m||x.ult>m.ult)?x:m,null);
+  $l("tVotos").textContent=nfl.format(votos);$l("tUrnas").textContent=`em ${nfl.format(urnas)} urnas`;
+  $l("tPos").textContent=nfl.format(pos17b(all));$l("tPosU").textContent=`em ${nfl.format(pu)} urnas`;
+  $l("tUlt").textContent=ult?hh(ult.ult):"–";$l("tUltS").textContent=ult?(BRUF?`${ult.nm} · seção ${ult.ultSec}`:(ult.ultLocal||ult.uf)):"";
+  renderWin();
+}
 function renderWin(){
-  if(!cur)return;const [a,b]=win(),S=cur.secoes;
+  if(!cur)return;
+  if(cur.kind==="br"){
+    const [a,b]=win();const rows=cur.itens.map(x=>({x,k:winBins(x.bins,a,b)})).filter(r=>r.k>0).sort((p,q)=>q.k-p.k);
+    $l("wN").textContent=nfl.format(rows.reduce((t,r)=>t+r.k,0));
+    $l("wTxt").textContent=`votos entre ${hh(a)} e ${hh(b)} (faixas de 5 min)`;
+    $l("tbTit").textContent=BRUF?"Cidades com votos na janela":"Estados com votos na janela";
+    $l("th").innerHTML=`<tr><th>${BRUF?"Cidade":"Estado"}</th><th class="r">Na janela</th><th class="r">Total</th><th class="r">Último voto</th></tr>`;
+    const tb=$l("tb");tb.innerHTML="";
+    for(const r of rows.slice(0,60)){const tr=document.createElement("tr");
+      for(const [t,c] of [[BRUF?r.x.nm:(NOMES[r.x.uf]||r.x.uf),""],[nfl.format(r.k),"r w"],[nfl.format(r.x.votos),"r"],[hh(r.x.ult),"r"]]){const td=document.createElement("td");td.textContent=t;if(c)td.className=c;tr.append(td)}
+      if(!BRUF){tr.className="click";tr.onclick=()=>openUF(r.x.uf)}
+      tb.append(tr)}
+    $l("tbHint").textContent=!rows.length?"Nenhum voto nessa janela.":(!BRUF?"Toque num estado para ver as cidades.":"")+(rows.length>60?` Mostrando as 60 com mais votos, de ${nfl.format(rows.length)}.`:"");
+    const b15=[];for(let i=0;i<56;i++)b15.push(cur.bins[84+3*i]+cur.bins[85+3*i]+cur.bins[86+3*i]);
+    return renderHist(a,b,b15);
+  }const [a,b]=win(),S=cur.secoes;
+  $l("tbTit").textContent="Seções com votos na janela";
+  $l("th").innerHTML='<tr><th>Zona</th><th>Seção</th><th class="r">Na janela</th><th class="r">Total</th><th class="r">Último voto</th></tr>';
   const rows=[];let n=0;
   for(const s of S){let k=0;for(const v of s.votos)if(v>=a&&v<=b)k++;n+=k;if(k)rows.push({...s,k})}
   $l("wN").textContent=nfl.format(n);
@@ -874,15 +927,16 @@ function renderWin(){
 }
 const NS2="http://www.w3.org/2000/svg";
 function mk(t,at,p){const e=document.createElementNS(NS2,t);for(const k in at)e.setAttribute(k,at[k]);p&&p.appendChild(e);return e}
-function renderHist(a,b){
+function renderHist(a,b,pre){
   const svg=$l("hist");svg.innerHTML="";const tip=$l("tip");tip.hidden=true;
   const H0=7,H1=21,BIN=900,nb=(H1-H0)*3600/BIN;const bins=new Array(nb).fill(0);
-  for(const s of cur.secoes)for(const v of s.votos){const i=Math.floor((v-H0*3600)/BIN);if(i>=0&&i<nb)bins[i]++}
+  if(pre)pre.forEach((q,i)=>bins[i]=q);else for(const s of cur.secoes)for(const v of s.votos){const i=Math.floor((v-H0*3600)/BIN);if(i>=0&&i<nb)bins[i]++}
   const W=640,Hh=230,L=44,R=8,T=26,B=26,pw=W-L-R,ph=Hh-T-B;
   const max=Math.max(1,...bins);
-  const step=[1,2,5,10,20,25,50,100,200,250,500,1000,2000,2500,5000,10000,20000,50000,100000].find(x=>max/x<=4)||Math.ceil(max/4);
+  const step=[1,2,5,10,20,25,50,100,200,250,500,1e3,2e3,2500,5e3,1e4,2e4,25e3,5e4,1e5,2e5,25e4,5e5,1e6,2e6,25e5,5e6].find(x=>max/x<=4)||Math.ceil(max/4);
   const top=Math.ceil(max/step)*step;
-  for(let y=0;y<=top;y+=step){const yy=T+ph-(y/top)*ph;mk("line",{x1:L,x2:W-R,y1:yy,y2:yy,class:"grid"},svg);const t=mk("text",{x:L-6,y:yy+4,class:"ax","text-anchor":"end"},svg);t.textContent=y>=1000?(y/1000).toLocaleString("pt-BR")+" mil":y}
+  const fmtY=y=>y>=1e6?(y/1e6).toLocaleString("pt-BR")+" mi":y>=1000?(y/1000).toLocaleString("pt-BR")+" mil":y;
+  for(let y=0;y<=top;y+=step){const yy=T+ph-(y/top)*ph;mk("line",{x1:L,x2:W-R,y1:yy,y2:yy,class:"grid"},svg);const t=mk("text",{x:L-6,y:yy+4,class:"ax","text-anchor":"end"},svg);t.textContent=fmtY(y)}
   const bw=pw/nb;
   for(let h=H0;h<=H1;h+=2){const x=L+(h-H0)*3600/BIN*bw;const t=mk("text",{x,y:Hh-6,class:"ax","text-anchor":h===H0?"start":h===H1?"end":"middle"},svg);t.textContent=h+"h"}
   bins.forEach((c,i)=>{
