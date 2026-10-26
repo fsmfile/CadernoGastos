@@ -109,6 +109,15 @@ def faz_uf(uf, saida, parte=1, partes=1):
             res[t] = r
             if feitos % 2000 == 0:
                 print(f"  {feitos}/{len(tarefas)}", flush=True)
+    # segunda tentativa, mais devagar, para as seções que deram erro
+    falhas = [t for t, r in res.items() if r and "erro" in r]
+    if falhas:
+        print(f"[{uf}] repetindo {len(falhas)} seções com erro", flush=True)
+        time.sleep(30)
+        with ThreadPoolExecutor(6) as ex:
+            for t, r in ex.map(um, falhas):
+                res[t] = r
+        erros = sum(1 for r in res.values() if r and "erro" in r)
     # fuso por município: hora mais comum do primeiro voto
     prim = {}
     for (mun, _, _), r in res.items():

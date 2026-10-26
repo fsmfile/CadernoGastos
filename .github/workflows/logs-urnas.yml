@@ -1,12 +1,21 @@
 name: Logs das urnas (Brasil)
 
+# Roda os estados listados em apuracao/tools/fila.txt (ou os informados ao disparar à mão).
+# "todas" = os 27 estados, com SP dividido em 6 partes. Um estado pode ser dividido com "sp:6".
+# O passo final junta os resultados novos com os que já estão em apuracao/dados/logs.
+
 on:
   workflow_dispatch:
+    inputs:
+      ufs:
+        description: "Estados (ex.: sp:6 rj mg) ou 'todas'"
+        default: todas
   push:
     branches: [main]
     paths:
       - .github/workflows/logs-urnas.yml
       - apuracao/tools/logs_urnas.py
+      - apuracao/tools/fila.txt
 
 permissions:
   contents: write
@@ -16,20 +25,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  uf:
+  planejar:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    outputs:
+      matriz: ${{ steps.m.outputs.matriz }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apuracao/tools
+      - id: m
+        env:
+          ENTRADA: ${{ github.event.inputs.ufs }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          txt = os.environ.get("ENTRADA") or open("apuracao/tools/fila.txt").read()
+          itens = txt.split()
+          if itens == ["todas"]:
+              itens = "sp:6 mg rj ba rs pr pe ce pa sc go ma am pb es mt rn pi al df ms se ro to ac ap rr".split()
+          m = []
+          for it in itens:
+              uf, _, n = it.lower().partition(":")
+              n = int(n or 1)
+              m += [{"uf": uf, "parte": f"{i}/{n}"} for i in range(1, n + 1)]
+          print("matriz=" + json.dumps({"include": m}))
+          PY
+
+  uf:
+    needs: planejar
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
     strategy:
       fail-fast: false
       max-parallel: 20
-      matrix:
-        uf: [mg, rj, ba, rs, pr, pe, ce, pa, sc, go, ma, am, pb, es, mt, rn, pi, al, df, ms, se, ro, to, ac, ap, rr]
-        parte: ["1/1"]
-        include:
-          - {uf: sp, parte: "1/4"}
-          - {uf: sp, parte: "2/4"}
-          - {uf: sp, parte: "3/4"}
-          - {uf: sp, parte: "4/4"}
+      matrix: ${{ fromJSON(needs.planejar.outputs.matriz) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,11 +91,17 @@ jobs:
       - name: Juntar e publicar
         run: |
           mkdir -p apuracao/dados/logs
+          for f in art/*.json; do
+            [ -e "$f" ] || continue
+            b=$(basename "$f"); u=${b%%-parte*}; u=${u%.json}
+            # resultado novo de um estado substitui o antigo (inteiro ou em partes)
+            rm -f "apuracao/dados/logs/$u.json"
+          done
           cp art/*.json apuracao/dados/logs/ 2>/dev/null || true
           python3 apuracao/tools/logs_urnas.py juntar apuracao/dados/logs
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apuracao/dados/logs
+          git add -A apuracao/dados/logs
           git diff --cached --quiet && exit 0
           git commit -m "Apuração: resumo nacional dos logs das urnas"
           git pull --rebase origin main
