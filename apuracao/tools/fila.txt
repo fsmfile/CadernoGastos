@@ -1,1 +1,1 @@
-sp:6
+sp:6:reparo rj:4:reparo mg:2:reparo ba:2:reparo df:2:reparo rs:2:reparo pe:1:reparo am:1:reparo pi:1:reparo se:1:reparo pb:1:reparo sc:1:reparo ap:1:reparo al:1:reparo ce:1:reparo es:1:reparo ms:1:reparo pa:1:reparo

@@ -80,7 +80,7 @@ def secao(uf, mun, zona, sec):
             "bytes": len(dados)}
 
 
-def faz_uf(uf, saida, parte=1, partes=1):
+def faz_uf(uf, saida, parte=1, partes=1, reparo=False):
     cs = get(f"{BASE}/{CICLO}/arquivo-urna/{PLEITO}/config/{uf}/{uf}-p{PLEITO:06d}-cs.json")
     if cs is None:
         print(f"[{uf}] lista de seções não publicada"); return
@@ -92,7 +92,13 @@ def faz_uf(uf, saida, parte=1, partes=1):
             for z in mu["zon"]:
                 for s in z["sec"]:
                     tarefas.append((mu["cd"], z["cd"], s["ns"]))
-    if partes > 1:  # divide por município para não separar o cálculo do fuso
+    if reparo:
+        # refaz só as cidades que tiveram seções com erro, dividindo as seções entre as partes
+        import os
+        base = json.load(open(os.path.join(os.environ.get("DADOS", "apuracao/dados/logs"), f"{uf}.json"), encoding="utf-8"))
+        alvo = {m["cd"] for m in base["municipios"] if m["erros"] > 0}
+        tarefas = [t for t in tarefas if t[0] in alvo][parte - 1::partes]
+    elif partes > 1:  # divide por município para não separar o cálculo do fuso
         tarefas = [t for t in tarefas if int(t[0]) % partes == parte - 1]
     print(f"[{uf}] parte {parte}/{partes}: {len(tarefas)} seções", flush=True)
     res, erros, feitos = {}, 0, 0
@@ -157,31 +163,54 @@ def faz_uf(uf, saida, parte=1, partes=1):
     out = {"uf": uf.upper(), "gerado": datetime.now(BRT).strftime("%d/%m/%Y %H:%M"), "dia": DIA.decode(),
            "secoes": len(tarefas), "erros": erros, "bytes": total_bytes,
            "municipios": sorted(muns.values(), key=lambda m: m["nm"])}
-    nome = uf if partes == 1 else f"{uf}-parte{parte}"
+    nome = f"{uf}-reparo{parte}" if reparo else (uf if partes == 1 else f"{uf}-parte{parte}")
     with open(f"{saida}/{nome}.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
     print(f"[{uf}] ok: {sum(m['votos'] for m in muns.values())} votos, {sum(m['pos17'] for m in muns.values())} após 17h, {erros} erros")
 
 
+def soma_mun(a, b):
+    r = dict(a)
+    for k in ("secoes", "urnas", "semlog", "erros", "votos", "pos17", "urnasPos17"):
+        r[k] = a[k] + b[k]
+    r["bins"] = [x + y for x, y in zip(a["bins"], b["bins"])]
+    if b["ult"] is not None and (a["ult"] is None or b["ult"] > a["ult"]):
+        r["ult"], r["ultSec"] = b["ult"], b["ultSec"]
+    return r
+
+
 def juntar(pasta):
-    import glob, os
+    import glob, os, re
     grupos = {}
     for p in sorted(glob.glob(f"{pasta}/*.json")):
         b = os.path.basename(p)
         if b == "brasil.json":
             continue
-        grupos.setdefault(b.split("-parte")[0].replace(".json", ""), []).append(p)
+        grupos.setdefault(re.split(r"-parte|-reparo|\.json", b)[0], []).append(p)
     ufs = []
     for uf, arqs in sorted(grupos.items()):
-        partes = [json.load(open(a, encoding="utf-8")) for a in arqs]
+        base = [a for a in arqs if "-reparo" not in a]
+        rep = [a for a in arqs if "-reparo" in a]
+        partes = [json.load(open(a, encoding="utf-8")) for a in base]
         d = {"uf": uf.upper(), "gerado": max(x["gerado"] for x in partes), "secoes": sum(x["secoes"] for x in partes),
-             "erros": sum(x["erros"] for x in partes), "bytes": sum(x.get("bytes", 0) for x in partes),
-             "municipios": sorted((m for x in partes for m in x["municipios"]), key=lambda m: m["nm"])}
+             "bytes": sum(x.get("bytes", 0) for x in partes),
+             "municipios": [m for x in partes for m in x["municipios"]]}
+        if rep:
+            novos = {}
+            for a in rep:
+                x = json.load(open(a, encoding="utf-8"))
+                d["gerado"] = max(d["gerado"], x["gerado"])
+                for m in x["municipios"]:
+                    novos[m["cd"]] = soma_mun(novos[m["cd"]], m) if m["cd"] in novos else m
+            d["municipios"] = [novos.get(m["cd"], m) for m in d["municipios"]]
+            print(f"[{uf}] reparo: {len(novos)} cidades refeitas")
+        d["municipios"].sort(key=lambda m: m["nm"])
+        d["erros"] = sum(m["erros"] for m in d["municipios"])
         if len(arqs) > 1:
             with open(f"{pasta}/{uf}.json", "w", encoding="utf-8") as f:
                 json.dump(d, f, ensure_ascii=False, separators=(",", ":"))
             for a in arqs:
-                if "-parte" in a:
+                if "-parte" in a or "-reparo" in a:
                     os.remove(a)
         ms = d["municipios"]
         s = lambda k: sum(m[k] for m in ms)
@@ -206,6 +235,7 @@ if __name__ == "__main__":
         import os
         os.makedirs(sys.argv[3] if len(sys.argv) > 3 else "saida", exist_ok=True)
         pa = sys.argv[4].split("/") if len(sys.argv) > 4 else ["1", "1"]
-        faz_uf(sys.argv[2].lower(), sys.argv[3] if len(sys.argv) > 3 else "saida", int(pa[0]), int(pa[1]))
+        faz_uf(sys.argv[2].lower(), sys.argv[3] if len(sys.argv) > 3 else "saida", int(pa[0]), int(pa[1]),
+               reparo=len(sys.argv) > 5 and sys.argv[5] == "reparo")
     else:
         juntar(sys.argv[2])

@@ -2,6 +2,7 @@ name: Logs das urnas (Brasil)
 
 # Roda os estados listados em apuracao/tools/fila.txt (ou os informados ao disparar à mão).
 # "todas" = os 27 estados, com SP dividido em 6 partes. Um estado pode ser dividido com "sp:6".
+# "rj:4:reparo" refaz só as cidades do RJ que tiveram seções com erro, em 4 partes.
 # O passo final junta os resultados novos com os que já estão em apuracao/dados/logs.
 
 on:
@@ -45,9 +46,9 @@ jobs:
               itens = "sp:6 mg rj ba rs pr pe ce pa sc go ma am pb es mt rn pi al df ms se ro to ac ap rr".split()
           m = []
           for it in itens:
-              uf, _, n = it.lower().partition(":")
+              uf, n, modo = (it.lower().split(":") + ["1", ""])[:3]
               n = int(n or 1)
-              m += [{"uf": uf, "parte": f"{i}/{n}"} for i in range(1, n + 1)]
+              m += [{"uf": uf, "parte": f"{i}/{n}", "modo": modo} for i in range(1, n + 1)]
           print("matriz=" + json.dumps({"include": m}))
           PY
 
@@ -62,11 +63,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: apuracao/tools
+          sparse-checkout: |
+            apuracao/tools
+            apuracao/dados/logs
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python3 apuracao/tools/logs_urnas.py uf ${{ matrix.uf }} saida ${{ matrix.parte }}
+      - run: python3 apuracao/tools/logs_urnas.py uf ${{ matrix.uf }} saida ${{ matrix.parte }} ${{ matrix.modo }}
       - uses: actions/upload-artifact@v4
         with:
           name: uf-${{ matrix.uf }}-${{ strategy.job-index }}
@@ -93,7 +96,9 @@ jobs:
           mkdir -p apuracao/dados/logs
           for f in art/*.json; do
             [ -e "$f" ] || continue
-            b=$(basename "$f"); u=${b%%-parte*}; u=${u%.json}
+            b=$(basename "$f")
+            case "$b" in *-reparo*) continue;; esac  # reparo completa o arquivo existente
+            u=${b%%-parte*}; u=${u%.json}
             # resultado novo de um estado substitui o antigo (inteiro ou em partes)
             rm -f "apuracao/dados/logs/$u.json"
           done
