@@ -80,7 +80,7 @@ def secao(uf, mun, zona, sec):
             "bytes": len(dados)}
 
 
-def faz_uf(uf, saida):
+def faz_uf(uf, saida, parte=1, partes=1):
     cs = get(f"{BASE}/{CICLO}/arquivo-urna/{PLEITO}/config/{uf}/{uf}-p{PLEITO:06d}-cs.json")
     if cs is None:
         print(f"[{uf}] lista de seções não publicada"); return
@@ -92,7 +92,9 @@ def faz_uf(uf, saida):
             for z in mu["zon"]:
                 for s in z["sec"]:
                     tarefas.append((mu["cd"], z["cd"], s["ns"]))
-    print(f"[{uf}] {len(tarefas)} seções", flush=True)
+    if partes > 1:  # divide por município para não separar o cálculo do fuso
+        tarefas = [t for t in tarefas if int(t[0]) % partes == parte - 1]
+    print(f"[{uf}] parte {parte}/{partes}: {len(tarefas)} seções", flush=True)
     res, erros, feitos = {}, 0, 0
     def um(t):
         try:
@@ -146,18 +148,32 @@ def faz_uf(uf, saida):
     out = {"uf": uf.upper(), "gerado": datetime.now(BRT).strftime("%d/%m/%Y %H:%M"), "dia": DIA.decode(),
            "secoes": len(tarefas), "erros": erros, "bytes": total_bytes,
            "municipios": sorted(muns.values(), key=lambda m: m["nm"])}
-    with open(f"{saida}/{uf}.json", "w", encoding="utf-8") as f:
+    nome = uf if partes == 1 else f"{uf}-parte{parte}"
+    with open(f"{saida}/{nome}.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
     print(f"[{uf}] ok: {sum(m['votos'] for m in muns.values())} votos, {sum(m['pos17'] for m in muns.values())} após 17h, {erros} erros")
 
 
 def juntar(pasta):
     import glob, os
-    ufs = []
+    grupos = {}
     for p in sorted(glob.glob(f"{pasta}/*.json")):
-        if os.path.basename(p) == "brasil.json":
+        b = os.path.basename(p)
+        if b == "brasil.json":
             continue
-        d = json.load(open(p, encoding="utf-8"))
+        grupos.setdefault(b.split("-parte")[0].replace(".json", ""), []).append(p)
+    ufs = []
+    for uf, arqs in sorted(grupos.items()):
+        partes = [json.load(open(a, encoding="utf-8")) for a in arqs]
+        d = {"uf": uf.upper(), "gerado": max(x["gerado"] for x in partes), "secoes": sum(x["secoes"] for x in partes),
+             "erros": sum(x["erros"] for x in partes), "bytes": sum(x.get("bytes", 0) for x in partes),
+             "municipios": sorted((m for x in partes for m in x["municipios"]), key=lambda m: m["nm"])}
+        if len(arqs) > 1:
+            with open(f"{pasta}/{uf}.json", "w", encoding="utf-8") as f:
+                json.dump(d, f, ensure_ascii=False, separators=(",", ":"))
+            for a in arqs:
+                if "-parte" in a:
+                    os.remove(a)
         ms = d["municipios"]
         s = lambda k: sum(m[k] for m in ms)
         bins = [sum(m["bins"][i] for m in ms) for i in range(NB)]
@@ -168,7 +184,9 @@ def juntar(pasta):
                     "gerado": d["gerado"], "bytes": d.get("bytes", 0)})
     tot = {k: sum(u[k] for u in ufs) for k in ("secoes", "urnas", "semlog", "erros", "votos", "pos17", "urnasPos17", "bytes")}
     tot["bins"] = [sum(u["bins"][i] for u in ufs) for i in range(NB)]
-    out = {"gerado": datetime.now(BRT).strftime("%d/%m/%Y %H:%M"), "dia": DIA.decode(), "total": tot, "ufs": ufs}
+    todas = "ac al am ap ba ce df es go ma mg ms mt pa pb pe pi pr rj rn ro rr rs sc se sp to".upper().split()
+    faltam = [u for u in todas if u not in {x["uf"] for x in ufs}]
+    out = {"gerado": datetime.now(BRT).strftime("%d/%m/%Y %H:%M"), "dia": DIA.decode(), "total": tot, "ufs": ufs, "faltam": faltam}
     with open(f"{pasta}/brasil.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
     print(f"Brasil: {tot['votos']} votos, {tot['pos17']} após 17h, {len(ufs)} UFs")
@@ -178,6 +196,7 @@ if __name__ == "__main__":
     if sys.argv[1] == "uf":
         import os
         os.makedirs(sys.argv[3] if len(sys.argv) > 3 else "saida", exist_ok=True)
-        faz_uf(sys.argv[2].lower(), sys.argv[3] if len(sys.argv) > 3 else "saida")
+        pa = sys.argv[4].split("/") if len(sys.argv) > 4 else ["1", "1"]
+        faz_uf(sys.argv[2].lower(), sys.argv[3] if len(sys.argv) > 3 else "saida", int(pa[0]), int(pa[1]))
     else:
         juntar(sys.argv[2])

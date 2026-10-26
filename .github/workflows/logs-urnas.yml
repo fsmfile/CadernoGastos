@@ -23,7 +23,13 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        uf: [sp, mg, rj, ba, rs, pr, pe, ce, pa, sc, go, ma, am, pb, es, mt, rn, pi, al, df, ms, se, ro, to, ac, ap, rr]
+        uf: [mg, rj, ba, rs, pr, pe, ce, pa, sc, go, ma, am, pb, es, mt, rn, pi, al, df, ms, se, ro, to, ac, ap, rr]
+        parte: ["1/1"]
+        include:
+          - {uf: sp, parte: "1/4"}
+          - {uf: sp, parte: "2/4"}
+          - {uf: sp, parte: "3/4"}
+          - {uf: sp, parte: "4/4"}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,10 +37,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python3 apuracao/tools/logs_urnas.py uf ${{ matrix.uf }} saida
+      - run: python3 apuracao/tools/logs_urnas.py uf ${{ matrix.uf }} saida ${{ matrix.parte }}
       - uses: actions/upload-artifact@v4
         with:
-          name: uf-${{ matrix.uf }}
+          name: uf-${{ matrix.uf }}-${{ strategy.job-index }}
           path: saida/*.json
           if-no-files-found: ignore
           retention-days: 7
