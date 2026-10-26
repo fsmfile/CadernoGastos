@@ -753,17 +753,19 @@ async function initLogs(){
 }
 function msg(t){$l("lgMsg").hidden=!t;$l("lgMsg").textContent=t||""}
 let scope="br",BR=null,BRUF=null;
+const DADOS=["dados/logs/","https://fsmfile.github.io/CadernoGastos/apuracao/dados/logs/"];
+async function getDados(nome){for(const b of DADOS){try{const r=await fetch(b+nome+"?t="+Date.now(),{cache:"no-store"});if(r.ok)return await r.json()}catch(e){}}throw new Error("sem dados")}
 function setScope(s){scope=s;$l("scBr").setAttribute("aria-pressed",String(s==="br"));$l("scLoc").setAttribute("aria-pressed",String(s!=="br"));$l("lgForm").hidden=s==="br";msg("");$l("lgRes").hidden=true;
   if(s==="br")loadBR();else if(cur&&cur.kind==="loc")renderRes()}
 $l("scBr").onclick=()=>setScope("br");$l("scLoc").onclick=()=>setScope("loc");
 async function loadBR(){
   try{
-    if(!BR){msg("Carregando o resumo nacional…");const r=await fetch("dados/logs/brasil.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;BR=await r.json()}
+    if(!BR){msg("Carregando o resumo nacional…");BR=await getDados("brasil.json")}
     msg("");cur={kind:"br"};BRUF=null;renderRes();
   }catch(e){msg("O resumo do Brasil inteiro ainda está sendo gerado: um robô baixa e processa os logs de todas as urnas, o que leva algumas horas. Enquanto isso, use \"Por cidade\".")}
 }
 async function openUF(uf){
-  try{msg("Carregando "+NOMES[uf]+"…");const r=await fetch("dados/logs/"+uf.toLowerCase()+".json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;BRUF=await r.json();msg("");renderRes();window.scrollTo({top:$l("lgRes").offsetTop-10,behavior:"smooth"})}
+  try{msg("Carregando "+NOMES[uf]+"…");BRUF=await getDados(uf.toLowerCase()+".json");msg("");renderRes();window.scrollTo({top:$l("lgRes").offsetTop-10,behavior:"smooth"})}
   catch(e){msg("Não achei o resumo de "+NOMES[uf]+".")}
 }
 $l("lgBack").onclick=()=>{BRUF=null;renderRes()};
