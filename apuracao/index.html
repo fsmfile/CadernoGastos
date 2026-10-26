@@ -883,7 +883,7 @@ function renderRes(){
   renderWin();
 }
 function renderBR(){
-  const D=BRUF?{nome:NOMES[BRUF.uf]||BRUF.uf,itens:BRUF.municipios,sub:`${nfl.format(BRUF.municipios.reduce((t,m)=>t+m.urnas,0))} urnas com log · processado em ${BRUF.gerado}`}:{nome:"Brasil",itens:BR.ufs,sub:`${nfl.format(BR.total.urnas)} urnas com log em ${BR.ufs.length} estados · processado em ${BR.gerado}`+(BR.total.erros?` · ${nfl.format(BR.total.erros)} com erro`:"")};
+  const D=BRUF?{nome:NOMES[BRUF.uf]||BRUF.uf,itens:BRUF.municipios,sub:`${nfl.format(BRUF.municipios.reduce((t,m)=>t+m.urnas,0))} urnas com log · processado em ${BRUF.gerado}`}:{nome:"Brasil",itens:BR.ufs,sub:`${nfl.format(BR.total.urnas)} urnas com log em ${BR.ufs.length} estados · processado em ${BR.gerado}`+(BR.total.erros?` · ${nfl.format(BR.total.erros)} com erro`:"")+((BR.faltam||[]).length?` · ainda sem dados de: ${BR.faltam.join(", ")}`:"")};
   const all=new Array(288).fill(0);for(const it of D.itens)it.bins.forEach((q,i)=>all[i]+=q);
   cur.bins=all;cur.itens=D.itens;
   $l("lgWhere").innerHTML="";$l("lgWhere").append(document.createTextNode(D.nome));const sm=document.createElement("small");sm.textContent=D.sub;$l("lgWhere").append(sm);
